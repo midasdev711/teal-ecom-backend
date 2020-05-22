@@ -1,9 +1,12 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const SchemaType = Schema.Types;
-const autoIncrement = require('mongoose-auto-increment');
-autoIncrement.initialize(mongoose);
-
+/*
+  * CreatedBy : Ankita Solace
+  * Purporse : user wallet balance Schema
+*/
+const mongoose = require("mongoose"),
+      Schema = mongoose.Schema,
+      SchemaType = Schema.Types,
+      autoIncrement = require('mongoose-auto-increment');
+      autoIncrement.initialize(mongoose);
 
 const UsersWalletSchema = new Schema({
     ID: {  type: Number,  required: true, exists: false, unique : true },
@@ -13,7 +16,6 @@ const UsersWalletSchema = new Schema({
     Purpose :{  type: String, enum : ["Donation","Subscription"] },
     RefrenceID :{  type: String },
     Currency : {  type: String, default : "USD" },
-    // TXNID :{  type: Number },
     Status : { type: Number, default: 1 },
     CreatedDate:  { type: Date, default: Date.now },
     ModifiedDate:  { type: Date, default: Date.now }

@@ -1,43 +1,66 @@
+/*
+  * CreatedBy : Ankita Solace
+  * Purporse : user paid subscrition log Schema
+*/
 const mongoose = require("mongoose"),
       Schema = mongoose.Schema,
       SchemaType = Schema.Types,
       autoIncrement = require('mongoose-auto-increment');
       autoIncrement.initialize(mongoose);
-      mongoose.set('useFindAndModify', false);
 
 const UserSchema = new Schema({
     ID: {  type: Number,   exists: false, unique : true },
     Name:  {  type: String,  required: true },
+    UserName : { type : String, exists : false, unique : true},
     Description:    String,
     Email:    {  type: String,  required: "email id is required", exists: false, unique : true },
     Password : { type: String },
-    // UserRole :{
-    //     RoleID: { type: Schema.Types.ObjectId, ref : UserAccessArea },
-    // },
-    // isSignup:{ type: Boolean, default: 0 },
-    // isLogin:{ type: Boolean, default: 0 },
-    UserCounter  :{ type: Number, default: 1 },
-    isVerified:{type: Boolean, default: false},
-    SignUpMethod :{ type: String, required: true },
-    RoleID: Number,
-    FaceBookUrl : { type : String, default : ""},
-    Avatar : String,
+    isVerified:{type: Boolean, default: true},
+    SignUpMethod :{
+          type: String,
+          required :true,
+          enum : ["Site","Facebook", "Google", "Mobile"],
+          default : "Site"
+   },
+   MobileNo : { type: String,   exists: false, unique : true },
+  RoleID: {type : Number},
+  Dob :  { type: Date },
+  Gender : {type : String
+    // , enum : ["Male","Female", "Other"] 
+  },
+   ParentCategories : [{
+     ID : Number,
+     Name : String
+   }],
+   SubCategories : [
+     {
+       ID : Number,
+       Name : String,
+       ParentCategoryID : Number
+     }
+   ],
+   Avatar :{ type: String, default: "" },
+   UniqueID : {type : String, exists: false, unique : true },
+   ReferenceID : {type : String},
     Status : { type: Number, default: 1 },
     CreatedDate:  { type: Date, default: Date.now },
     ModifiedDate:  { type: Date, default: Date.now },
-    TotalWalletAmount : { type : SchemaType.Decimal128, default : "0.00" },
-    isPaidSubscription : { type : Boolean, default : false },
-    PaidSubscription : [
-      {
-        SubscriptionID : { type : Number },
-        Name : { type : String },
-        Amount : { type : SchemaType.Decimal128, default : "0.00" },
-        Description : { type : String },
-        Days  : { type : Number },
-        Status : { type : Number , default :  1}
 
-      }
-    ],
+    UserCounter  :{ type: Number, default: 1 },
+     FaceBookUrl : { type : String, default : ""},
+     TotalWalletAmount : { type : SchemaType.Decimal128, default : "0.00" },
+     isPaidSubscription : { type : Boolean, default : false },
+     PaidSubscription : [
+       {
+         SubscriptionID : { type : Number },
+         Name : { type : String },
+         Amount : { type : SchemaType.Decimal128, default : "0.00" },
+         Description : { type : String },
+         Days  : { type : Number },
+         Status : { type : Number , default :  1}
+       }
+     ],
+     IpAddress : { type : String }
 });
 
 

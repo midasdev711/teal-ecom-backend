@@ -1,155 +1,263 @@
 /*
   * Created By : Ankita Solace
   * Created Date : 16-12-2019
-  * Purpose : Declare all users schema methods
+  * Purpose : Declare all users queries
 */
 
-const { UserType,UserSettingType } = require('../types/constant'),
-      { GraphQLInt,GraphQLFloat,GraphQLList , GraphQLString,GraphQLBoolean,GraphQLInputObjectType } = require('graphql'),
+const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoolean,GraphQLInputObjectType } = require('graphql'),
       {  GraphQLEmail } = require('graphql-custom-types'),
+      {  GraphQLDate } = require('graphql-iso-date'),
       Users = require('../../models/users'),
+      EmailLogs = require('../../models/email_logs'),
       UserSettings = require('../../models/user_settings'),
-      await = require('await'),
-      fs = require('fs'),
-      { client, UploadFolderPath,ServerImageFolder,UserLocalImagePath, RoleObject,ArticleStatusConst } = require('../constant');
-var UploadBase64OnS3 = require('../../../upload/base64_upload'),
-     sendMailToUser = require('../mail/signup'),
-    { AWSCredentails } = require('../../../upload/aws_constants');
-// const { LoginUserRoleID } = require('../constant'),
+      ForgotPasswordLogs = require('../../models/forgot_passwords_log'),
+      { UserType,PasswordInfo,EmailLogType,ProfileImageInfo } = require('../types/constant'),
+      uniqid = require('uniqid'),
+      sendMailToUser = require('../mail/signup'),
+      sentForgotPasswordMail = require('../mail/forgot_password'),
+      { RoleObject,MAIL_DETAILS,AWSCredentails } = require('../constant'),
+      passwordHash = require('password-hash'),
+      fs       = require('fs'),
+      UploadBase64OnS3 = require('../../../upload/base64_upload');
 
 
-// var base64Img = require('base64-img');
-
-
-      const AddUser = {
-          type : UserType,
-          args : {
-              ID: { type: GraphQLInt },
-              Name: { type: GraphQLString },
-              Email : {type : GraphQLEmail },
-              Description: { type: GraphQLString },
-              Password: { type: GraphQLString }
-          },
-          resolve(parent, args) {
-              let UserConstant = new Users({
-                  ID: args.ID,
-                  Name: args.Name,
-                  Email : args.Email,
-                  Description: args.Description,
-                  Password: args.Password,
-                  RoleID : LoginUserRoleID
-              });
-              return UserConstant.save();
-          }
-      };
-
-  const DeleteUser = {
-    type : UserType,
+  // only profile picture update
+  const ProfilePictureUpdate = {
+    type : ProfileImageInfo,
     args : {
-        ID: { type: GraphQLInt }
-    },
-    resolve(root, params) {
-        return Users.update(
-            { ID: params.ID },
-            { $set: { Status: 0 } },
-            { new: true }
-        )
-        .catch(err => new Error(err));
-      }
+        UserID: { type: GraphQLInt },
+        ProfileImage : {type : GraphQLString },
+      },
+    async resolve(parent, args) {
+      var AwsUrl = await UploadBase64OnS3( args.ProfileImage, AWSCredentails.AWS_USER_IMG_PATH );
+        var Message = {};
+        if( typeof args.UserID != "undefined" && args.UserID != 0 ) {
+            Users.updateOne(
+                  { ID: args.UserID },{ $set: { Avatar : AwsUrl } },{ upsert: false }
+            ).then((result)=>{});
+        }
+        Message["Avatar"] = AwsUrl;
+        return Message;
+    }
   };
 
-  const PaidSubscriptionInputType = new GraphQLInputObjectType({
-    name: 'PaidSubscriptionInput',
-    fields: () => ({
-      SubscriptionID : { type : GraphQLInt },
-      Name : { type : GraphQLString },
-      Amount : { type : GraphQLFloat },
-      Description : { type : GraphQLString },
-      Days : { type : GraphQLInt }
-    })
+
+  // sub category Input object for sign up
+  const SubcategoriesInputType = new GraphQLInputObjectType({
+      name : "SubcategoriesInput",
+      fields: () => ({
+        ID: { type: GraphQLInt },
+        Name: { type: GraphQLString },
+        ParentCategoryID: { type: GraphQLInt },
+      })
   });
-    const UpdateUser = {
-        type : UserType,
-        args : {
-            ID: { type: GraphQLInt },
-            Name: { type: GraphQLString },
-            Email : {type : GraphQLEmail },
-            Description: { type: GraphQLString },
-            Password: { type: GraphQLString },
-            Avatar: { type: GraphQLString },
-            Status: { type: GraphQLInt },
-            FaceBookUrl : { type: GraphQLString },
-            isPaidSubscription : { type : GraphQLBoolean },
-            PaidSubscription : {type : new GraphQLList(PaidSubscriptionInputType) }
-        },
-        async resolve(root, params) {
-          if(typeof params.Avatar != "undefined")
-            params.Avatar = await UploadBase64OnS3( params.Avatar , AWSCredentails.AWS_USER_IMG_PATH  );
 
-            return await Users.findOneAndUpdate(
-                { ID: params.ID },
-                params,
-                { new: true, returnNewDocument: true  }
-            )
-            .catch(err => new Error(err));
-          }
-    };
+  // parent category Input object for sign up
+  const ParentCategoryInputType = new GraphQLInputObjectType({
+      name : "UsersParentCategoryInput",
+      fields: () => ({
+        ID: { type: GraphQLInt },
+        Name: { type: GraphQLString }
+      })
+  });
 
-
-
-
+  // user sign up API
   const UserSignUp = {
     type : UserType,
     args : {
         Name: { type: GraphQLString },
         Email : {type : GraphQLEmail },
         Password: { type: GraphQLString },
-        isVerified : { type: GraphQLBoolean },
-        SignUpMethod : { type: GraphQLString },
+        SignUpMethod : { type: GraphQLString,
+         description : 'enum fileds with value allowed : ["Site","Facebook", "Google", "Mobile"]' },
+        MobileNo : { type: GraphQLString },
+        Dob : { type : GraphQLDate },
+        Gender : { type : GraphQLString ,description : 'enum fileds with value allowed : ["Male","Female", "Other"]' },
+        ParentCategories : { type : new GraphQLList(ParentCategoryInputType) },
+        SubCategories : { type : new GraphQLList(SubcategoriesInputType) },
+        ReferenceID  : { type : GraphQLString },
+        Avatar : { type : GraphQLString },
+        IpAddress : { type : GraphQLString }
     },
     async resolve(parent, args,context) {
-        let SignUpConstant = new Users({
-                Name: args.Name,
-                Email : args.Email,
-                Description: args.Name+"--"+args.Email,
-                Password: args.Password,
-                isVerified : args.isVerified,
-                SignUpMethod : args.SignUpMethod,
-                RoleID : RoleObject.user
-        });
+      args.Description = args.Name+"--"+args.Email;
+      args.UniqueID = uniqid();
+      args.RoleID = RoleObject.user;
+      if( typeof args.Name != "undefined" )
+            args.UserName = await generateUserName( args.Name );
+      // SaveUserSettings( args,result.ID );
 
-        return Users.findOne({ Email : args.Email }).then(async (checkEmail) =>{
-
-            if( checkEmail != null ) {
-                Users.updateOne(  { Email : args.Email },{ $inc: { UserCounter : 1 }});
-                checkEmail.UserCounter ++;
-                return  checkEmail;
-            }
-            else {
-              return await SignUpConstant.save()
-                     .then(async (result) => {
-                              sendMailToUser(args.Name,args.Email,args.Name+"--"+args.Email);
-                              let UserSettingsConstant = new UserSettings({
-                                  UserID : result.ID,
-                                  Account : {
-                                    Name : args.Name,
-                                    Email : args.Email
-                                  }
-                              });
-
-                              await  UserSettingsConstant.save();
-                              return await result;
-                      })
-                     .catch((err) => {  return err; });
-            }
-
-        });
-
+      if(typeof args.SignUpMethod  != "undefined" && args.SignUpMethod == "Site" && typeof args.Password != "undefined" ) {
+        args.Password = passwordHash.generate(args.Password);
+         return await Users.create( args ).then((result) => {
+            sendMailToUser(args.Name,args.Email,args.Name+"--"+args.Email);
+            SaveUserSettings( args,result.ID ); return result;
+         });
+      } else if(typeof args.SignUpMethod  != "undefined" && args.SignUpMethod == "Facebook") {
+          return await Users.create( args ).then((result) => {
+             sendMailToUser(args.Name,args.Email,args.Name+"--"+args.Email);
+             SaveUserSettings( args,result.ID );return result;
+          });
+      } else if(typeof args.SignUpMethod  != "undefined" && args.SignUpMethod == "Google") {
+          return await Users.create( args ).then((result) => {
+             sendMailToUser(args.Name,args.Email,args.Name+"--"+args.Email);
+             SaveUserSettings( args,result.ID );return result;
+          });
+      } else return [];
     }
   };
 
 
+      async function generateUserName( FullName ) {
+        FullName =  await FullName.trim().replace(/ /g,"-")+"-"+await makeid(4);
+        return await FullName.toLowerCase();
+      }
+
+      async function makeid(length) {
+          var result           = '';
+          var characters       = 'abcdefghijklmnopqrstuvwxyz0123456789';
+          var charactersLength = characters.length;
+          for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+          }
+          // console.log(result,"result");
+
+          return await result;
+    }
 
 
-  const UsersArray = { AddUser, DeleteUser,UpdateUser,UserSignUp };
-  module.exports = UsersArray;
+    async function SaveUserSettings( args,UserID ) {
+      let UserSettingsConstant = new UserSettings({
+                UserID : UserID,
+                Account : {
+                  Name : args.Name,
+                  Email : args.Email
+                }
+            });
+
+          await  UserSettingsConstant.save();
+    }
+
+  // after reset link mail reset password
+  const ResetPassword = {
+    type : UserType,
+    args : {
+      UniqueLinkKey : { type : GraphQLString },
+      Password : { type : GraphQLString },
+    },
+    resolve(parent, args)  {
+      return ForgotPasswordLogs.findOneAndUpdate(
+               { UniqueLinkKey : args.UniqueLinkKey },
+               {$set :{ Status : 0 } },
+               { upsert: false, returnNewDocument: true}
+            ).then((result) => {
+                var hashedPassword =   passwordHash.generate(args.Password);
+                return  Users.findOneAndUpdate(
+                       {$and: [{ Email : result.Email },{isVerified :1}]},
+                       {$set : { Password : hashedPassword } },
+                       { upsert : false, returnNewDocument: true }
+                      );
+            });
+    }
+  };
+
+  // forgot password
+  const ForgotPassword = {
+    type : PasswordInfo,
+    args : {
+      Email : { type : GraphQLEmail }
+    },
+    resolve(parent, args)  {
+      return  Users.findOne({Email : args.Email, isVerified :1}).then((isEmail) =>{
+          var Message = {};
+            if(isEmail != null && isEmail.Email) {
+              sendSetPassworkLink( args );
+                Message["Message"] = "We sent the link on "+args.Email+". Please check your inbox.";
+            }
+            else Message["Message"] = args.Email+" this email does not exists";
+            return Message;
+        });
+    }
+  };
+
+  // call send function and set a unqiue link
+  function sendSetPassworkLink( args ) {
+      try {
+        var end_date = new Date();
+            end_date.setHours(end_date.getHours() + 48);
+        var UniqueLinkKey = uniqid(args.Email+'_');
+
+        let EmailLogConstant = new EmailLogs({
+                Email : args.Email,
+                Description:"Forgot Password "+args.Email,
+                Subject : "Forgot Password",
+                UniqueLinkKey : UniqueLinkKey,
+                // From : args.ParentCategories,
+                EndDate : end_date
+        });
+        EmailLogConstant.save();
+
+        let ForgotPasswordLogsConstant = new ForgotPasswordLogs({
+                Email : args.Email,
+                Description:"Forgot Password "+args.Email,
+                Subject : "Forgot Password",
+                UniqueLinkKey : UniqueLinkKey,
+                // From : args.ParentCategories,
+                ExpiryDate : end_date
+        });
+        ForgotPasswordLogsConstant.save();
+        sentForgotPasswordMail( ForgotPasswordLogsConstant );
+        // sentForgotPasswordMail( ForgotPasswordLogsConstant );
+      } catch (e) { console.log(e); }
+  }
+
+  // delete user
+  const DeleteUser = {
+  type : UserType,
+  args : {
+      ID: { type: GraphQLInt }
+  },
+  resolve(root, params) {
+      return Users.update({ ID: params.ID },{ $set: { Status: 0 } },{ new: true })
+             .catch(err => new Error(err));
+    }
+};
+  // send mail using gmail crendentials
+
+  // piad subscription input object
+  const PaidSubscriptionInputType = new GraphQLInputObjectType({
+      name: 'PaidSubscriptionInput',
+      fields: () => ({
+        SubscriptionID : { type : GraphQLInt },
+        Name : { type : GraphQLString },
+        Amount : { type : GraphQLFloat },
+        Description : { type : GraphQLString },
+        Days : { type : GraphQLInt }
+      })
+    });
+
+  // update user data
+  const UpdateUser = {
+       type : UserType,
+       args : {
+           ID: { type: GraphQLInt },
+           Name: { type: GraphQLString },
+           Email : {type : GraphQLEmail },
+           Description: { type: GraphQLString },
+           Password: { type: GraphQLString },
+           Avatar: { type: GraphQLString },
+           Status: { type: GraphQLInt },
+           FaceBookUrl : { type: GraphQLString },
+           isPaidSubscription : { type : GraphQLBoolean },
+           PaidSubscription : {type : new GraphQLList(PaidSubscriptionInputType) }
+       },
+       async resolve(root, params) {
+         if(typeof params.Avatar != "undefined")
+           params.Avatar = await UploadBase64OnS3( params.Avatar , AWSCredentails.AWS_USER_IMG_PATH  );
+
+           return await Users.findOneAndUpdate({ ID: params.ID }, params, { new: true, returnNewDocument: true  })
+           .catch(err => new Error(err));
+         }
+   };
+
+  module.exports = { UserSignUp,ForgotPassword,ResetPassword,ProfilePictureUpdate,DeleteUser,UpdateUser };

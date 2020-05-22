@@ -5,15 +5,11 @@
 */
 
 const { DonationTranscationType } = require('../types/donation_transaction'),
-      { GraphQLID,GraphQLInt,GraphQLList , GraphQLString, GraphQLBoolean } = require('graphql'),
-      {  GraphQLEmail } = require('graphql-custom-types'),
-      await = require('await'),
+      { GraphQLInt,GraphQLList ,   } = require('graphql'),
       { DonationStatusConst } = require('../constant'),
-      async = require("async"),
       DonationTranscations = require('../../models/donation_transaction');
 
-
-
+    // my donation transaction details (login user)
     const MyDonationtransactionDetails = {
         type : new GraphQLList( DonationTranscationType ),
         description : "get login users donation paid details",
@@ -24,6 +20,7 @@ const { DonationTranscationType } = require('../types/donation_transaction'),
     };
 
 
+    // donation recived to login users
     const DonationRecivedTransaction = {
         type : new GraphQLList( DonationTranscationType ),
         description : "get login users donation received details",

@@ -16,6 +16,7 @@ const Users = require('../../models/users'),
       DonationTranscations = require('../../models/donation_transaction');
 
 
+      // get users balance details from wallet 
       const GetUsersBalanceDetails = {
            type : new GraphQLList(UsersWalletBalanceType),
            args : { UserID :  { type: GraphQLInt } },
@@ -36,7 +37,7 @@ const Users = require('../../models/users'),
       };
 
 
-  
+
 
 
 module.exports = { GetUsersBalanceDetails };

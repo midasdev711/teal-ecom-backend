@@ -13,9 +13,6 @@ const { GraphQLObjectType, GraphQLInputObjectType,GraphQLString,GraphQLID,GraphQ
       Users = require('../../models/users');
 
 
-
-
-
       // convert Decimal128 for db aritcle minimum amount
       const DonationAmountType = new GraphQLScalarType({
             name : "DonationAmountType",

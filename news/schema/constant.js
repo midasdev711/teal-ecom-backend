@@ -13,7 +13,28 @@ const MAIL_DETAILS = {
     "Password" :'solace@123',
     // "HTTP_RESET_URL" : "http://localhost/demo/node_mail.html"
     "HTTP_RESET_URL" : "http://localhost:3000/resetpassword"
+    // "HTTP_RESET_URL" : "http://jointeal.com/resetpassword"
 };
+
+
+const AWSCredentails = {
+    credentials : {
+      accessKeyId: "AKIAVHYRQR3GKO5SU24Z",
+      secretAccessKey : "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"
+    },
+    Region: 'us-east-2',
+    Timeout : 5000,
+    Bucket: 'jointeal',
+    ContentEncoding: 'base64',
+    ContentType: 'image/png',
+    ACL: "public-read-write",
+    // AWS_BASE_URL : "https://jointeal.s3.us-east-2.amazonaws.com/",
+    AWS_BASE_URL : "http://cdn.jointeal.com.global.prod.fastly.net/",
+    AWS_USER_IMG_PATH : "users",
+    AWS_SHOP_IMG_PATH : "shop",
+    AWS_STORIES_IMG_PATH : "stories",
+};
+
 
 
 const LocalFolderImagePath = 'images',
@@ -22,7 +43,9 @@ const LocalFolderImagePath = 'images',
       ArticleStatusConst = DonationStatusConst = { "inActive" : 0,"Active" : 1, "Approved" : 2,  "Rejected" : 3 },
       AmountType = { Credit : "Credit", Debit : "Debit" },
       PremiumContentLen = 100,
+      TitleMaxLen = 125,
+      SubTitleMaxLen = 150,
       SubscribeCdnUrl = "http://cdn.jointeal.com.global.prod.fastly.net/subscribe.jpg";
 
-  const ConstantArray = { SubscribeCdnUrl,PremiumContentLen,AmountType, MAIL_DETAILS,LocalFolderImagePath,UserLocalImagePath, ArticleStatusConst,RoleObject,DonationStatusConst };
+  const ConstantArray = { SubTitleMaxLen, TitleMaxLen,AWSCredentails,SubscribeCdnUrl,PremiumContentLen,AmountType, MAIL_DETAILS,LocalFolderImagePath,UserLocalImagePath, ArticleStatusConst,RoleObject,DonationStatusConst };
   module.exports = ConstantArray;

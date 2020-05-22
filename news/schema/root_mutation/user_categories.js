@@ -5,10 +5,11 @@
 */
 
 
-const UserCategory = require('../../models/users_categories');
-const { UserCategoryType } = require('../types/constant');
-const {  GraphQLInt,GraphQLNonNull,GraphQLList } = require('graphql');
+const UserCategory = require('../../models/users_categories'),
+      { UserCategoryType } = require('../types/constant'),
+      {  GraphQLInt,GraphQLNonNull,GraphQLList } = require('graphql');
 
+      // add users categories
   const AddUserCategory = {
       type: UserCategoryType,
       args : {
@@ -16,7 +17,6 @@ const {  GraphQLInt,GraphQLNonNull,GraphQLList } = require('graphql');
         UserID: { type: new GraphQLNonNull(GraphQLInt) }
       },
       resolve(parent, args) {
-        console.log(args);
           let UserCategoryConstant = new UserCategory({ CategoryID: args.CategoryID,UserID: args.UserID });
           UserCategory.updateOne(
                 {$and: [{ UserID: args.UserID },{ Status: 1 }]},
@@ -24,25 +24,7 @@ const {  GraphQLInt,GraphQLNonNull,GraphQLList } = require('graphql');
                 { upsert: true }
           );
           return UserCategoryConstant.save();
-
-
-          // return UserCategory.findOne({$and: [{  CategoryID: args.CategoryID },{ UserID: args.UserID },{Status:1}]})
-          //   .then(result => {
-          //       if(result == null) {   return UserCategoryConstant.save(); }
-          //       else {
-          //             return UserCategory.updateOne(
-          //                   {$and: [{ UserID: args.UserID },{ Status: 1 }]},
-          //                   { $set: { Status: 0 ,ModifiedDate: Date.now()} },
-          //                   { upsert: true }
-          //             ).then(results => { return results; })
-          //             .catch( errs => {return errs})
-          //         }
-          //   })
-          //   .catch(err => {return err})
       }
   };
 
-
-
-  const UserCagtegoryArray = { AddUserCategory };
-  module.exports = UserCagtegoryArray;
+  module.exports = { AddUserCategory };

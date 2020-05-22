@@ -1,149 +1,169 @@
 /*
   * Created By : Ankita Solace
-  * Created Date : 10-12-2019
+  * Created Date : 29-11-2019
   * Purpose : Declare all the constants
 */
 
 const Categories = require('../../models/categories'),
-      Articles = require('../../models/article'),
       Users = require('../../models/users'),
-      Roles = require('../../models/roles'),
-      Notifications = require('../../models/notification'),
-      ArticleRatings = require('../../models/article_rating'),
-      ArticleBookmarks = require('../../models/bookmarks'),
-      ReportArticle = require('../../models/report_article'),
-      BlockAuthor = require('../../models/block_author'),
-      FollowAuthor = require('../../models/follow_author'),
-      UserCategory = require('../../models/users_categories'),
-      UserSettings = require('../../models/user_settings');
-
-const { GraphQLFloat, GraphQLObjectType, GraphQLInputObjectType,GraphQLString,GraphQLID,GraphQLNonNull, GraphQLScalarType,GraphQLBoolean, GraphQLInt, GraphQLList} = require('graphql'),
-      { GraphQLEmail, GraphQLPassword } = require('graphql-custom-types'),
+      Articles = require('../../models/articles'),
+      { GraphQLObjectType, GraphQLScalarType,GraphQLInputObjectType,GraphQLString,GraphQLID,GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLList} = require('graphql'),
+      { GraphQLEmail } = require('graphql-custom-types'),
       {  GraphQLDate } = require('graphql-iso-date'),
-      await = require('await');
+      { await } = require("await"),
+      { GraphQLJSON } = require('graphql-type-json');
 
-
-    const UserSettingAmountType = new GraphQLScalarType({
-          name : "UserSettingAmountType",
-          resolve(parent){   return parseFloat(parent.Amount);  }
-    });
-
-  const UserSettingPaidSubscriptionType = new GraphQLObjectType({
-      name: 'UserSettingPaidSubscriptionType',
-      fields: () => ({
-          SubscriptionID : { type : GraphQLInt },
-          Name : { type : GraphQLString },
-          Amount : { type :  UserSettingAmountType },
-          Description : { type : GraphQLString },
-          Days  : { type : GraphQLInt },
-          Status : { type : GraphQLInt }
-      })
-  });
-
-// declared the article category common constant
-const UserSettingType = new GraphQLObjectType({
-    name: 'UserSettings',
-    fields: () => ({
+// sites schema typ4e def
+const SiteType = new GraphQLObjectType({
+    name: 'Sites',
+    fields: ( ) => ({
         ID: { type: GraphQLInt },
-        UserID: { type: GraphQLInt },
-        Account: { type: AccountSettingType },
-        Notification : { type: UserNotificationType },
-        Privacy : { type : PrivacyType },
-        PaidSubscription : { type : new GraphQLList(UserSettingPaidSubscriptionType) },
-        // isPaidSubscription : {},
-        isPaidSubscription : { type : GraphQLBoolean },
-
-        ModifiedDate : { type: GraphQLDate },
+        AuthorID: { type: new GraphQLNonNull(GraphQLInt) },
+        SiteUrl: { type: GraphQLString },
         Status : { type: GraphQLInt }
     })
 });
 
-  // account settings type defination for account fields in user settings
-  const AccountSettingType = new GraphQLObjectType({
-        name : "AccountSettings",
-        fields : () => ({
-          Name: { type: GraphQLString },
-          Email : { type:GraphQLEmail },
-          UserName : { type:GraphQLString },
-          isFacebook :  { type:GraphQLBoolean }
-        })
-  });
-
-  // user notification type defination for notification field in users settings
-  const UserNotificationType = new GraphQLObjectType({
-        name : "NotificationSettings",
-        fields : () => ({
-          Trending: { type: RadioButtonType },
-          Recommanded : { type:RadioButtonType },
-          AuthorsLike : { type:RadioButtonType },
-          PagesLike :  { type:RadioButtonType },
-          AuthorsFollow :  { type:EmailPushSettingType },
-          PagesFollow :  { type:EmailPushSettingType },
-          SocialActivity :  { type:EmailPushSettingType }
-        })
-  });
-
-  // radio button and updates buttons for user notfication feilds in constant
-  const RadioButtonType = new GraphQLObjectType({
-      name : 'RadioButton',
-      fields : () =>({
-        isEmail : {type : GraphQLBoolean },
-        isPush :  {type : GraphQLBoolean },
-        Button : { type : ButtonType }
-      })
-  });
-
-  const ButtonType = new GraphQLObjectType({
-      name : 'Button',
-      fields : () =>({
-         isDaily : {type : GraphQLBoolean },
-         isWeekly : {type : GraphQLBoolean },
-         isOff : {type : GraphQLBoolean }
-      })
-  });
-
-// email & push boolean type defination for user notification fileds in constant
-  const EmailPushSettingType = new GraphQLObjectType({
-      name : 'EmailPush',
-      fields : () =>({
-        isEmail : {type : GraphQLBoolean },
-        isPush :  {type : GraphQLBoolean }
-      })
-  });
-
-// type defination for privacy field in users settings const
-const PrivacyType = new GraphQLObjectType({
-   name : "PrivacySettings",
-   fields : () => ({
-      isSocialStatShow : {type : GraphQLBoolean },
-      isCheeredPostShow : {type : GraphQLBoolean }
-   })
-});
-
-// type defination for is show boolean in privacy type constant
-const ShowType =  new GraphQLObjectType({
-    name : "IsShow",
-    fields : () => ({
-        isShow : {type : GraphQLBoolean }
+// declared the article report type def common constant
+const ReportArticleType = new GraphQLObjectType({
+    name: 'ReportArticle',
+    fields: ( ) => ({
+        ID: { type: GraphQLInt },
+        ArticleID: { type: new GraphQLNonNull(GraphQLInt) },
+        UserID: { type: new GraphQLNonNull(GraphQLInt) },
+        AuthorID: { type: new GraphQLNonNull(GraphQLInt) },
+        ReasonType: { type: GraphQLString },
+        Status : { type: GraphQLBoolean },
+        isAuthorBlocked: { type: GraphQLBoolean }
     })
 });
 
+// declared the block author type def common constant
+const BlockAuthorType = new GraphQLObjectType({
+    name: 'BlockAuthor',
+    fields: ( ) => ({
+        ID: { type: GraphQLInt },
+        UserID: { type: new GraphQLNonNull(GraphQLInt) },
+        AuthorID: { type: new GraphQLNonNull(GraphQLInt) },
+        Status : { type: GraphQLBoolean },
+        isAuthorBlocked: { type: GraphQLBoolean }
+    })
+});
+// declared the users common constant
+const RoleType = new GraphQLObjectType({
+    name: 'Roles',
+    fields: () => ({
+        ID: { type: GraphQLInt },
+        Name: { type: GraphQLString },
+        Description: { type: GraphQLString },
+        Status: { type: GraphQLInt }
+    })
+});
 
-  const TotalWalletAmountType = new GraphQLScalarType({
-      name : "TotalWalletAmountType",
-      resolve(parent){
-          return parseFloat(parent.TotalWalletAmount);
-      }
+// declared the notifications common constant
+  const ArticleRatingType = new GraphQLObjectType({
+      name: 'ArticleRatings',
+      fields: () => ({
+          ID: { type: GraphQLInt },
+          Description :{ type: GraphQLString },
+          UserID : { type:GraphQLInt },
+          ClapCount :{ type: GraphQLInt },
+          UpVote  : { type: GraphQLString },
+          DownVote : { type: GraphQLString },
+          ArticleID : { type: GraphQLInt },
+          Status : { type: GraphQLString },
+          Article : {
+            type: GraphQLJSON,
+            resolve(parent, args) {
+                return Articles.findOne({ ID: parent.ArticleID });
+            }
+          }
+      })
   });
 
-  const SubscriptionAmountType = new GraphQLScalarType({
-      name : "SubscriptionAmountType",
-      resolve(parent){
-          return parseFloat(parent.Amount);
-      }
-  });
+// parent category sub object type def for usertype
+const ParentCategoryType = new GraphQLObjectType({
+    name : "UsersParentCategory",
+    fields: () => ({
+      ID: { type: GraphQLInt },
+      Name: { type: GraphQLString }
+    })
+});
 
-  const PaidSubscriptionType = new GraphQLObjectType({
+// sub category sub object type def for usertype
+const SubcategoriesType = new GraphQLObjectType({
+    name : "UsersSubCategories",
+    fields: () => ({
+      ID: { type: GraphQLInt },
+      Name: { type: GraphQLString },
+      ParentCategoryID: { type: GraphQLInt },
+    })
+});
+
+// display the count
+const TableInfo = new GraphQLObjectType({
+  name: 'TableInfo',
+  fields :() => ({
+    count: { type: GraphQLInt }
+  })
+});
+
+
+// display message for password
+const PasswordInfo = new GraphQLObjectType({
+  name: 'PasswordInfo',
+  fields :() => ({
+    Message: { type: GraphQLString }
+  })
+});
+
+
+// display profile image as return cvlue
+const ProfileImageInfo = new GraphQLObjectType({
+  name: 'ProfileImageInfo',
+  fields :() => ({
+    Avatar: { type: GraphQLString }
+  })
+});
+
+// declared the users common constant
+const EmailLogType = new GraphQLObjectType({
+    name: 'EmailLogs',
+    fields: () => ({
+      ID: { type: GraphQLInt },
+      Email : { type:GraphQLEmail },
+      Subject: { type: GraphQLString },
+      UniqueLinkKey: { type: GraphQLString },
+      Description: { type: GraphQLString },
+      From  : { type: GraphQLString },
+      StartDate :  { type : GraphQLDate },
+      EndDate:  { type : GraphQLDate },
+      Status : { type: GraphQLInt },
+      CreatedDate :  { type : GraphQLDate },
+      ModifiedDate :  { type : GraphQLDate },
+      CreatedBy: { type: GraphQLInt },
+      ModifiedBy: { type: GraphQLInt },
+    })
+});
+
+// ttoal amount decimal in user typedef
+const TotalWalletAmountType = new GraphQLScalarType({
+    name : "TotalWalletAmountType",
+    resolve(parent){
+        return parseFloat(parent.TotalWalletAmount);
+    }
+});
+
+//paid subcription type def decimal amount
+const SubscriptionAmountType = new GraphQLScalarType({
+    name : "SubscriptionAmountType",
+    resolve(parent){
+        return parseFloat(parent.Amount);
+    }
+});
+
+// paid subcription type def
+const PaidSubscriptionType = new GraphQLObjectType({
       name : 'PaidSubscriptionType',
       fields : () => ({
         SubscriptionID : { type : GraphQLInt },
@@ -155,172 +175,163 @@ const ShowType =  new GraphQLObjectType({
       })
   });
 
+const ActivityLogType = new GraphQLObjectType({
+    name: 'ActivityLogUsers',
+    fields: () => ({
+        LatestArticles : { type : new GraphQLList(GraphQLJSON) },
+        ClapedArticles : { type : new GraphQLList(GraphQLJSON) },
+        RecentlyVisited : { type : new GraphQLList(GraphQLJSON) },
+        BookmarkedArticles : { type : new GraphQLList(GraphQLJSON) },
+    })
+});
+
 // declared the users common constant
 const UserType = new GraphQLObjectType({
     name: 'Users',
     fields: () => ({
         ID: { type: GraphQLInt },
         Name: { type: GraphQLString },
+        UserName : { type : GraphQLString },
         Email : { type:GraphQLEmail },
         Description: { type: GraphQLString },
         Status: { type: GraphQLInt },
         Password: { type: GraphQLString },
         RoleID : { type: GraphQLInt },
-        // isSignup : { type: GraphQLBoolean },
-        // isLogin : { type: GraphQLBoolean },
         Avatar: { type: GraphQLString },
         isVerified : { type: GraphQLBoolean },
-        SignUpMethod: { type: GraphQLString },
+        SignUpMethod: {
+          type: GraphQLString ,
+           description : 'enum fileds with value allowed : ["Site","Facebook", "Google", "Mobile"]'},
         FaceBookUrl : { type: GraphQLString},
         UserCounter  : { type: GraphQLInt },
         TotalWalletAmount : { type: TotalWalletAmountType },
         isPaidSubscription : { type : GraphQLBoolean },
         PaidSubscription : { type : new GraphQLList( PaidSubscriptionType ) },
-        Following :{
-          type: GraphQLInt,
-          resolve(parent, args){
-              return FollowAuthor.find({ UserID : parent.ID }).countDocuments();
-          }
+        Following : { type : GraphQLInt },
+        Follower : { type : GraphQLInt },
+        ParentCategories : { type : new GraphQLList( ParentCategoryType ) },
+        SubCategories : { type : new GraphQLList( SubcategoriesType ) },
+        CreatedDate :  { type : GraphQLDate },
+        ModifiedDate :  { type : GraphQLDate },
+        MobileNo : { type: GraphQLString },
+        Dob : { type : GraphQLDate },
+        Gender : { type : GraphQLString,
+          description : 'enum fileds with value allowed : ["Male","Female", "Other"]'
+         },
+        UniqueID : { type : GraphQLString },
+        ReferenceID : { type : GraphQLString },
+        FreeArticles : { type : new GraphQLList(GraphQLJSON) },
+        PremiumArticles : { type : new GraphQLList(GraphQLJSON) },
+        ActivityLog : { type : ActivityLogType },
+        IpAddress : { type : GraphQLString },
+        isFollowing :{ 
+          type : GraphQLBoolean,
+          description : "used for authors profiles details"
         },
-        Follower :{
-          type: GraphQLInt,
-          resolve(parent, args){
-            return FollowAuthor.find({ AuthorID : parent.ID }).countDocuments();
-          }
-        },
-        // MyStories : {
-        //   // type : new GraphQLList(ArticleType),
-        //   // async resolve(parent, args) {
-        //   //   console.log(parent.ID);
-        //   //   return await Articles.find({ AuthorID : parent.ID, Status:1 });
-        //   // }
-        // },
-        Mycheers :{
-          type: new GraphQLList(ArticleType),
-             resolve(parent, args) {
-               return   ArticleRatings.distinct("ArticleID",{UserID : parent.ID, Status : 1 }).then( (get) =>{
-                 return   Articles.find({ ID : { $in : get }, Status:1 });
-               });
-            }
-        },
-        // MyBookmarks : {
-        //   type: new GraphQLList(ArticleType),
-        //   async resolve(parent, args) {
-        //      return  await ArticleBookmarks.distinct("ArticleID",{UserID : parent.ID, Status : 1 }).then(async (get) =>{
-        //        return  await Articles.find({ ID : { $in : get }, Status:1 });
-        //      });
-        //   }
-        // },
+        isSubscriptionAllowed :{ 
+          type : GraphQLBoolean,
+          description : "used for authors profiles details"
+        }
     })
 });
 
+// declared the Creators common constant
+const CreatorType = new GraphQLObjectType({
+    name: 'Creators',
+    fields: () => ({
+        ID: { type: GraphQLInt },
+        Name: { type: GraphQLString },
+        Email : { type:GraphQLEmail },
+        Description: { type: GraphQLString },
+        Status: { type: GraphQLInt },
+        CreatedDate :  { type : GraphQLDate },
+        ModifiedDate :  { type : GraphQLDate },
+        MobileNo : { type: GraphQLString },
+        UniqueID : { type : GraphQLString },
+    })
+});
 
-      // account settings type defination for account fields in user settings
-      const DefSubCategory = new GraphQLObjectType({
-            name : "SubArticleCategories",
-            fields : () => ({
-              ID: { type: GraphQLInt },
-              Name : { type:GraphQLString }
-            })
-      });
-
-    const DefCategoryType = new GraphQLObjectType({
-          name : "ParentArticleCategories",
-          fields : () => ({
-            ID: { type: GraphQLInt },
-            Name : { type:GraphQLString },
-            SubCategories: { type : new GraphQLList(DefSubCategory) }
-          })
-    });
-
-
-    // convert Decimal128 for db aritcle minimum amount
-    const MinimumDonationAmountType = new GraphQLScalarType({
-          name : "MinimumDonationAmountType",
-          resolve(parent){
-              return parseFloat(parent.MinimumDonationAmount);
+// declared the category common constant
+const CategoryType = new GraphQLObjectType({
+    name: 'Categories',
+    fields: () => ({
+        ID: { type: GraphQLInt },
+        Name: { type: GraphQLString },
+        Description: { type: GraphQLString },
+        Status: { type: GraphQLInt },
+        Slug: { type: GraphQLString },
+        isParent: { type: GraphQLBoolean },
+      	FeatureImage : { type: GraphQLString },
+        ParentCategoryID : { type : GraphQLInt },
+        CreatedDate :  { type : GraphQLDate },
+        ModifiedDate :  { type : GraphQLDate },
+      	Sequence : { type : GraphQLInt },
+        SubCategories : {
+          type: new GraphQLList(CategoryType),
+          resolve(parent, args){
+              return Categories.find({ ParentCategoryID : parent.ID });
           }
-    });
+        }
+    })
+});
 
-  // declared the article common constant
-  const ArticleType = new GraphQLObjectType({
-      name: 'Articles',
-      fields: () => ({
-          ID: { type: GraphQLInt },
-          Title: { type: new GraphQLNonNull(GraphQLString) },
-          SubTitle: { type: GraphQLString },
-          Description: { type: GraphQLString },
-          Slug: { type: new GraphQLNonNull(GraphQLString) },
-          Sequence: { type: GraphQLID },
-          CreatedDate :{type:GraphQLDate},
-          AuthorID :{ type: GraphQLInt },
-          Authors :{
-            type: new GraphQLList(UserType),
-            resolve(parent, args){
-                return Users.find({ ID: parent.AuthorID });
-            }
-          },
-          isPublish : { type : GraphQLBoolean},
-          AmpSlug:{ type: GraphQLString },
-          FeatureImage:{ type: GraphQLString },
-          Thumbnail:{ type: GraphQLString },
-          ReadMinutes:{ type: GraphQLString },
-          ViewCount:{ type: GraphQLInt },
-          Tags:{ type:new GraphQLList(GraphQLString) },
-          Status: { type: GraphQLID },
-          TotalClapCount : { type: GraphQLInt },
-          // TotalUpVote : { type: GraphQLInt },
-          // TotalDownVote : { type: GraphQLInt },
-          Categories : {type : DefCategoryType },
-          TotalArticleCount : {
-            type: GraphQLInt,
-            resolve(parent, args){
-                return Articles.find( { Status :  1 } ).countDocuments();
-            }
-          },
-          AcceptDonation : { type : GraphQLBoolean},
-          MinimumDonationAmount : { type : MinimumDonationAmountType },
-          isBookmark : { type : GraphQLBoolean},
-          isFollowed : { type : GraphQLBoolean},
-          isPaidSubscription : { type : GraphQLBoolean },
-          isContentAllowed : { type : GraphQLBoolean },
-      }),
+// account settings type defination for account fields in user settings
+  const DefSubCategory = new GraphQLObjectType({
+      name : "SubArticleCategories",
+      fields : () => ({
+        ID: { type: GraphQLInt },
+        Name : { type:GraphQLString }
+      })
   });
 
-  // declared the article category common constant
-  const CategoryType = new GraphQLObjectType({
-      name: 'Categories',
-      fields: () => ({
-          ID: { type: new GraphQLNonNull(GraphQLInt) },
-          Name: { type: new GraphQLNonNull(GraphQLString) },
-          Description: { type: GraphQLString },
-          Slug: { type: new GraphQLNonNull(GraphQLString) },
-          Sequence: { type: GraphQLInt },
-          Status: { type: GraphQLInt },
-          FeatureImage : { type: GraphQLString },
-          isParent : { type: GraphQLBoolean },
-          ParentCategoryID : { type: GraphQLInt },
-          SubCategories : {
-            type: new GraphQLList(CategoryType),
-            resolve(parent, args){
-                return Categories.find({ ParentCategoryID : parent.ID });
-            }
+
+const DefCategoryType = new GraphQLObjectType({
+      name : "ParentArticleCategories",
+      fields : () => ({
+        ID: { type: GraphQLInt },
+        Name : { type:GraphQLString },
+        SubCategories: { type : new GraphQLList(DefSubCategory) }
+      })
+});
+
+const ArticleBookmarkType = new GraphQLObjectType({
+      name: 'ArticleBookmarks',
+      fields: ( ) => ({
+          ID: { type: GraphQLInt },
+          ArticleID: { type: GraphQLInt },
+          UserID: { type: new GraphQLNonNull(GraphQLInt) },
+          Status : { type: GraphQLInt },
+          Article: {
+              type: new GraphQLList( GraphQLJSON ),
+            async  resolve(parent, args) {
+                  return await Articles.find({ ID: parent.ArticleID }).then(async (mark) =>{
+                    if(mark.length > 0  ) {
+                      if( parent.Status == 1 ) mark[0].isBookmark = true;
+                      else mark[0].isBookmark = false;
+                   }
+                    return await mark;
+                  });
+
+              }
           }
       })
   });
 
-  // declared the users common constant
-  const RoleType = new GraphQLObjectType({
-      name: 'Roles',
-      fields: () => ({
-          ID: { type: GraphQLInt },
-          Name: { type: GraphQLString },
-          Description: { type: GraphQLString },
-          Status: { type: GraphQLInt }
-      })
-  });
 
-  // declared the notifications common constant
+  // declared the follow author type def common constant
+  const FollowAuthorType = new GraphQLObjectType({
+    name: 'FollowAuthor',
+    fields: ( ) => ({
+        ID: { type: GraphQLInt },
+        UserID: { type: new GraphQLNonNull(GraphQLInt) },
+        AuthorID: { type: new GraphQLNonNull(GraphQLInt) },
+        isFollowed : { type: GraphQLBoolean },
+        Status : { type: GraphQLInt },
+        ModifiedDate : {type: GraphQLDate }
+    })
+});
+
+// declared the notifications common constant
   const NotificationType = new GraphQLObjectType({
       name: 'Notifications',
       fields: () => ({
@@ -346,82 +357,6 @@ const UserType = new GraphQLObjectType({
       })
   });
 
-  // declared the notifications common constant
-  const ArticleRatingType = new GraphQLObjectType({
-      name: 'ArticleRatings',
-      fields: () => ({
-          ID: { type: GraphQLInt },
-          Description :{ type: GraphQLString },
-          UserID : { type:GraphQLInt },
-          ClapCount :{ type: GraphQLInt },
-          UpVote  : { type: GraphQLString },
-          DownVote : { type: GraphQLString },
-          ArticleID : { type: GraphQLInt },
-          Status : { type: GraphQLString },
-          Articles : {
-            type: new GraphQLList(ArticleType),
-            resolve(parent, args) {
-                return Articles.find({ ID: parent.ArticleID });
-            }
-          }
-      })
-  });
-
-    // declared the article bookmark type def common constant
-  const ArticleBookmarkType = new GraphQLObjectType({
-      name: 'ArticleBookmarks',
-      fields: ( ) => ({
-          ID: { type: GraphQLInt },
-          ArticleID: { type: GraphQLInt },
-          UserID: { type: new GraphQLNonNull(GraphQLInt) },
-          Status : { type: GraphQLInt },
-          Article: {
-              type: new GraphQLList(ArticleType),
-              resolve(parent, args) {
-                  return Articles.find({ ID: parent.ArticleID });
-              }
-          }
-      })
-  });
-
-  // declared the article report type def common constant
-  const ReportArticleType = new GraphQLObjectType({
-      name: 'ReportArticle',
-      fields: ( ) => ({
-          ID: { type: GraphQLInt },
-          ArticleID: { type: new GraphQLNonNull(GraphQLInt) },
-          UserID: { type: new GraphQLNonNull(GraphQLInt) },
-          AuthorID: { type: new GraphQLNonNull(GraphQLInt) },
-          ReasonType: { type: GraphQLString },
-          Status : { type: GraphQLBoolean },
-          isAuthorBlocked: { type: GraphQLBoolean }
-      })
-  });
-
-// declared the block author type def common constant
-  const BlockAuthorType = new GraphQLObjectType({
-      name: 'BlockAuthor',
-      fields: ( ) => ({
-          ID: { type: GraphQLInt },
-          UserID: { type: new GraphQLNonNull(GraphQLInt) },
-          AuthorID: { type: new GraphQLNonNull(GraphQLInt) },
-          Status : { type: GraphQLBoolean },
-          isAuthorBlocked: { type: GraphQLBoolean }
-      })
-  });
-
-  // declared the follow author type def common constant
-  const FollowAuthorType = new GraphQLObjectType({
-    name: 'FollowAuthor',
-    fields: ( ) => ({
-        ID: { type: GraphQLInt },
-        UserID: { type: new GraphQLNonNull(GraphQLInt) },
-        AuthorID: { type: new GraphQLNonNull(GraphQLInt) },
-        isFollowed : { type: GraphQLBoolean },
-        Status : { type: GraphQLInt },
-        ModifiedDate : {type: GraphQLDate }
-    })
-});
 
 // declared the users selected type def common constant
 const UserCategoryType = new GraphQLObjectType({
@@ -435,6 +370,5 @@ const UserCategoryType = new GraphQLObjectType({
     })
 });
 
-  // export all the constants
-  const SchemaArray = { CategoryType, ArticleType,UserType,RoleType,NotificationType,ArticleRatingType,ArticleBookmarkType,ReportArticleType, BlockAuthorType,FollowAuthorType, UserCategoryType,UserSettingType };
-  module.exports = SchemaArray;
+// export all the constants
+module.exports = { UserCategoryType,NotificationType,SiteType,ProfileImageInfo,EmailLogType,PasswordInfo, TableInfo,FollowAuthorType,BlockAuthorType,ReportArticleType,RoleType, CategoryType, UserType,CreatorType,ArticleBookmarkType,ArticleRatingType };

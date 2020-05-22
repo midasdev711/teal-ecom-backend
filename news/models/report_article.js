@@ -1,7 +1,11 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const autoIncrement = require('mongoose-auto-increment');
-autoIncrement.initialize(mongoose);
+/*
+  * CreatedBy : Ankita Solace
+  * Purporse :  Report Articles schema
+*/
+const mongoose = require("mongoose"),
+      Schema = mongoose.Schema,
+      autoIncrement = require('mongoose-auto-increment');
+      autoIncrement.initialize(mongoose);
 
 const ReportArticleSchema = new Schema({
     ID: {  type: Number,  required: true, exists: false, unique : true },

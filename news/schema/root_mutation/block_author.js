@@ -4,10 +4,11 @@
   * Purpose : Declare all report article root schema methods
 */
 
-const BlockAuthor = require('../../models/block_author');
-const { BlockAuthorType } = require('../types/constant');
-const { GraphQLList , GraphQLInt,GraphQLNonNull } = require('graphql');
+const BlockAuthor = require('../../models/block_author'),
+      { BlockAuthorType } = require('../types/constant'),
+      { GraphQLList , GraphQLInt,GraphQLNonNull } = require('graphql');
 
+  // block authors create api
   const BlockAuthors = {
     type: BlockAuthorType,
     args: {

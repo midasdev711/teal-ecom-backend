@@ -4,15 +4,14 @@
   * Purpose : Declare all user settings schema methods
 */
 
-const graphql = require('graphql');
-const UserSettings = require('../../models/user_settings');
-const Articles = require('../../models/article');
-const Users = require('../../models/users');
-const { UserSettingType, UserType } = require('../types/constant');
-
-const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoolean,GraphQLInputObjectType } = graphql;
-const {  GraphQLEmail } = require('graphql-custom-types');
-var await = require('await');
+const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoolean,GraphQLInputObjectType } = require('graphql'),
+      UserSettings = require('../../models/user_settings'),
+      Articles = require('../../models/articles'),
+      Users = require('../../models/users'),
+      {  UserType } = require('../types/constant'),
+      { UserSettingType } = require("../types/user_settings"),
+      {  GraphQLEmail } = require('graphql-custom-types'),
+      await = require('await');
 
 // input object of arguments to userSettings
 const AccountInputType = new GraphQLInputObjectType({
@@ -25,6 +24,7 @@ const AccountInputType = new GraphQLInputObjectType({
     })
 });
 
+// input object for Privacy
 const PrivacyInputType = new GraphQLInputObjectType({
     name: 'PrivacyInput',
     fields: () => ({
@@ -33,6 +33,7 @@ const PrivacyInputType = new GraphQLInputObjectType({
     })
 });
 
+// input type to set button type
 const ButtonType = new GraphQLInputObjectType({
     name: 'CommonButton',
     fields: () => ({
@@ -41,6 +42,8 @@ const ButtonType = new GraphQLInputObjectType({
       isOff : { type: GraphQLBoolean },
     })
 });
+
+// trending input object
 const TrendingInputType = new GraphQLInputObjectType({
     name: 'TrendingInput',
     fields: () => ({
@@ -50,6 +53,7 @@ const TrendingInputType = new GraphQLInputObjectType({
     })
 });
 
+// social activity input object
 const SocialActivityInputType = new GraphQLInputObjectType({
     name: 'SocialActivityInput',
     fields: () => ({
@@ -58,6 +62,7 @@ const SocialActivityInputType = new GraphQLInputObjectType({
     })
 });
 
+// page follow input object
 const PagesFollowInputType = new GraphQLInputObjectType({
     name: 'PagesFollowInput',
     fields: () => ({
@@ -66,6 +71,7 @@ const PagesFollowInputType = new GraphQLInputObjectType({
     })
 });
 
+// author follow input object
 const AuthorsFollowInputType = new GraphQLInputObjectType({
     name: 'AuthorsFollowInput',
     fields: () => ({
@@ -83,6 +89,7 @@ const PagesLikeInputType = new GraphQLInputObjectType({
     })
 });
 
+// author like input object
 const AuthorsLikeInputType = new GraphQLInputObjectType({
     name: 'AuthorsLikeInput',
     fields: () => ({
@@ -92,6 +99,7 @@ const AuthorsLikeInputType = new GraphQLInputObjectType({
     })
 });
 
+// Recommanded input object
 const RecommandedInputType = new GraphQLInputObjectType({
     name: 'RecommandedInput',
     fields: () => ({
@@ -101,7 +109,7 @@ const RecommandedInputType = new GraphQLInputObjectType({
     })
 });
 
-
+// notification input object
   const NotificationInputType =  new GraphQLInputObjectType({
       name : "NotificationInput",
       fields: () =>({
@@ -115,7 +123,7 @@ const RecommandedInputType = new GraphQLInputObjectType({
       })
   });
 
-
+// paid subscription input object
   const PaidSubscriptionInputType = new GraphQLInputObjectType({
       name: 'PaidSubscriptionInputSettings',
       fields: () => ({
@@ -128,7 +136,7 @@ const RecommandedInputType = new GraphQLInputObjectType({
       })
   });
 
-
+// update data in user table
 async function updateUserData( args,UserID ) {
   var data = {};
 
@@ -150,6 +158,7 @@ async function updateUserData( args,UserID ) {
   //         { $set : { isPaidSubscription : true } },{ upsert: true,new: true, returnNewDocument: true }).then((t) =>{console.log(t);});
   // }
 
+  // update user settings
   const UpdateUserSettings = {
       type : UserSettingType,
       args: {
@@ -170,7 +179,6 @@ async function updateUserData( args,UserID ) {
                   FinalData.isPaidSubscription = args.isPaidSubscription;
                   FinalData.PaidSubscription = args.PaidSubscription;
                   // if( args.isPaidSubscription ) updateAllArticlesSubscription( args.UserID );
-
               }
 
               if( typeof args.Account != "undefined" ) {
@@ -184,23 +192,23 @@ async function updateUserData( args,UserID ) {
               if( typeof args.Privacy != "undefined" )
                   FinalData.Privacy =  await getPrivacyData(SettingData.Privacy,args.Privacy);
 
-
               return UserSettings.findOneAndUpdate(
                 {$and: [{  UserID: args.UserID },{ Status : 1 }]},
                 FinalData,
-                {  new: true,returnNewDocument: true }
+                {  upsert:true, new: true,returnNewDocument: true }
               );
-
         });
       }
   };
 
+  // check value is exists in args if not then replace value
   async function checkExistsOrNot( dbVal, ArgsVal) {
     var ReturnFeild = dbVal;
       if( ArgsVal != "undefined")  ReturnFeild = ArgsVal;
       return ReturnFeild;
   }
 
+  // get account realted data collect through args and db value
   async function getAccountData(AllData, ArgsData) {
      let AccountData = {};
      if( typeof ArgsData.Name != "undefined" )
@@ -213,18 +221,10 @@ async function updateUserData( args,UserID ) {
           AccountData.isFacebook = await checkExistsOrNot(AllData.isFacebook,ArgsData.isFacebook);
      else  AccountData.isFacebook = AllData.isFacebook;
 
-      // Users.findOneAndUpdate(
-      //         { UserID: ArgsData.UserID },
-      //         ArgsData.Name,
-      //         {
-      //           new: true,
-      //           returnNewDocument: true,
-      //         }
-      //      );
-
      return AccountData;
   }
 
+  // get notification related args and db data
   async function getNotificationData( AllData, ArgsData ) {
     let NotificationData = {};
     if( typeof ArgsData.Trending != "undefined" )
@@ -259,6 +259,7 @@ async function updateUserData( args,UserID ) {
     return NotificationData;
   }
 
+  // notification data with button related values
   async function NotificationWithButton( AllData, ArgsData ) {
     let setData = {};
     if( typeof ArgsData.isEmail != "undefined" )
@@ -274,6 +275,7 @@ async function updateUserData( args,UserID ) {
     return setData;
   }
 
+  // get button data
   async function getButtonData( AllData, ArgsData ) {
     let setButtonData = {};
       if( typeof ArgsData.Button.isDaily != "undefined" ) setButtonData.isDaily = await checkExistsOrNot(AllData.Button.isDaily,ArgsData.Button.isDaily);
@@ -287,6 +289,7 @@ async function updateUserData( args,UserID ) {
       return setButtonData;
   }
 
+  // get notification data without button related value
   async function NotificationWithoutButton( AllData, ArgsData ) {
       let setData = {};
       if( typeof ArgsData.isEmail != "undefined" )
@@ -298,6 +301,7 @@ async function updateUserData( args,UserID ) {
       return setData;
   }
 
+  // get account provicy data if not found in edit case set values form db for same id
   async function getPrivacyData( AllData, ArgsData ) {
       let ReturnPrivacyData = {};
       if( typeof ArgsData.isSocialStatShow != "undefined" )
@@ -308,9 +312,7 @@ async function updateUserData( args,UserID ) {
       else  ReturnPrivacyData.isCheeredPostShow = AllData.isCheeredPostShow;
 
       return ReturnPrivacyData;
-
   }
 
 
-const UserSettingsArray = { UpdateUserSettings };
-module.exports = UserSettingsArray;
+module.exports = { UpdateUserSettings };

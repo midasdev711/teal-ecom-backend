@@ -4,17 +4,16 @@
   * Purpose : Declare all report article root schema methods
 */
 
-const ReportArticle = require('../../models/report_article');
-const { ReportArticleType } = require('../types/constant');
-const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt } = require('graphql');
+const ReportArticle = require('../../models/report_article'),
+      { ReportArticleType } = require('../types/constant'),
+      { GraphQLID,GraphQLList , GraphQLString,GraphQLInt } = require('graphql');
 
+  // report article list
   const ReportArticleList = {
     type: new GraphQLList(ArticleType),
     args: { ID: { type: GraphQLID } },
     resolve(parent, args){ return Articles.find({ ID:args.ID }); }
   };
 
-;
 
-  const ReportArticleArray = { ReportArticleList };
-  module.exports = ReportArticleArray;
+  module.exports = { ReportArticleList };

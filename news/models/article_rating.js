@@ -1,7 +1,13 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const autoIncrement = require('mongoose-auto-increment');
-autoIncrement.initialize(mongoose);
+/*
+  * CreatedBy : Ankita Solace
+  * CreatedDate : 30-11-2019
+  * Purporse :  article rating schema
+*/
+
+const mongoose = require("mongoose"),
+      Schema = mongoose.Schema,
+      autoIncrement = require('mongoose-auto-increment');
+      autoIncrement.initialize(mongoose);
 
 
 const ArticleRatingSchema = new Schema({
@@ -9,8 +15,6 @@ const ArticleRatingSchema = new Schema({
     Description:    String,
     UserID : Number,
     ClapCount:  { type: Number, default: 0 },
-    UpVote :  { type: Number, default: 0 },
-    DownVote: { type: Number, default: 0 },
     ArticleID : Number,
     Status : { type: Number, default: 1 }
 });

@@ -10,11 +10,13 @@ const { GraphQLID,GraphQLInt,GraphQLList , GraphQLString } = require('graphql'),
       { SubscriptionListType } = require('../types/subscription_list');
 
 
+  // get all subcription list
   const GetAllSubscriptionList = {
     type: new GraphQLList(SubscriptionListType),
     resolve(parent, args) { return SubscriptionLists.find({ Status : 1 }); }
   };
 
+// get authors paid subscription list
  const GetAuthordPaidSubscriptionList = {
      type: new GraphQLList(SubscriptionListType),
      args : { AuthorID : { type : GraphQLInt }},
@@ -22,6 +24,7 @@ const { GraphQLID,GraphQLInt,GraphQLList , GraphQLString } = require('graphql'),
      resolve(parent, args) {
         return UserSettings.findOne({UserID : args.AuthorID},{_id : false,PaidSubscription: true})
                .then((data) => {
+                 console.log(data,"datadatadatadatadata");
                   return data.PaidSubscription.filter( ( object) => {
                       if(object.Status == 1) return object;
                    });

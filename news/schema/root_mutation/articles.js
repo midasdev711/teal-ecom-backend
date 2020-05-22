@@ -5,14 +5,14 @@
 */
 
 const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQLInputObjectType,GraphQLFloat } = require('graphql'),
-      Articles = require('../../models/article'),
-      Notifications = require('../../models/notification'),
-      { ArticleType } = require('../types/constant'),
-      base64Img = require('base64-img'),
+      Articles = require('../../models/articles'),
+      Notifications = require('../../models/notifications'),
+      { ArticleType } = require('../types/articles'),
       UploadBase64OnS3 = require('../../../upload/base64_upload'),
       { AWSCredentails } = require('../../../upload/aws_constants'),
       fs = require('fs'),
       {  ArticleStatusConst } = require('../constant'),
+      uniqid = require('uniqid'),
       await = require('await'),
       each = require('foreach');
 
@@ -24,7 +24,6 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         ArticleID : {type : GraphQLInt }
       },
     async   resolve(parent,args) {
-
       return Articles.findOneAndUpdate(
                { ID :  { $in : args.ArticleID  } },
                { $set : { Status : ArticleStatusConst.Approved } },
@@ -79,6 +78,7 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
   };
 
 
+  // sub categories input params
   const SubCategoriesInputType = new GraphQLInputObjectType({
       name: 'SubCategoriesInput',
       fields: () => ({
@@ -86,6 +86,7 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
           Name: {   type: GraphQLString }
       })
   });
+
   // input object of arguments to userSettings
   const CategoryInputType = new GraphQLInputObjectType({
       name: 'CategoriesInput',
@@ -111,15 +112,15 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         ReadMinutes :{ type: GraphQLString },
         Tags:{ type:new GraphQLList(GraphQLString) },
         isPublish : {type : GraphQLBoolean },
-        Categories: {type : new GraphQLList(CategoryInputType)},
+        Categories: {type : CategoryInputType },
         AcceptDonation : { type : GraphQLBoolean },
         MinimumDonationAmount : { type : GraphQLFloat },
-        isPaidSubscription : {type : GraphQLBoolean }
+        isPaidSubscription : {type : GraphQLBoolean },
+        ArticleScope : { type : GraphQLInt , description : "0 : 'Private', 1 : 'Public', 2 : 'Premium'"}
     },
    async resolve(parent, args) {
-     // console.log("herhehre",args);
         if(typeof args.Title != "undefined") {
-            args.Slug =  args.AmpSlug = args.Title.replace(/<p>/g,"").replace(/<\/p>/g,"").trim().replace(/[^a-zA-Z0-9-. ]/g, '').replace(/\s+/g, '-').toLowerCase();
+            args.TitleSlug =  args.AmpSlug = args.Title.replace(/<p>/g,"").replace(/<\/p>/g,"").trim().replace(/[^a-zA-Z0-9-. ]/g, '').replace(/\s+/g, '-').toLowerCase();
         }
 
         if( typeof args.FeatureImage != "undefined" )
@@ -127,33 +128,34 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         if(typeof args.Description != "undefined")
             args.Description = await uploadDescriptionImagesOnS3( args.Description );
 
-        let ArticleConstant = new Articles({
-                Title: args.Title,
-                SubTitle: args.SubTitle,
-                Description: args.Description,
-                Slug: args.Slug,
-                AuthorID: args.AuthorID,
-                AmpSlug: "amp/"+args.Slug,
-                FeatureImage: args.FeatureImage,
-                ReadMinutes: args.ReadMinutes,
-                Tags : args.Tags,
-                isPublish: args.isPublish,
-                AcceptDonation : args.AcceptDonation,
-                Categories : args.Categories,
-                MinimumDonationAmount : args.MinimumDonationAmount,
-                isPaidSubscription : args.isPaidSubscription
-        });
-
           if( args.ID != 0  && args.ID != undefined ) {
             return  Articles.findOneAndUpdate(
                      {$and: [{  ID: args.ID }]},
                      args,
-                     {
-                       new: true,
-                       returnNewDocument: true
-                     }
+                     { new: true, upsert : true, returnNewDocument: true }
                   );
-          } else { return await ArticleConstant.save(); }
+          } else {
+            args.Slug = uniqid( Date.now() );
+              let ArticleConstant = new Articles({
+                  Title: args.Title,
+                  SubTitle: args.SubTitle,
+                  TitleSlug: args.TitleSlug,
+                  Description: args.Description,
+                  Slug: args.Slug,
+                  AuthorID: args.AuthorID,
+                  AmpSlug: "amp/"+args.Slug,
+                  FeatureImage: args.FeatureImage,
+                  ReadMinutes: args.ReadMinutes,
+                  Tags : args.Tags,
+                  isPublish: args.isPublish,
+                  AcceptDonation : args.AcceptDonation,
+                  Categories : args.Categories,
+                  MinimumDonationAmount : args.MinimumDonationAmount,
+                  isPaidSubscription : args.isPaidSubscription
+              });
+
+             return await ArticleConstant.save();
+           }
     }
   };
 
@@ -166,12 +168,13 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
   async function  uploadDescriptionImagesOnS3( Description ) {
       var DescImageObject = await getBlobImageObject( Description ),
           Urllen = DescImageObject.length;
-
+      var base = /base64/g;
            for (var i = 0; i < Urllen; i++) {
-              desc = await UploadBase64OnS3( DescImageObject[i] , AWSCredentails.AWS_STORIES_IMG_PATH  );
-              Description = Description.replace(DescImageObject[i],desc);
+             if(base.exec(DescImageObject[i]) != null) {
+                desc = await UploadBase64OnS3( DescImageObject[i] , AWSCredentails.AWS_STORIES_IMG_PATH  );
+                Description = Description.replace(DescImageObject[i],desc);
+             }
            }
-
            return Description;
   }
 
@@ -179,14 +182,18 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
  async function getBlobImageObject( DescriptionString ) {
         var m,
             urls = [],
+            base = /base64/g,
             rex = /img.*?src='(.*?)'/g,
             rexd = /img.*?src='(.*?)'/g;
-            // console.log("fourth");
-         if (DescriptionString.indexOf('"') >= 0 ) { while ( m = rexd.exec( DescriptionString ) ) { urls.push( m[1] ); } } else { while ( m = rex.exec( DescriptionString ) ) { urls.push( m[1] ); } }
+        if(base.exec(DescriptionString) != null) {
+            if (DescriptionString.indexOf('"') >= 0 ) {
+               while ( m = rexd.exec( DescriptionString ) ) {  urls.push( m[1] ); }
+            } else {
+              while ( m = rex.exec( DescriptionString ) ) { urls.push( m[1] ); }
+             }
+        }
          return await urls;
       }
-
-
 
   // update only tags
   const UpdateTags = {
@@ -214,12 +221,13 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         AuthorID : { type: GraphQLInt },
         FeatureImage : { type: GraphQLString }
       },
-      resolve(root, params) {
-          return Articles.updateOne(
-            {$and: [{  ArticleID: params.ArticleID },{ AuthorID: params.AuthorID },{ Status: ArticleStatusConst.Active }]},
+      async resolve(root, params) {
+          params.FeatureImage = await uploadFeaturedImage( params.FeatureImage, uniqid() );
+          return Articles.findOneAndUpdate(
+            {$and: [{  ID : params.ArticleID },{ AuthorID: params.AuthorID },{ Status:{ $ne : ArticleStatusConst.inActive }  }]},
             { $set: { FeatureImage: params.FeatureImage } },
-            { upsert: true }
-          )
+            { upsert: true,returnNewDocument: true }
+          ).then((t) =>{ console.log(t); return t;})
           .catch(err => new Error(err));
         }
     };
@@ -249,12 +257,9 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
       },
       async resolve(root, params) {
           return await Articles.findOneAndUpdate(
-              { ID: params.ID, Status: 1 },
+              { ID: params.ID, Status: {$ne : 0 } },
               { $set: { Status: ArticleStatusConst.inActive } },
-              {
-                new: true,
-                returnNewDocument: true
-              }
+              {  new: true,returnNewDocument: true }
           )
           .catch(err => new Error(err));
         }
@@ -291,9 +296,7 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         if(params.ReadMinutes == "") delete params.ReadMinutes;
 
           return Articles.updateOne(
-              { ID: params.ID },
-              params,
-              { new: true }
+              { ID: params.ID }, params, { new: true }
           )
           .catch(err => new Error(err));
         }

@@ -1,8 +1,12 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const SchemaType = Schema.Types;
-const autoIncrement = require('mongoose-auto-increment');
-autoIncrement.initialize(mongoose);
+/*
+  * CreatedBy : Ankita Solace
+  * Purporse : user paid subscrition  Schema
+*/
+const mongoose = require("mongoose"),
+      Schema = mongoose.Schema,
+      SchemaType = Schema.Types,
+      autoIncrement = require('mongoose-auto-increment');
+      autoIncrement.initialize(mongoose);
 
 
 const UserPaidSubscriptionSchema = new Schema({
@@ -18,7 +22,6 @@ const UserPaidSubscriptionSchema = new Schema({
     Purpose :{  type: String, enum : ["Donation","Subscription"] },
     TXNID :{  type: String },
     Currency : {  type: String, default : "USD" },
-    // TXNID :{  type: Number },
     Status : { type: Number, default: 1 },
     StartDate:  { type: Date, default: Date.now },
     EndDate:  { type: Date, default: Date.now },

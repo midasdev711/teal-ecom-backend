@@ -1,8 +1,13 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const SchemaType = Schema.Types;
-const autoIncrement = require('mongoose-auto-increment');
-autoIncrement.initialize(mongoose);
+/*
+  * CreatedBy : Ankita Solace
+  * CreatedDate : 30-11-2019
+  * Purporse :  Donation transction schema
+*/
+const mongoose = require("mongoose"),
+      Schema = mongoose.Schema,
+      SchemaType = Schema.Types,
+      autoIncrement = require('mongoose-auto-increment');
+      autoIncrement.initialize(mongoose);
 
 
 const DonationTranscationSchema = new Schema({

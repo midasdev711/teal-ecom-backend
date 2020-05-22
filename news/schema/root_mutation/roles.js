@@ -4,11 +4,12 @@
   * Purpose : Declare all roles schema methods
 */
 
-const graphql = require('graphql');
-const Roles = require('../../models/roles');
-const { RoleType } = require('../types/constant');
-const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString } = graphql;
+const graphql = require('graphql'),
+      Roles = require('../../models/roles'),
+      { RoleType } = require('../types/constant'),
+      { GraphQLInt,GraphQLID,GraphQLList , GraphQLString } = graphql;
 
+  // add user roles
   const AddRole = {
     type : RoleType,
     args : {
@@ -24,21 +25,17 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString } = graphql;
     }
   };
 
+  // delete roles
   const DeleteRole = {
     type : RoleType,
-    args : {
-        ID: { type: GraphQLID }
-    },
+    args : { ID: { type: GraphQLID } },
     resolve(root, params) {
-        return Roles.update(
-            { ID: params.ID },
-            { $set: { Status: 0 } },
-            { new: true }
-        )
-        .catch(err => new Error(err));
+        return Roles.update({ ID: params.ID }, { $set: { Status: 0 } },{ new: true })
+               .catch(err => new Error(err));
       }
   };
 
+  //edit roles
   const UpdateRole = {
     type : RoleType,
     args : {
@@ -52,12 +49,8 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString } = graphql;
       if(params.Description == "") delete params.Description;
       if(params.Status == "") delete params.Status;
 
-        return Roles.updateOne(
-            { ID: params.ID },
-            params,
-            { new: true }
-        )
-        .catch(err => new Error(err));
+        return Roles.updateOne({ ID: params.ID }, params, { new: true })
+               .catch(err => new Error(err));
       }
   };
 

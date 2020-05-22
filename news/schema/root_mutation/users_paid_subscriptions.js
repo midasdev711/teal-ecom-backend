@@ -9,6 +9,7 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
       UsersPaidSubscriptions = require('../../models/users_paid_subscriptions'),
       UsersWalletBalance = require('../../models/user_wallet_balance'),
       UsersPaidSubscriptionLogs = require('../../models/users_paid_subscription_logs'),
+      Notifications = require('../../models/notifications'),
       { UserPaidSubscriptionType } = require('../types/users_paid_subscriptions'),
       {  GraphQLEmail } = require('graphql-custom-types'),
       {  GraphQLDate } = require('graphql-iso-date'),
@@ -18,7 +19,7 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
       await = require('await');
 
 
-
+  // set users subscription to author
   const SetUsersSubscription = {
       type : UserPaidSubscriptionType,
       description : "this api create users subscription",
@@ -36,29 +37,43 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
         ModifiedDate:  { type: GraphQLDate }
       },
       async resolve( parent, args ) {
-        sendSubscriptionMailToUser( args );
+          sendSubscriptionMailToUser( args );
           args = await  calculateSubscriptionDates( args );
           addToUserWallet( args );
           updateUserBalance( args );
+          sendNotoficationTouser( args );
           UsersPaidSubscriptionLogs.create( args ).then((r) =>{return r;});
-          // if(typeof args.UserSubscriptionID != undefined && args.UserSubscriptionID != 0 ) {
-          //     // UserSubscriptionID
-          //     // return findOneAndUpdate(
-          //     //   { UserSubscriptionID : args.UserSubscriptionID },
-          //     //    args,
-          //     //   {new : true, upsert : true}
-          //     // );
-          //   return  UsersPaidSubscriptions.findOneAndUpdate(
-          //        { UserSubscriptionID : args.UserSubscriptionID },
-          //        args,
-          //       {new : true, upsert : true}
-          //     );
-          // } else
-           return await UsersPaidSubscriptions.create( args );
-
+          return await UsersPaidSubscriptions.create( args );
       }
   };
 
+
+// send notification to user and author
+  async function  sendNotoficationTouser( args ) {
+    let NotificationConstant = new Notifications({
+          SenderID :args.AuthorID,
+          RecieverID :args.UserID,
+          Purpose: "Authors "+args.Purpose,
+          NotifyMessage: "you are successfully subscribe to this "+args.SubscriptionTitle+" plan ",
+          Subject: "Your plan is start from now for "+args.Days+" days. You have paid "+args.Amount+" "+args.Currency,
+          CreatedBy: args.UserID,
+          ModifiedBy: args.UserID
+    });
+    NotificationConstant.save();
+
+    let NotificationConstant2 = new Notifications({
+          SenderID :args.UserID,
+          RecieverID :args.AuthorID,
+          Purpose: "New user subscribed",
+          NotifyMessage: "New user subscribe to this plan "+args.SubscriptionTitle,
+          Subject: "The plan is for "+args.Days+" days and amount paid "+args.Amount+" "+args.Currency,
+          CreatedBy: args.AuthorID,
+          ModifiedBy: args.AuthorID
+    });
+    NotificationConstant2.save();
+  }
+
+  // update Author total amount
   async function  updateUserBalance( Data ) {
      Users.findOne( { ID : Data.AuthorID } )
           .then((user_data) =>{
@@ -72,6 +87,7 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
         });
   }
 
+  // calculate subscription date from days
   async function  calculateSubscriptionDates( args ) {
     var TodaysDate = new Date();
         args.StartDate = new Date();
@@ -82,8 +98,8 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
       return args;
   }
 
+  // create user wallet entry
   async function  addToUserWallet( args ) {
-
     var saveObject = {};
         saveObject.UserID = args.AuthorID;
         saveObject.Amount = args.Amount;
@@ -93,8 +109,6 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
         saveObject.Status = DonationStatusConst.Active;
         saveObject.RefrenceID = args.TXNID;
         UsersWalletBalance.create( saveObject );
-
-        // TotalBalanceAmount
   }
 
 

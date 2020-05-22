@@ -17,7 +17,7 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString } = require('graphql'),
     resolve(parent, args) { return UserPaidSubscriptionLogs.find({ Status : 1,UserID: args.UserID }); }
   };
 
-
+// get authors pais subscriber list log
   const GetAuthorsPaidSubscribersList = {
       type : new GraphQLList( AuthorsSubscriberType ),
       args : { AuthorID : {type :GraphQLInt }},

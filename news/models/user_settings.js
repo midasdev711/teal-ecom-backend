@@ -1,11 +1,13 @@
+/*
+  * CreatedBy : Ankita Solace
+  * Purporse : user setting Schema
+*/
 const mongoose = require("mongoose"),
       Schema = mongoose.Schema,
       SchemaType = Schema.Types,
       autoIncrement = require('mongoose-auto-increment');
       autoIncrement.initialize(mongoose);
-      mongoose.set('useFindAndModify', false);
-
-
+      
 const UserSettings = new Schema({
           ID: {  type: Number,  required: true, exists: false, unique : true },
           UserID : Number,
@@ -16,7 +18,6 @@ const UserSettings = new Schema({
               isFacebook :  {type : Boolean, default : false}
           },
           Notification : {
-              // Settings : {
                       Trending : {
                           isEmail : {type : Boolean, default : true},
                           isPush :  {type : Boolean, default : true},
@@ -65,7 +66,6 @@ const UserSettings = new Schema({
                           isEmail : {type : Boolean, default : true},
                           isPush :  {type : Boolean, default : true}
                       }
-                  // }
            },
           Privacy : {
                 isSocialStatShow : {type : Boolean, default : true},
@@ -85,10 +85,7 @@ const UserSettings = new Schema({
               Status : { type : Number , default :  1}
             }
           ],
-
-
 });
 
 UserSettings.plugin(autoIncrement.plugin, { model: 'user_settings', field: 'ID',startAt: 1 });
-// UserSettings.plugin(autoIncrement.plugin, { model: 'user_settings', field: 'Sequence',startAt: 1 });
 module.exports = mongoose.model('user_settings',UserSettings );
