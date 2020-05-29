@@ -13,15 +13,16 @@ const Users = require('../../models/users'),
       await = require('await'),
       { DonationStatusConst } = require('../constant'),
       async = require("async"),
-      DonationTranscations = require('../../models/donation_transaction');
+      DonationTranscations = require('../../models/donation_transaction'),
+      { verifyToken } = require('../middleware/middleware');
 
-
-      // get users balance details from wallet 
+      // get users balance details from wallet
       const GetUsersBalanceDetails = {
            type : new GraphQLList(UsersWalletBalanceType),
            args : { UserID :  { type: GraphQLInt } },
-           async resolve(parent, args) {
-
+           resolve: async (parent, args, context) => {
+              const id = await verifyToken(context);
+              if( id.UserID ) args.UserID = id.UserID
               return new Promise(async (fullfill, reject) => {
                   let query = { UserID : args.UserID, Status : DonationStatusConst.Active },
                       Data = await UsersWalletBalance.find(query).lean();

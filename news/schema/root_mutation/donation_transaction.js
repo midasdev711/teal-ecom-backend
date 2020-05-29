@@ -12,8 +12,8 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean,GraphQLF
       { DonationTranscationType } = require('../types/donation_transaction'),
       { AmountType,DonationStatusConst } = require('../constant'),
       uniqid = require('uniqid'),
-      Users = require('../../models/users');
-
+      Users = require('../../models/users'),
+      { verifyToken } = require('../middleware/middleware');
 
       // PayDonation to author
      const PayDonation = {
@@ -33,7 +33,9 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean,GraphQLF
             ModifiedDate: { type: GraphQLDate },
             MinimunAmount : { type : GraphQLFloat },
         },
-        resolve(parent,args) {
+        resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
+          if(id.UserID) args.UserID = id.UserID
           var Message = {};
           if(args.Amount >=  args.MinimunAmount) {
             args.TXNID = uniqid();
@@ -53,7 +55,8 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean,GraphQLF
           Status :  { type: GraphQLInt },
           PaymentStatus : {  type: GraphQLString },
         },
-        resolve(parent,args){
+        resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
           if( typeof args.Status == "undefined" ) args.Status = DonationStatusConst.Approved;
 
           return DonationTranscations.findOneAndUpdate(

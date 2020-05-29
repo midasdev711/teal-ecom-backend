@@ -17,6 +17,8 @@ const Users = require('../../models/users'),
       FollowAuthor = require('../../models/follow_author'),
       {  GraphQLEmail } = require('graphql-custom-types'),
       { RoleObject,StatusConstant,ArticleStatusConst } = require('../constant'),
+      { generateToken,verifyToken } = require("../middleware/middleware"),
+      {  AuthPayloadType }= require("../types/authorise"),
       passwordHash = require('password-hash');
 
 // get user profile details
@@ -26,7 +28,9 @@ const GetUserProfile = {
      UserID: { type: GraphQLInt },
     UserName : { type: GraphQLString }
 },
-  async resolve(parent, args) {
+resolve: async (parent, args, context) => {
+  const id = await verifyToken(context);
+      if(id.UserID) args.UserID = id.UserID
       if(typeof args.UserID != "undefined" && args.UserID != "" && args.UserID != 0 ) {
             return await Users.findOne({ Status: 1, ID : args.UserID }).then(async (user) =>{
               return await getFollowerFollowingForUserProfile( user );
@@ -75,8 +79,9 @@ const GetAuthorProfileDetails = {
     UserID : { type : GraphQLInt },
     AuthorUserName : { type : GraphQLString },
     ActivityLog : { type : ActivityLogInput}},
-  async resolve(parent, args) {
-
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      if( id.UserID ) args.UserID = id.UserID
       if( typeof args.AuthorID != "undefined" && args.AuthorID != "" && args.AuthorID != 0) {
         return await Users.findOne({ Status: 1, ID : args.AuthorID }).then(async (user) =>{
           if( user != null ) return userDetailsPromise( user,args );
@@ -93,15 +98,15 @@ const GetAuthorProfileDetails = {
 };
 
       async function userDetailsPromise( user,args ) {
-          const Following = FollowAuthor.find({ UserID : user.ID, Status : 1 }).countDocuments();
-          const Follower = FollowAuthor.find({ AuthorID : user.ID, Status : 1 }).countDocuments();
+          const Following = FollowAuthor.find({ UserID : user.ID, Status : 1 ,isFollowed : true}).countDocuments();
+          const Follower = FollowAuthor.find({ AuthorID : user.ID, Status : 1, isFollowed : true }).countDocuments();
           const FreeArticles = Articles.find({ AuthorID : user.ID, Status : 2, ArticleScope : 1 });
           const PremiumArticles = Articles.find({ AuthorID : user.ID, Status : 2, ArticleScope : 2 });
           const LatestArticles = getLatestArticles(  args , user);
           const ClapedArticles = getAuthorsClapedArticle( args , user );
           const RecentlyVisited = getRecentlyVisitedArticle( args , user );
           const BookmarkedArticles = getBookmarkedArticle( args , user );
-          const isFollowing = FollowAuthor.findOne({ AuthorID : user.ID, Status : 1,UserID : args.UserID, isFollowed : true }).countDocuments();
+          const isFollowing = FollowAuthor.findOne({ AuthorID : user.ID, Status : 1,UserID : args.UserID,isFollowed : true }).countDocuments();
           // console.log(" user.ID===>", user.ID,"args.UserID===>",args.UserID);
 
           const isSubscriptionAllowed = UsersPaidSubscriptions.findOne({ $and : [{AuthorID : user.ID },{ Status : { $ne : 0 } },{ UserID : args.UserID },{ EndDate :{ $gte: new Date() }  }]}).countDocuments()
@@ -186,19 +191,24 @@ const GetAuthorProfileDetails = {
 
 // get user by id
 const GetUserByID = {
-  type: new GraphQLList(UserType),
+  type: UserType,
   args: { UserID: { type: GraphQLInt } },
-  async resolve(parent, args) {
-      return await Users.find({ Status: 1, ID : args.UserID });
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
+       if( id.UserID ) args.UserID = id.UserID;
+           return  Users.findOne({ Status: 1, ID : args.UserID })
   }
+
 };
 
 // get rewards progress
 const RewardsProgress = {
     type: TableInfo,
     args: { UserID: { type: GraphQLInt }},
-    resolve(parent,args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
       var Object = {};
+      if( id.UserID ) args.UserID = id.UserID;
         return  Users.findOne({ ID:args.UserID,Status :1},{_id:false, UniqueID : true } ).then(async (res) => {
             await Users.find({ ReferenceID : res.UniqueID })
                   .countDocuments()
@@ -247,30 +257,39 @@ const IsEmailExist = {
 
 // user singin
   const SignInObject = {
-      type: new GraphQLList(UserType),
+      type: UserType,
       Description : "user sign in",
       args: {
         Email: { type: GraphQLEmail },
         Password: { type: GraphQLString },
         MobileNo : { type: GraphQLString  }
       },
-      resolve(parent, args) {
-        console.log(args.Email);
+      async resolve( parent, args, context ) {
+        var UserData = [];
          var passwordHash = require('password-hash');
          if( typeof args.Email != "undefined" && args.Email != "" && args.Email != null ){
-           return Users.find({ Email:args.Email,Status :1, isVerified :1 }).then((result) =>{
-             console.log(result.length);
-             if(result.length > 0 && passwordHash.verify(args.Password, result[0].Password)) return result;
-             else return [];
+           UserData = await  Users.findOne({ Email:args.Email,Status :1, isVerified :1 })
+           .then((result) =>{
+             console.log(result,"resultresultresult");
+               if(result != null) {
+                 if(passwordHash.verify(args.Password, result.Password)) return result;
+                 else throw new Error("Password does not match");
+               }
+               else throw new Error("Email does not exists");
            });
          }
          if(typeof args.MobileNo != "undefined" && args.MobileNo != "" && args.MobileNo != null ) {
-           return Users.find({ MobileNo:args.MobileNo,Status :1, isVerified :1 }).then((result) =>{
-             console.log(result.length);
-             if(result.length > 0 && passwordHash.verify(args.Password, result[0].Password)) return result;
-             else return [];
+           UserData = await Users.findOne({ MobileNo:args.MobileNo,Status :1, isVerified :1 })
+           .then((result) => {
+               if(result != null ) {
+                 if(passwordHash.verify(args.Password, result.Password)) return result;
+                 else throw new Error("Password does not match");
+               } else throw new Error("Mobile No. does not exists");
            });
          }
+         // data =
+         console.log(UserData,'UserData');
+         return ( UserData ) ? await generateToken( context, UserData ) : [];
       }
     };
 
@@ -279,20 +298,22 @@ const FaceBookSignInObject = {
     type: UserType,
     Description : "facebook sign in",
     args: { Name: { type: GraphQLString },Email: { type: GraphQLEmail } },
-    resolve(parent, args) {
-      return Users.findOne({ Name:args.Name,Email:args.Email,Status :1 });
+    async resolve(parent, args,context) {
+      UserData = await Users.findOne({ Name:args.Name,Email:args.Email,Status :1 });
+       return await generateToken( context, UserData );
     }
 };
 
   // google sign in
   const GoogleSignInObject = {
-    type: new GraphQLList(UserType),
+    type: UserType ,
     Description : "Google sign in",
     args: { Name: { type: GraphQLString },Email: { type: GraphQLEmail } },
-    resolve(parent, args) {
-      return Users.find({ Name:args.Name,Email:args.Email,Status :1 })
-          .then( (result) =>{
-            if(result.length == 0) {
+    async resolve(parent, args,context) {
+      var UserData = [];
+      UserData = await Users.findOne({ Name:args.Name,Email:args.Email,Status :1 })
+          .then( async (result) =>{
+            if(result == null) {
                   let SignUpConstant = new Users({
                           Name: args.Name,
                           Email : args.Email,
@@ -301,14 +322,12 @@ const FaceBookSignInObject = {
                           SignUpMethod : "Google",
                           Password : ""
                   });
-                  return  SignUpConstant.save().then((res) =>{
-                      const testdata = [];
-                      testdata.push( res );
-                      return testdata;
-                   });
+                  return  await SignUpConstant.save();
             }
             return result;
           });
+
+           return await generateToken( context, UserData );
      }
   };
 
@@ -320,7 +339,7 @@ const FaceBookSignInObject = {
     },
     resolve(parent, args)  {
       var Message = {};
-      console.log(args);
+      // console.log(args);
         return ForgotPasswordLogs.findOne({UniqueLinkKey : args.UniqueLinkKey, Status :ArticleStatusConst.Active, ExpiryDate : { $gte : Date.now() }  })
         .then( (Valid) => {
                 if(Valid != null && Valid.ExpiryDate) Message["Message"] = true;
@@ -334,20 +353,28 @@ const FaceBookSignInObject = {
   const User = {
     type: new GraphQLList(UserType),
     args: { ID: { type: GraphQLID } },
-    resolve(parent, args) { return Users.find({ ID:args.ID }); }
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      if( id.UserID ) args.ID = id.UserID;
+       return Users.find({ ID:args.ID });
+      }
   };
 
 // get all users
   const UserAll = {
     type: new GraphQLList(UserType),
-    resolve(parent, args) {  return Users.find({Status: 1 }); }
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      return Users.find({Status: 1 }); }
   };
 
 // get user total balance
   const GetTotalUserBalance = {
      type : UserType,
      args : { UserID :  { type: GraphQLInt } },
-     resolve( parent, args ) {
+     resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+       if( id.UserID ) args.UserID = id.UserID;
        return  Users.findOne({ID : args.UserID},{ _id: false, TotalWalletAmount : true });
      }
  };

@@ -6,13 +6,16 @@
 
 const ReportArticle = require('../../models/report_article'),
       { ReportArticleType } = require('../types/constant'),
-      { GraphQLID,GraphQLList , GraphQLString,GraphQLInt } = require('graphql');
+      { GraphQLID,GraphQLList , GraphQLString,GraphQLInt } = require('graphql'),
+      { verifyToken } = require('../middleware/middleware');
 
   // report article list
   const ReportArticleList = {
     type: new GraphQLList(ArticleType),
     args: { ID: { type: GraphQLID } },
-    resolve(parent, args){ return Articles.find({ ID:args.ID }); }
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      return Articles.find({ ID:args.ID }); }
   };
 
 

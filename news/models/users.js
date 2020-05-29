@@ -26,17 +26,19 @@ const UserSchema = new Schema({
   RoleID: {type : Number},
   Dob :  { type: Date },
   Gender : {type : String
-    // , enum : ["Male","Female", "Other"] 
+    // , enum : ["Male","Female", "Other"]
   },
    ParentCategories : [{
      ID : Number,
-     Name : String
+     Name : String,
+     Type : Number,
    }],
    SubCategories : [
      {
        ID : Number,
        Name : String,
-       ParentCategoryID : Number
+       ParentCategoryID : Number,
+       Type : Number
      }
    ],
    Avatar :{ type: String, default: "" },

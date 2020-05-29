@@ -6,7 +6,8 @@
 
 const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt,GraphQLNonNull } = require('graphql'),
       Bookmarks = require('../../models/bookmarks'),
-      { ArticleBookmarkType } = require('../types/constant');
+      { ArticleBookmarkType } = require('../types/constant'),
+      { verifyToken } = require('../middleware/middleware');
 
   // add and remove bookmark using same api
   const AddBookmark= {
@@ -15,9 +16,10 @@ const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt,GraphQLNonNull } = requ
         ArticleID: { type: new GraphQLNonNull(GraphQLInt) },
         UserID: { type: GraphQLInt }
       },
-      resolve(parent, args,context) {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
         var object = {};
-        if(context.UserID) args.UserID = context.UserID
+        if(id.UserID) args.UserID = id.UserID
 
         if(typeof args.UserID != "undefined" && args.UserID != 0 ) {
             let BookmarkConstant = new Bookmarks({ ArticleID: args.ArticleID,UserID: args.UserID });
@@ -44,11 +46,12 @@ const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt,GraphQLNonNull } = requ
         ArticleID: { type: new GraphQLNonNull(GraphQLInt) },
         UserID: { type: GraphQLInt }
       },
-      resolve(root, params,context) {
-      if(context.UserID) params.UserID = context.UserID
-      if(typeof args.UserID != "undefined" && args.UserID != 0 ) {
-          return Bookmarks.findOneAndUpdate({  ArticleID: params.ArticleID,UserID: params.UserID,Status: 1 }, {$set : { Status : 0 }},{ new: true, returnNewDocument: true })
-      } else throw new Error("Please login to continue");
+      resolve: async (parent, params, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) params.UserID = id.UserID
+        if(typeof args.UserID != "undefined" && args.UserID != 0 ) {
+            return Bookmarks.findOneAndUpdate({  ArticleID: params.ArticleID,UserID: params.UserID,Status: 1 }, {$set : { Status : 0 }},{ new: true, returnNewDocument: true })
+        } else throw new Error("Please login to continue");
       }
   };
 

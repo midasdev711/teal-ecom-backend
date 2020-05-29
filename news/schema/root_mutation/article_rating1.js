@@ -8,7 +8,8 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean } = requ
       ArticleRatings = require('../../models/article_rating'),
       Articles = require('../../models/articles'),
       { ArticleRatingType } = require('../types/constant'),
-      await = require('await');
+      await = require('await'),
+      { verifyToken } = require('../middleware/middleware');
 
 // declare the Increase clap count methods constant
   const PlusClapCount = {
@@ -17,7 +18,9 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean } = requ
       UserID : { type: GraphQLInt },
       ArticleID : { type: GraphQLInt }
     },
-    async resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      if(id.UserID) args.UserID = id.UserID
       return ArticleRatings.find({ ArticleID: args.ArticleID, UserID : args.UserID, Status : 1 })
               .then( async ( rating ) => {
                 if( rating.length == 0 ) {

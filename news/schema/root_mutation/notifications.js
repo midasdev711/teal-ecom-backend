@@ -6,7 +6,8 @@
 
 const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean } = require('graphql'),
       Notification = require('../../models/notifications'),
-      { NotificationType } = require('../types/constant');
+      { NotificationType } = require('../types/constant'),
+      { verifyToken } = require('../middleware/middleware');
 
   // add user notification
   const AddNotification = {
@@ -19,7 +20,9 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean } = requ
       Subject : { type: GraphQLString },
       isView : { type: GraphQLBoolean }
     },
-    resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      if(id.UserID) args.SenderID = id.UserID
           let NotificationConstant = new Notification({
               SenderID :args.SenderID,
               RecieverID :args.RecieverID,

@@ -11,6 +11,7 @@ const isBase64 = require('is-base64');
 const fs   = require('fs');
 const UploadBase64OnS3 = require('../../../upload/base64_upload'),
     { AWSCredentails } = require('../../../upload/aws_constants');
+const { generateToken,regenerateToken, regenerateCreativeToken } = require("../middleware/middleware");
 
 
 /**
@@ -34,7 +35,8 @@ const AdminCategorySignIn = {
              if (!valid) {
                  throw new Error('Wrong Password');
              }
-             return user ;
+            //  return user ;
+             return ( user ) ? await generateToken( context, user ) : [];
            }
            else{
                throw new Error('No admin with that email');

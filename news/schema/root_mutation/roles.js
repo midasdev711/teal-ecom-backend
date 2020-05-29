@@ -7,7 +7,8 @@
 const graphql = require('graphql'),
       Roles = require('../../models/roles'),
       { RoleType } = require('../types/constant'),
-      { GraphQLInt,GraphQLID,GraphQLList , GraphQLString } = graphql;
+      { GraphQLInt,GraphQLID,GraphQLList , GraphQLString } = graphql,
+      { verifyToken } = require('../middleware/middleware');
 
   // add user roles
   const AddRole = {
@@ -16,7 +17,8 @@ const graphql = require('graphql'),
         Name: { type: GraphQLString },
         Description: { type: GraphQLString }
     },
-    resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
         let RoleConstant = new Roles({
                 Name: args.Name,
                 Description: args.Description
@@ -29,7 +31,8 @@ const graphql = require('graphql'),
   const DeleteRole = {
     type : RoleType,
     args : { ID: { type: GraphQLID } },
-    resolve(root, params) {
+    resolve: async (parent, params, context) => {
+      const id = await verifyToken(context);
         return Roles.update({ ID: params.ID }, { $set: { Status: 0 } },{ new: true })
                .catch(err => new Error(err));
       }
@@ -44,7 +47,8 @@ const graphql = require('graphql'),
         Description: { type: GraphQLString },
         Status: { type: GraphQLID }
     },
-    resolve(root, params) {
+    resolve: async (parent, params, context) => {
+      const id = await verifyToken(context);
       if(params.Name == "") delete params.Name;
       if(params.Description == "") delete params.Description;
       if(params.Status == "") delete params.Status;

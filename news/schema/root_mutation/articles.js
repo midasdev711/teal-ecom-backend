@@ -14,7 +14,8 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
       {  ArticleStatusConst } = require('../constant'),
       uniqid = require('uniqid'),
       await = require('await'),
-      each = require('foreach');
+      each = require('foreach'),
+      { verifyToken } = require('../middleware/middleware');
 
 // approved article by admin
   const ApprovedArticle = {
@@ -23,7 +24,9 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         AdminUserID : {type : GraphQLInt },
         ArticleID : {type : GraphQLInt }
       },
-    async   resolve(parent,args) {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) args.AdminUserID = id.UserID
       return Articles.findOneAndUpdate(
                { ID :  { $in : args.ArticleID  } },
                { $set : { Status : ArticleStatusConst.Approved } },
@@ -53,7 +56,9 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         AdminUserID : {type : GraphQLInt },
         ArticleID : {type : GraphQLInt }
       },
-    async   resolve(parent,args) {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) args.AdminUserID = id.UserID
 
       return Articles.findOneAndUpdate(
                { ID :  { $in : args.ArticleID  } },
@@ -118,7 +123,9 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         isPaidSubscription : {type : GraphQLBoolean },
         ArticleScope : { type : GraphQLInt , description : "0 : 'Private', 1 : 'Public', 2 : 'Premium'"}
     },
-   async resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+       if(id.UserID) args.AuthorID = id.UserID
         if(typeof args.Title != "undefined") {
             args.TitleSlug =  args.AmpSlug = args.Title.replace(/<p>/g,"").replace(/<\/p>/g,"").trim().replace(/[^a-zA-Z0-9-. ]/g, '').replace(/\s+/g, '-').toLowerCase();
         }
@@ -203,7 +210,9 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         AuthorID : {type : GraphQLInt},
         Tags:{ type:new GraphQLList(GraphQLString) }
     },
-    resolve(root, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+    if(id.UserID) args.AuthorID = id.UserID
         return Articles.updateOne(
             {$and: [{  ID: args.ArticleID },{ AuthorID: args.AuthorID },{ Status: ArticleStatusConst.Active }]},
             { $set: { Tags: args.Tags } },
@@ -221,7 +230,9 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         AuthorID : { type: GraphQLInt },
         FeatureImage : { type: GraphQLString }
       },
-      async resolve(root, params) {
+      resolve: async (parent, params, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) params.AuthorID = id.UserID
           params.FeatureImage = await uploadFeaturedImage( params.FeatureImage, uniqid() );
           return Articles.findOneAndUpdate(
             {$and: [{  ID : params.ArticleID },{ AuthorID: params.AuthorID },{ Status:{ $ne : ArticleStatusConst.inActive }  }]},
@@ -239,13 +250,15 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
         ArticleID : { type: GraphQLInt },
         AuthorID : { type: GraphQLInt }
       },
-      resolve(root, params) {
-          return Articles.updateOne(
-            {$and: [{  ArticleID: params.ArticleID },{ AuthorID: params.AuthorID },{ Status: ArticleStatusConst.Active }]},
-            { $set: { isPublish: params.isPublish } },
-            { upsert: true }
-          )
-          .catch(err => new Error(err));
+      resolve: async (parent, params, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) params.AuthorID = id.UserID
+        return Articles.updateOne(
+          {$and: [{  ArticleID: params.ArticleID },{ AuthorID: params.AuthorID },{ Status: ArticleStatusConst.Active }]},
+          { $set: { isPublish: params.isPublish } },
+          { upsert: true }
+        )
+        .catch(err => new Error(err));
         }
     };
 
@@ -255,7 +268,8 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
       args : {
           ID: { type: GraphQLInt }
       },
-      async resolve(root, params) {
+      resolve: async (parent, params, context) => {
+        const id = await verifyToken(context);
           return await Articles.findOneAndUpdate(
               { ID: params.ID, Status: {$ne : 0 } },
               { $set: { Status: ArticleStatusConst.inActive } },
@@ -282,7 +296,8 @@ const { GraphQLID,GraphQLBoolean , GraphQLString,GraphQLInt,GraphQLList, GraphQL
           Status: { type: GraphQLInt },
           isPublish : {type : GraphQLBoolean}
       },
-      resolve(root, params) {
+      resolve: async (parent, params, context) => {
+        const id = await verifyToken(context);
         if(params.Title == "") delete params.Title;
         if(params.SubTitle == "") delete params.SubTitle;
         if(params.Description == "") delete params.Description;

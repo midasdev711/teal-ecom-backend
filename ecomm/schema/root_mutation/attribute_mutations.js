@@ -4,7 +4,7 @@ const { AdminType } = require('../types/admin_constant');
 const { GraphQLObjectType,GraphQLJSON, GraphQLEnumType, GraphQLInputObjectType,GraphQLFloat,GraphQLString, GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLNonNull } = require('graphql');
 const {  GraphQLDate } = require('graphql-iso-date');
 const { StatusConst,ImagePath } = require("../../constant");
-
+const { verifyToken } = require('../middleware/middleware');
 
 /**
     * Add attributes
@@ -22,7 +22,8 @@ const AddAttributes = {
     AttributeValues:{type: new GraphQLList(GraphQLString) },
     ProductType : { type : GraphQLString }
   },
-  resolve: async (parent, args ) => {
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
              if(args._id){
               return await Attributes.findOneAndUpdate(
                      { _id: args._id},
@@ -47,7 +48,8 @@ const RemoveAttributes = {
     _id:{type: GraphQLString },
     MerchantId:{type: GraphQLInt }
   },
-  resolve: async (parent, args ) => {
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
              if(args._id){
               return await Attributes.findOneAndDelete(
                      { _id: args._id,MerchantId:args.MerchantId

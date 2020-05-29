@@ -11,6 +11,7 @@ const Categories = require('../../models/categories'),
       { GraphQLEmail } = require('graphql-custom-types'),
       {  GraphQLDate } = require('graphql-iso-date'),
       { await } = require("await"),
+      { ArticleType } = require("./articles"),
       { GraphQLJSON } = require('graphql-type-json');
 
 // sites schema typ4e def
@@ -86,7 +87,8 @@ const ParentCategoryType = new GraphQLObjectType({
     name : "UsersParentCategory",
     fields: () => ({
       ID: { type: GraphQLInt },
-      Name: { type: GraphQLString }
+      Name: { type: GraphQLString },
+      Type: { type: GraphQLInt },
     })
 });
 
@@ -97,6 +99,7 @@ const SubcategoriesType = new GraphQLObjectType({
       ID: { type: GraphQLInt },
       Name: { type: GraphQLString },
       ParentCategoryID: { type: GraphQLInt },
+      Type: { type: GraphQLInt },
     })
 });
 
@@ -190,6 +193,9 @@ const UserType = new GraphQLObjectType({
     name: 'Users',
     fields: () => ({
         ID: { type: GraphQLInt },
+        token: { type: GraphQLString },
+        refreshToken: { type: GraphQLString },
+        CreativeToken: { type: GraphQLString },
         Name: { type: GraphQLString },
         UserName : { type : GraphQLString },
         Email : { type:GraphQLEmail },
@@ -224,11 +230,11 @@ const UserType = new GraphQLObjectType({
         PremiumArticles : { type : new GraphQLList(GraphQLJSON) },
         ActivityLog : { type : ActivityLogType },
         IpAddress : { type : GraphQLString },
-        isFollowing :{ 
+        isFollowing :{
           type : GraphQLBoolean,
           description : "used for authors profiles details"
         },
-        isSubscriptionAllowed :{ 
+        isSubscriptionAllowed :{
           type : GraphQLBoolean,
           description : "used for authors profiles details"
         }
@@ -266,6 +272,7 @@ const CategoryType = new GraphQLObjectType({
         CreatedDate :  { type : GraphQLDate },
         ModifiedDate :  { type : GraphQLDate },
       	Sequence : { type : GraphQLInt },
+      	Type : { type : GraphQLInt,description :"enum [1:stories, 2:ecomm]" },
         SubCategories : {
           type: new GraphQLList(CategoryType),
           resolve(parent, args){
@@ -302,13 +309,16 @@ const ArticleBookmarkType = new GraphQLObjectType({
           UserID: { type: new GraphQLNonNull(GraphQLInt) },
           Status : { type: GraphQLInt },
           Article: {
-              type: new GraphQLList( GraphQLJSON ),
+              type: new GraphQLList( ArticleType ),
             async  resolve(parent, args) {
                   return await Articles.find({ ID: parent.ArticleID }).then(async (mark) =>{
                     if(mark.length > 0  ) {
                       if( parent.Status == 1 ) mark[0].isBookmark = true;
                       else mark[0].isBookmark = false;
-                   }
+                    }
+
+
+                    console.log(mark,"mark");
                     return await mark;
                   });
 

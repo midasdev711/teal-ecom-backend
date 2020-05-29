@@ -26,7 +26,7 @@ const ApiContracts = require('authorizenet').APIContracts;
 const ApiControllers = require('authorizenet').APIControllers;
 const SDKConstants = require('authorizenet').Constants;
 const constants = require('../../authorizeConstant');
-
+const { verifyToken } = require('../middleware/middleware');
 
 /**
     * Creating shooping cart
@@ -45,7 +45,8 @@ const CreateShoppingCart = {
       UserID: { type: GraphQLString },
       TotalCartItem: { type: GraphQLInt }
   },
-  resolve: async (parent, args ) => {
+  resolve: async (parent, args, context) => {
+     const id = await verifyToken(context);
      let totalCartPrice = 0;
       let userShoppingCard = await ShoppingCartSchema.find({ UserId: args.UserID ,OrderId : null });
        if(userShoppingCard.length > 0)
@@ -163,7 +164,8 @@ const UpdateShoppingCart = {
       UserID: { type: GraphQLString },
       TotalCartItem: { type: GraphQLInt }
   },
-  resolve: async (parent, args ) => {
+  resolve: async (parent, args, context) => {
+       const id = await verifyToken(context);
        let totalCartPrice = 0;
 
        /* checking whether shopping cart has been created or not */
@@ -342,7 +344,8 @@ const UpdateShoppingCart = {
           ProductID  : {type : GraphQLString },
           UserID: { type: GraphQLString }
       },
-      resolve : async (parent, args) => {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
         const order = await OrderSchema.find({ _id: args.OrderID , UserId : args.UserID });
 
           if(order.length > 0)
@@ -388,7 +391,8 @@ const UpdateShoppingCart = {
             OrderID : {type : GraphQLString },
             UserID: { type: GraphQLString }
         },
-        resolve : async (parent, args) => {
+        resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
           const order = await OrderSchema.find({ _id: args.OrderID , UserId : args.UserID });
             if(order.length > 0)
             {
@@ -421,7 +425,8 @@ const UpdateShoppingCart = {
          OrderID : {type : GraphQLString },
          ProductID: { type: GraphQLString }
      },
-     resolve : async (parent, args) => {
+     resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
 
        const order = await OrderSchema.find({ _id: args.OrderID , "Products._id" : args.ProductID });
          if(order.length > 0)
@@ -454,7 +459,8 @@ const UpdateShoppingCart = {
            _id: { type: GraphQLString },
            PaymentMethod : { type : GraphQLString},
         },
-        resolve: async (parent, args) => {
+        resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
            const order = await OrderSchema.find({ _id: args._id});
 
              if(order.length > 0)
@@ -490,7 +496,8 @@ const PlaceOrderMutation = {
           TokenID :{type: GraphQLString },
           ReceiptEmail :{ type: GraphQLEmail }
       },
-      resolve: async (parent, args ) => {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
 
         const userShoppingCard = await ShoppingCartSchema.find({ UserId: args.UserID ,OrderId : null });
 

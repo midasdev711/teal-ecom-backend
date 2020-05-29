@@ -6,8 +6,8 @@
 
 const FollowAuthor = require('../../models/follow_author'),
       { FollowAuthorType } = require('../types/constant'),
-      { GraphQLInt,GraphQLList } = require('graphql');
-
+      { GraphQLInt,GraphQLList } = require('graphql'),
+      { verifyToken } = require('../middleware/middleware');
 
     // follow author list
   const FollowAuthorList = {
@@ -16,7 +16,9 @@ const FollowAuthor = require('../../models/follow_author'),
         UserID : { type : GraphQLInt },
         AuthorID : { type : GraphQLInt }
     },
-    resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      if( id.UserID ) args.UserID = id.UserID
        return FollowAuthor.find({ UserID:args.UserID,AuthorID:args.AuthorID, isFollowed : true, Status : 1 });
        }
   };

@@ -19,7 +19,7 @@ const { ProductType } = require('../types/product_constant');
 const { MerchantType } = require('../types/merchant_constant');
 const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt }= require('graphql');
 const { GraphQLEmail } = require('graphql-custom-types');
-
+const { verifyToken } = require('../middleware/middleware');
 
 
 /**
@@ -34,7 +34,8 @@ const MerchantCategoryAll = {
   args: {
          Search: {type: GraphQLString },
     },
-  resolve(parent, args) {
+  resolve: async (parent, args, context) => {
+     const id = await verifyToken(context);
      if(args.Search == undefined ){
         return MerchantCatgory.find({ Status: 1 }).sort({_id: -1});
      }else{
@@ -64,7 +65,8 @@ const MerchantCategoryWithPagination = {
          Skip:  {type: GraphQLInt },
          Search: {type: GraphQLString }
       },
-  resolve(parent, args) {
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
     const limit = args.Limit;
     const offset = limit * (args.Skip-1);
        if(limit == undefined){
@@ -92,7 +94,9 @@ const MerchantCategoryWithPagination = {
 const MerchantCategoryByID = {
   type: new GraphQLList(MerchantType),
   args: { _id: {type: GraphQLString } },
-  resolve(parent, args) { return MerchantCatgory.find({ _id: args._id }); }
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
+    return MerchantCatgory.find({ _id: args._id }); }
 };
 
 
@@ -105,7 +109,9 @@ const MerchantCategoryByID = {
 const MerchantBusinessCatgoryByID = {
   type: new GraphQLList(MerchantType),
   args: { MerchantId: {type: GraphQLString } },
-  resolve(parent, args) { return MerchantBusinessCatgory.find({MerchantId: args.MerchantId }); }
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
+    return MerchantBusinessCatgory.find({MerchantId: args.MerchantId }); }
 };
 
 
@@ -118,7 +124,9 @@ const MerchantBusinessCatgoryByID = {
 const MerchantContactsCatgoryByID = {
   type: new GraphQLList(MerchantType),
   args: { MerchantId: {type: GraphQLString } },
-  resolve(parent, args) { return MerchantContactsCatgory.find({MerchantId: args.MerchantId }); }
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
+    return MerchantContactsCatgory.find({MerchantId: args.MerchantId }); }
 };
 
 

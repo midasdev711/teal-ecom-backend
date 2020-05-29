@@ -7,25 +7,31 @@
 
 const ArticleCatgory = require('../../models/categories'),
       { CategoryType } = require('../types/constant'),
-      { GraphQLID,GraphQLList , GraphQLInt }= require('graphql');
+      { GraphQLID,GraphQLList , GraphQLInt }= require('graphql'),
+      { verifyToken } = require('../middleware/middleware');
 
 // get category by id
   const ArticleByCategoryID = {
     type: new GraphQLList(CategoryType),
     args: { ID: { type: GraphQLID } },
-    resolve(parent, args){ return ArticleCatgory.find({ ID:args.ID }); }
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      return ArticleCatgory.find({ ID:args.ID }); }
   };
 
 // get all article categories
   const ArticleCategoryAll = {
     type: new GraphQLList(CategoryType),
-    resolve(parent, args) { return ArticleCatgory.find({ Status: 1 }); }
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      return ArticleCatgory.find({ Status: 1 }); }
   };
 
   // get parent categories
   const GetParentCategories = {
     type :  new GraphQLList( CategoryType ),
-    resolve( parent,args ){
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
       return ArticleCatgory.find({ isParent : true, Status : 1,ParentCategoryID:0 });
     }
   };
@@ -34,7 +40,8 @@ const ArticleCatgory = require('../../models/categories'),
   const  GetCategoriesByIDs = {
       type :  new GraphQLList( CategoryType ),
       args : { IDs : { type: new GraphQLList( GraphQLInt ) } },
-      resolve(root, params) {
+      resolve: async (root, params, context) => {
+        const id = await verifyToken(context);
         // console.log(params.IDs );
         return ArticleCatgory.find({
              isParent : false,
@@ -43,5 +50,14 @@ const ArticleCatgory = require('../../models/categories'),
           });
       }
   };
-  
-  module.exports = { ArticleByCategoryID, ArticleCategoryAll,GetParentCategories,GetCategoriesByIDs };
+
+  const GetCategoryByType = {
+    type : new GraphQLList( CategoryType ),
+    args : { Type : { type : GraphQLInt } },
+    resolve: async (parent, args, context) => {
+      // const id = await verifyToken(context);
+      return ArticleCatgory.find({ Type : args.Type, isParent : true, Status : 1,ParentCategoryID:0})
+    }
+  };
+
+  module.exports = { GetCategoryByType, ArticleByCategoryID, ArticleCategoryAll,GetParentCategories,GetCategoriesByIDs };

@@ -5,7 +5,9 @@
 */
 
 const Users = require('../../models/users'),
+      ArticleViewCounts = require('../../models/article_click_details'),
       Articles = require('../../models/articles'),
+      Bookmarks = require('../../models/bookmarks'),
       { GraphQLObjectType, GraphQLScalarType,GraphQLInputObjectType,GraphQLString,GraphQLID,GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLList} = require('graphql'),
       { GraphQLEmail } = require('graphql-custom-types'),
       {  GraphQLDate } = require('graphql-iso-date'),
@@ -75,17 +77,36 @@ const ArticleType = new GraphQLObjectType({
         TotalArticleCount : {
           type: GraphQLInt,
           resolve(parent, args){
-              return Articles.find( { Status :  1 } ).countDocuments();
+              return Articles.find( { Status :  2 } ).countDocuments();
           }
         },
         AcceptDonation : { type : GraphQLBoolean},
         MinimumDonationAmount : { type : MinimumDonationAmountType },
-        isBookmark : { type : GraphQLBoolean},
+        isBookmark : { type : GraphQLBoolean,
+        async resolve( parent,args,context ) {
+            if( typeof context.UserID != "undefined") {
+              return ( await Bookmarks.findOne({ArticleID : parent.ID, UserID : context.UserID, Status : 1 }).countDocuments() > 0 ) ? true : false
+            } else return false;
+        } 
+      },
         isFollowed : { type : GraphQLBoolean},
+        isClicked : { type : GraphQLBoolean},
         // isPaidSubscription : { type : GraphQLBoolean },
         isContentAllowed : { type : GraphQLBoolean },
         ArticleScope : { type: GraphQLInt,
         description : "[{0:private},{1:public},{2:Premium}]" },
+        ViewCount : {
+          type : GraphQLInt,
+          async resolve( parent ) {
+              return await ArticleViewCounts.find({ ArticleID : parent.ID }).countDocuments()
+          }
+        },
+        // isArticleViewed : {
+        //   type : GraphQLString,
+        //   async resolve( parent ) {
+        //      return await ArticleViewCounts.find()
+        //   }
+        // }
     }),
 });
 

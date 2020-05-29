@@ -6,7 +6,8 @@
 
 const BlockAuthor = require('../../models/block_author'),
       { BlockAuthorType } = require('../types/constant'),
-      { GraphQLList , GraphQLInt,GraphQLNonNull } = require('graphql');
+      { GraphQLList , GraphQLInt,GraphQLNonNull } = require('graphql'),
+      { verifyToken } = require('../middleware/middleware');
 
   // block authors create api
   const BlockAuthors = {
@@ -15,7 +16,9 @@ const BlockAuthor = require('../../models/block_author'),
           UserID: { type: new GraphQLNonNull(GraphQLInt) },
           AuthorID: { type: new GraphQLNonNull(GraphQLInt) }
           },
-    resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      if(id.UserID) args.UserID = id.UserID
       return BlockAuthor.findOne({AuthorID : args.AuthorID, UserID : args.UserID }).then((isFound) =>{
           if(isFound == null ) {
             let BlockAuthorConstant = new BlockAuthor({

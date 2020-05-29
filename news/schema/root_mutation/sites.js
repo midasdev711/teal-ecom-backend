@@ -6,13 +6,14 @@
 
 const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString } = require('graphql'),
       Sites = require('../../models/sites'),
-      { SiteType } = require('../types/constant');
-
+      { SiteType } = require('../types/constant'),
+      { verifyToken } = require('../middleware/middleware');
 
   const AddSites = {
     type : SiteType,
     args : { AuthorID: { type: GraphQLInt }, SiteUrl: { type: GraphQLString } },
-    resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
         let SitesConstants = new Sites({ AuthorID: args.AuthorID, SiteUrl: args.SiteUrl });
         return SitesConstants.save();
     }

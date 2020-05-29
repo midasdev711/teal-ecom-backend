@@ -21,7 +21,8 @@ const isBase64 = require('is-base64');
 const fs   = require('fs');
 const UploadBase64OnS3 = require('../../../upload/base64_upload'),
     { AWSCredentails } = require('../../../upload/aws_constants');
-
+const { verifyToken } = require('../middleware/middleware');
+const { generateToken,regenerateToken, regenerateCreativeToken } = require("../middleware/middleware");
 
 /* setting up the email */
 const transporter = nodemailer.createTransport({
@@ -174,7 +175,8 @@ const transporter = nodemailer.createTransport({
                      if (!valid) {
                          throw new Error('Wrong Password');
                      }else{
-                        return user;
+                        // return user;
+                        return ( user ) ? await generateToken( context, user ) : [];
                      }
                    }
                   else
@@ -285,7 +287,8 @@ const transporter = nodemailer.createTransport({
            ContactPersonEmail :{type: GraphQLEmail },
            ContactPersonPhone :{type: GraphQLString }
         },
-        resolve: async (parent, args) => {
+        resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
           const merchant_contact_updates  = await  MerchantContactsCatgory.findOneAndUpdate(
                { MerchantId: args._id },
                 { $set: {
@@ -374,7 +377,8 @@ const transporter = nodemailer.createTransport({
     args : {
         _id: { type: GraphQLID }
     },
-    resolve(root, params) {
+    resolve: async (root, params, context) => {
+      const id = await verifyToken(context);
         return Merchants.updateOne(
             { ID: params.ID },
             { $set: { Status: 0 } },

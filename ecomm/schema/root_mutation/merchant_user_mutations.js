@@ -14,6 +14,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 const emailTemplates = require('email-templates');
 const {BASE_URL ,EmailCredentials ,STRIPE_KEY , NMI_KEY , NMI_MERCHAT_URL } = require("../../constant");
+const { generateToken,regenerateToken, regenerateCreativeToken } = require("../middleware/middleware");
 
 /* setting up the email */
 
@@ -49,7 +50,8 @@ const transporter = nodemailer.createTransport({
                  if (!valid) {
                      throw new Error('Wrong Password');
                  }else{
-                    return user;
+                    // return user;
+                    return ( user ) ? await generateToken( context, user ) : [];
                  }
                }
               else

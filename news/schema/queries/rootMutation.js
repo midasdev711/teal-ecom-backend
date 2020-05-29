@@ -7,7 +7,7 @@
 // const _ = require('lodash');
 const { GraphQLObjectType } = require('graphql'),
       { AddArticle, DeleteArticle,UpdateArticle,SavedFeaturedImage,PublishedArticle, UpdateTags,ApprovedArticle,RejectdArticle } = require('../root_mutation/articles'),
-      { UserSignUp,ForgotPassword,ResetPassword,ProfilePictureUpdate,DeleteUser,UpdateUser } = require('../root_mutation/users'),
+      { RegenerateCreativeToken,RegenerateToken,UserSignUp,ForgotPassword,ResetPassword,ProfilePictureUpdate,DeleteUser,UpdateUser } = require('../root_mutation/users'),
       { CreatorSignUp } = require('../root_mutation/creators'),
       { AddArticleCategory, DeleteArticleCategory,UpdateArticleCategory  } = require('../root_mutation/categories'),
       { AddBookmark,RemoveBookmark } = require('../root_mutation/bookmarks'),
@@ -21,7 +21,8 @@ const { GraphQLObjectType } = require('graphql'),
       { PayDonation,ApprovedDonationAmount } = require('../root_mutation/donation_transaction'),
       { SetUsersSubscription } = require('../root_mutation/users_paid_subscriptions'),
       { UpdateUserSettings } = require('../root_mutation/user_settings'),
-      { AddUserCategory } = require('../root_mutation/user_categories');
+      { AddUserCategory } = require('../root_mutation/user_categories'),
+      { UploadUIImages } = require('../root_mutation/upload_ui_images');
 
 // declared a mutation constant
 const Mutation = new GraphQLObjectType({
@@ -73,6 +74,9 @@ const Mutation = new GraphQLObjectType({
         signUp : UserSignUp, // user signup functionality
         deleteUser : DeleteUser,// soft delete users
         updateUser : UpdateUser, // updated only enter values of fields
+        uploadFrondendImg : UploadUIImages,
+        regenerateToken : RegenerateToken,
+        RegenerateCreativeToken : RegenerateCreativeToken
 
 
 

@@ -11,7 +11,8 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
       {  UserType } = require('../types/constant'),
       { UserSettingType } = require("../types/user_settings"),
       {  GraphQLEmail } = require('graphql-custom-types'),
-      await = require('await');
+      await = require('await'),
+      { verifyToken } = require('../middleware/middleware');
 
 // input object of arguments to userSettings
 const AccountInputType = new GraphQLInputObjectType({
@@ -169,7 +170,9 @@ async function updateUserData( args,UserID ) {
         isPaidSubscription : { type : GraphQLBoolean },
         PaidSubscription : {type : new GraphQLList(PaidSubscriptionInputType) }
       },
-      async resolve(parent, args) {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) args.UserID = id.UserID
         return await UserSettings.findOne({$and: [{  UserID: args.UserID },{ Status : 1 }]})
         .then(async (SettingData) => {
             let FinalData =  {};
@@ -217,6 +220,9 @@ async function updateUserData( args,UserID ) {
      if( typeof ArgsData.Email != "undefined" )
           AccountData.Email = await checkExistsOrNot(AllData.Email,ArgsData.Email);
      else  AccountData.Email = AllData.Email;
+          if( typeof ArgsData.UserName != "undefined" )
+               AccountData.UserName = await checkExistsOrNot(AllData.UserName,ArgsData.UserName);
+     else  AccountData.UserName = AllData.UserName;
      if( typeof ArgsData.isFacebook != "undefined" )
           AccountData.isFacebook = await checkExistsOrNot(AllData.isFacebook,ArgsData.isFacebook);
      else  AccountData.isFacebook = AllData.isFacebook;

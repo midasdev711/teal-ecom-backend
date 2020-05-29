@@ -6,7 +6,7 @@ const Users = require('../../../news/models/users');
 const { UserType } = require('../../../news/schema/types/constant');
 const Categories = require('../../../news/models/categories');
 const { CategoryType } = require('../../../news/schema/types/constant');
-
+const { verifyToken } = require('../middleware/middleware');
 
 
 /**
@@ -20,7 +20,8 @@ const AllProductCategoryList = {
   args: {
          Search: {type: GraphQLString },
     },
-  resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
      if(args.Search == undefined ){
         return Categories.find({ ParentCategoryID: 0 ,isParent:true , Status: 1 }).sort({_id: -1});
      }else{
@@ -49,7 +50,8 @@ const AllProductCategoryListWithPagination = {
         Skip:  {type: GraphQLInt },
         Search: {type: GraphQLString }
     },
-  resolve(parent, args) {
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
     const limit = args.Limit;
     const offset = limit * (args.Skip-1);
        if(limit == undefined){
@@ -78,7 +80,8 @@ const AllProductSubCategoryList = {
          Search: {type: GraphQLString },
          ID: { type: GraphQLInt }
     },
-  resolve(parent, args) {
+  resolve: async (parent, args, context) => {
+     const id = await verifyToken(context);
      if(args.Search == undefined ){
         return Categories.find({ ParentCategoryID :args.ID , Status: 1 }).sort({_id: -1});
      }else{
@@ -107,8 +110,8 @@ const AllProductSubCategoryListWithPagination = {
         Search: {type: GraphQLString },
         ID: { type: GraphQLInt }
     },
-  resolve(parent, args) {
-    const limit = args.Limit;
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
     const offset = limit * (args.Skip-1);
        if(limit == undefined){
           return Categories.find({ ParentCategoryID :args.ID , Status: 1}).sort({_id: -1});
@@ -135,7 +138,8 @@ const CategoryDetailsByID = {
   args: {
          ID: { type: GraphQLInt }
     },
-  resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
          return Categories.find({ ID :args.ID , Status: 1 });
     }
 };

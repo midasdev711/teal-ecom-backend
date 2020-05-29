@@ -11,7 +11,7 @@ const { UserType } = require('../../../news/schema/types/constant');
 const { ShoppingCartDetailsType } = require('../types/shopping_cart_details_constant');
 const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt }= require('graphql');
 const { GraphQLEmail } = require('graphql-custom-types');
-
+const { verifyToken } = require('../middleware/middleware');
 
 
 /**
@@ -23,7 +23,8 @@ const { GraphQLEmail } = require('graphql-custom-types');
 const GetAllApproveReview = {
     type: new GraphQLList(ProductReviewRatingType),
     args: { productId: {type: GraphQLString } },
-    resolve : async (parent, args) => {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
       const reviews = await ProductReview.find({ productId: args.productId , isAdminApproved : true});
         if(reviews.length > 0)
         {
@@ -68,7 +69,8 @@ const GetAllApproveReview = {
 
   const GetAllUnApproveReview = {
     type: new GraphQLList(ProductReviewRatingType),
-     resolve : async (parent, args) => {
+    resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
         const reviews = await ProductReview.find({ isAdminApproved : false });
           if(reviews.length > 0)
           {

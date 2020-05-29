@@ -17,15 +17,19 @@ const Articles = require('../../models/articles'),
       { SubTitleMaxLen,TitleMaxLen,ArticleStatusConst, RoleObject,PremiumContentLen ,SubscribeCdnUrl } = require('../constant'),
       { GraphQLID,GraphQLList , GraphQLString,GraphQLInt }= require('graphql'),
       await = require('await'),
-      async = require("async");
+      async = require("async"),
+      { verifyToken } = require('../middleware/middleware');
 
 
   // get article by slug with all bookmaked and followed data
   const ArticleBySlug = {
       type: new GraphQLList(ArticleType),
       args: { Slug: { type: GraphQLString }, UserID: { type: GraphQLInt } },
-      async resolve( parent, args, context ) {
-          if(context.UserID) args.UserID = context.UserID
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        console.log('id', id);
+        
+          if(id.UserID) args.UserID = id.UserID
              let lor =  await Articles.find({ Slug: args.Slug, isPublish : true,Status: { $ne:ArticleStatusConst.inActive }, ArticleScope : { $ne : 0 } })
              // console.log(lor[0].ArticleScope,"----",lor[0].AuthorID);
               if(lor.length == 0 ) return [];
@@ -127,8 +131,9 @@ async function  getBookMarkCount( data,args ) {
  const MyArticleList = {
      type: new GraphQLList(ArticleType),
      args: { UserID: { type: GraphQLInt } },
-     resolve(parent, args,context){
-       if(context.UserID) args.UserID = context.UserID
+     resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+       if(id.UserID) args.UserID = id.UserID
          return Articles.find({ AuthorID: args.UserID, Status: { $ne : 0 } });
      }
  };
@@ -137,7 +142,8 @@ async function  getBookMarkCount( data,args ) {
   const DashboardKeywordSerach = {
      type: new GraphQLList(ArticleType),
      args: { Keywords: { type: GraphQLString } },
-     resolve(parent, args){
+     resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
        return Articles.find( { Title: { $regex: args.Keywords, $options: "i" }, Status : ArticleStatusConst.Approved } );
      }
   };
@@ -147,8 +153,9 @@ async function  getBookMarkCount( data,args ) {
    const PopularArticleList = {
       type: new GraphQLList(ArticleType),
       args: { UserID: { type: GraphQLInt } },
-      resolve(parent, args,context){
-        if(context.UserID) args.UserID = context.UserID
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) args.UserID = id.UserID
 
           if( args.UserID == undefined ) { return getAllPopularArticles(); }
           else {
@@ -175,8 +182,9 @@ const TrendingArticleList = {
              ArticleIds: { type: new GraphQLList(GraphQLInt) },
              Scroll : { type : GraphQLInt }
     },
-    async resolve( parent, args,context ) {
-      if(context.UserID) args.UserID = context.UserID
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      if(id.UserID) args.UserID = id.UserID
          args.offset = (args.offset * args.limit );
          let query = { Status: 2, isPublish: true, ArticleScope : { $ne : 0 } };
          if( args.UserID == undefined || args.UserID == 0 )
@@ -294,7 +302,8 @@ const GetFeaturedImage = {
         ArticleID : { type: GraphQLInt },
         AuthorID : { type: GraphQLInt }
     },
-    resolve(root, params) {
+    resolve: async (root, params, context) => {
+      const id = await verifyToken(context);
         return Articles.find({ ArticleID: params.ArticleID,AuthorID: params.AuthorID })
         .catch(err => new Error(err));
     }
@@ -304,8 +313,9 @@ const GetFeaturedImage = {
 const GetAdminArticleList = {
   type: new GraphQLList(ArticleType),
   args: { UserID: { type: GraphQLInt } },
-  resolve( parent, args,context ) {
-    if(context.UserID) args.UserID = context.UserID
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
+    if(id.UserID) args.UserID = id.UserID
       return Users.find({ RoleID : { $in: [ RoleObject.admin , RoleObject.moderator ] },ID : args.UserID,Status : 1}).then((isAdmin) => {
         if(isAdmin.length) return Articles.find({ Status:{ $ne : 0 },isPublish : 1 });
         else return [];
@@ -320,8 +330,9 @@ const GetAdminArticleList = {
       ArticleID: { type: GraphQLInt },
       UserID: { type: GraphQLInt }
     },
-    async resolve( parent, args,context ) {
-      if(context.UserID) args.UserID = context.UserID
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      if(id.UserID) args.UserID = id.UserID
          let lor =  await Articles.find({ ID: args.ArticleID, isPublish : true,Status: 1 })
                           .then((result) =>{
                               Articles.updateOne(
@@ -362,8 +373,9 @@ const GetAdminArticleList = {
           offset: { type: GraphQLInt },
           ArticleIds: { type: new GraphQLList(GraphQLInt) },
       },
-      async resolve(parent, args,context) {
-        if(context.UserID) args.UserID = context.UserID
+      resolve: async (parent, args, context) => {
+        // const id = await verifyToken(context);
+        // if(id.UserID) args.UserID = id.UserID
            // args.offset = (args.offset * args.limit );
            let query = { Status: 2, isPublish: true, ArticleScope : { $ne : 0 } , ID : { $nin : args.ArticleIds }};
            if( args.UserID == undefined || args.UserID == 0 )
@@ -387,15 +399,18 @@ const GetAdminArticleList = {
   const Article = {
     type: new GraphQLList(ArticleType),
     args: { ID: { type: GraphQLInt } },
-    resolve(parent, args){ return Articles.find({ ID:args.ID, Status: { $ne : ArticleStatusConst.inActive} }); }
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      return Articles.find({ ID:args.ID, Status: { $ne : ArticleStatusConst.inActive} }); }
   };
 
 // get all articles
   const ArticlesAll = {
    type: new GraphQLList(ArticleType),
    args: { UserID: { type: GraphQLInt } },
-   resolve( parent, args,context ){
-     if(context.UserID) args.UserID = context.UserID
+   resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
+     if(id.UserID) args.UserID = id.UserID
        if( args.UserID == undefined ) return getAllArticles();
        else {
          return BlockAuthor.find({ UserID : args.UserID, Status : 0 },{ AuthorID : 1, _id:0 })
@@ -417,16 +432,17 @@ const GetAdminArticleList = {
             UserID : { type : GraphQLInt },
             AuthorUserName : { type : GraphQLString }
           },
-          async resolve( parent, args, context ) {
-                if( context.UserID ) args.UserID = context.UserID
-                if( typeof args.AuthorUserName != "undefined" && args.AuthorUserName != "" && args.AuthorUserName != 0) {
-                  args.AuthorUserName = args.AuthorUserName.trim();
-                  AuthorDetails =  await Users.findOne({ Status: 1, UserName : args.AuthorUserName });
-                  // console.log(AuthorDetails.ID,"cklzjxcklzjxcklzjkxlc");
-                  if(AuthorDetails != null) args.AuthorID = AuthorDetails.ID
-                }
+          resolve: async (parent, args, context) => {
+            const id = await verifyToken(context);
+            if( id.UserID ) args.UserID = id.UserID
+            if( typeof args.AuthorUserName != "undefined" && args.AuthorUserName != "" && args.AuthorUserName != 0) {
+              args.AuthorUserName = args.AuthorUserName.trim();
+              AuthorDetails =  await Users.findOne({ Status: 1, UserName : args.AuthorUserName });
+              // console.log(AuthorDetails.ID,"cklzjxcklzjxcklzjkxlc");
+              if(AuthorDetails != null) args.AuthorID = AuthorDetails.ID
+            }
 
-                return await Articles.find({ AuthorID : args.AuthorID, Status : 2, ArticleScope : 1 });
+            return await Articles.find({ AuthorID : args.AuthorID, Status : 2, ArticleScope : 1 });
           }
         };
 
@@ -437,15 +453,16 @@ const GetAdminArticleList = {
             UserID : { type : GraphQLInt },
             AuthorUserName : { type : GraphQLString }
           },
-          async resolve( parent, args, context ) {
-                if( context.UserID ) args.UserID = context.UserID
-                if( typeof args.AuthorUserName != "undefined" && args.AuthorUserName != "" && args.AuthorUserName != 0) {
-                  args.AuthorUserName = args.AuthorUserName.trim();
-                  AuthorDetails =  await Users.findOne({ Status: 1, UserName : args.AuthorUserName });
-                  if(AuthorDetails != null) args.AuthorID = AuthorDetails.ID
-                }
+          resolve: async (parent, args, context) => {
+            const id = await verifyToken(context);
+            if( id.UserID ) args.UserID = id.UserID
+            if( typeof args.AuthorUserName != "undefined" && args.AuthorUserName != "" && args.AuthorUserName != 0) {
+              args.AuthorUserName = args.AuthorUserName.trim();
+              AuthorDetails =  await Users.findOne({ Status: 1, UserName : args.AuthorUserName });
+              if(AuthorDetails != null) args.AuthorID = AuthorDetails.ID
+            }
 
-                return await Articles.find({ AuthorID : args.AuthorID, Status : 2, ArticleScope : 2 });
+            return await Articles.find({ AuthorID : args.AuthorID, Status : 2, ArticleScope : 2 });
           }
         };
 

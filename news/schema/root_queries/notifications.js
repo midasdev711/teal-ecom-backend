@@ -6,14 +6,16 @@
 
 const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt } = require('graphql'),
       Notifications = require('../../models/notifications'),
-      { NotificationType } = require('../types/constant');
-
+      { NotificationType } = require('../types/constant'),
+      { verifyToken } = require('../middleware/middleware');
 
     // get users notifications
   const getUsersNotifications = {
     type: new GraphQLList(NotificationType),
       args: { RecieverID: { type: GraphQLInt } },
-    resolve(parent, args) {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) args.RecieverID = id.UserID
        return Notifications.find({ RecieverID: args.RecieverID, isView: false });
      }
   };

@@ -8,19 +8,24 @@ const graphql = require('graphql'),
       Roles = require('../../models/roles'),
       schemaArray = require('../types/constant'),
       { RoleType } = schemaArray,
-      { GraphQLID,GraphQLList , GraphQLString } = graphql;
+      { GraphQLID,GraphQLList , GraphQLString } = graphql,
+      { verifyToken } = require('../middleware/middleware');
 
 // get roles by id
   const Role = {
     type: new GraphQLList(RoleType),
     args: { ID: { type: GraphQLID } },
-    resolve(parent, args) { return Roles.find({ ID:args.ID }); }
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      return Roles.find({ ID:args.ID }); }
   };
 
 // get all roles
   const RoleAll = {
     type: new GraphQLList(RoleType),
-    resolve(parent, args) {  return Roles.find({Status: 1 }); }
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      return Roles.find({Status: 1 }); }
   };
 
 

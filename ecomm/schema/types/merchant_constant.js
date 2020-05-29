@@ -11,6 +11,8 @@ const MerchantType = new GraphQLObjectType({
     fields: () => ({
         _id: {type: GraphQLString},
         ID: { type: GraphQLInt },
+        token: { type: GraphQLString },
+        refreshToken: { type: GraphQLString },
         Name: { type: new GraphQLNonNull(GraphQLString) },
         Email : { type: new GraphQLNonNull(GraphQLEmail) },
         UserName :{type: GraphQLString },

@@ -10,7 +10,7 @@ const isBase64 = require('is-base64');
 const fs   = require('fs');
 const UploadBase64OnS3 = require('../../../upload/base64_upload'),
     { AWSCredentails } = require('../../../upload/aws_constants');
-
+const { verifyToken } = require('../middleware/middleware');
 
   /**
       * Add product category/subcategory
@@ -33,7 +33,8 @@ const UploadBase64OnS3 = require('../../../upload/base64_upload'),
           isParent : { type: GraphQLBoolean },
           ParentCategoryID : { type: GraphQLInt }
       },
-      resolve: async (parent, args ) => {
+      resolve: async (parent, args, context) => {
+         const id = await verifyToken(context);
          let base64Str = args.FeatureImage;
          let imagePath = await UploadBase64OnS3(args.FeatureImage, AWSCredentails.AWS_PRODUCT_THUMBNAIL  );
 
@@ -71,7 +72,8 @@ const UploadBase64OnS3 = require('../../../upload/base64_upload'),
           Status: { type: GraphQLID },
           FeatureImage : { type: GraphQLString }
       },
-      resolve: async (parent, args ) => {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
             if(isBase64(args.MerchatLogo, {allowMime: true}))
             {
                let imagePath = await UploadBase64OnS3(args.FeatureImage, AWSCredentails.AWS_PRODUCT_THUMBNAIL  );
@@ -121,7 +123,8 @@ const UploadBase64OnS3 = require('../../../upload/base64_upload'),
           ID: { type: GraphQLInt },
           ParentCategoryID : { type: GraphQLInt }
       },
-      resolve: async (parent, args ) => {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
         let category_updates;
           if(args.ParentCategoryID === 0)
             {

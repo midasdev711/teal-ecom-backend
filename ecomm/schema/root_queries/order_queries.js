@@ -10,7 +10,7 @@ const { UserType } = require('../../../news/schema/types/constant');
 const { ShoppingCartDetailsType } = require('../types/shopping_cart_details_constant');
 const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt }= require('graphql');
 const { GraphQLEmail } = require('graphql-custom-types');
-
+const { verifyToken } = require('../middleware/middleware');
 
 /**
     * get user shopping card details by userid
@@ -21,7 +21,8 @@ const { GraphQLEmail } = require('graphql-custom-types');
  const GetUserShoppingCartDetailsByID = {
     type: new GraphQLList(ShoppingCartDetailsType),
     args: { UserId: {type: GraphQLString } },
-    resolve : async (parent, args) => {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
 
       let userShoppingCard = await ShoppingCartSchema.find({ UserId: args.UserId ,OrderId : null });
 
@@ -49,7 +50,8 @@ const { GraphQLEmail } = require('graphql-custom-types');
 const GetOrderDetailsByID = {
     type: new GraphQLList(OrderType),
     args: { OrderId: {type: GraphQLString } },
-    resolve : async (parent, args) => {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
 
       const orderDetails = await OrderSchema.find({ _id : args.OrderId ,Status : 1});
 
@@ -67,7 +69,8 @@ const GetOrderDetailsByID = {
 const GetOrderDetailsByUserID = {
     type: new GraphQLList(OrderType),
     args: { UserId: {type: GraphQLString } },
-    resolve : async (parent, args) => {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
 
       const orderDetails = await OrderSchema.find({ UserId : args.UserId ,Status : 1 });
 
@@ -85,7 +88,8 @@ const GetOrderDetailsByUserID = {
   const GetUserShoppingCartDetailsByShoppingCardID = {
       type: new GraphQLList(ShoppingCartDetailsType),
       args: { ShoppingCartId: {type: GraphQLString } },
-      resolve : async (parent, args) => {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
         const shoppingCardDetails = await ShoppingCartDetailSchema.find({ ShoppingCartId: args.ShoppingCartId });
 
         return shoppingCardDetails;
@@ -107,7 +111,8 @@ const GetOrderDetailsByUserID = {
           args : {
               MerchantID : {type: GraphQLInt },
           },
-          resolve: async (parent, args) => {
+          resolve: async (parent, args, context) => {
+            const id = await verifyToken(context);
 
               const order_List  =  await OrderSchema.aggregate([
                      { $match : { "Products.ProductMerchantID":  args.MerchantID,"Products.Status" : 1 } },
@@ -132,7 +137,8 @@ const GetOrderDetailsByUserID = {
         args : {
             MerchantID : {type: GraphQLInt },
         },
-        resolve: async (parent, args) => {
+        resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
 
           const order_List  =  await OrderSchema.aggregate([
                  { $match : { "Products.ProductMerchantID": args.MerchantID,"Products.Status" : 0 } },
@@ -154,14 +160,17 @@ const GetOrderDetailsByUserID = {
 
       const LastOrderActivity = {
       type: new GraphQLList(OrderType),
-      resolve(parent, args) { return OrderSchema.find({}).sort({_id:-1}).limit(10) }
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        return OrderSchema.find({}).sort({_id:-1}).limit(10) }
     };
 
 
     // get all products
     const DisplayOrderListToAdmin = {
         type : new  GraphQLList(OrderType),
-        resolve(parent,args) {
+        resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
           return Orders.find({ });
         }
     };
@@ -173,7 +182,8 @@ const GetOrderDetailsByUserID = {
         args : {
           ProductMerchantID : {type : GraphQLString }
         },
-        resolve(parent,args) {
+        resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
 
           return Orders.aggregate([
             { "$match": { 'Products.ProductMerchantID': args.ProductMerchantID }},
@@ -199,7 +209,8 @@ const GetOrderDetailsByUserID = {
         args : {
           UserID : { type : GraphQLString }
         },
-        resolve(parent,args) {
+        resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
             return Orders.find( { UserId : args.UserID } )
         }
     }

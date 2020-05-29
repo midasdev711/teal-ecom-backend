@@ -6,8 +6,8 @@
 
 const FollowAuthor = require('../../models/follow_author'),
       { FollowAuthorType } = require('../types/constant'),
-      { GraphQLInt,GraphQLList , GraphQLString, GraphQLBoolean } = require('graphql');
-
+      { GraphQLInt,GraphQLList , GraphQLString, GraphQLBoolean } = require('graphql'),
+      { verifyToken } = require('../middleware/middleware');
 
   // follow author
   const FollowUnFollowObject = {
@@ -17,9 +17,11 @@ const FollowAuthor = require('../../models/follow_author'),
             AuthorID: { type: GraphQLInt },
             isFollowed : {type : GraphQLBoolean }
          },
-    resolve(parent, args) {
-        const objectType = [];
-        return FollowAuthor.find({$and: [{  AuthorID: args.AuthorID },{ UserID: args.UserID }]})
+         resolve: async (parent, args, context) => {
+          const id = await verifyToken(context);
+          if(id.UserID) args.UserID = id.UserID
+          const objectType = [];
+          return FollowAuthor.find({$and: [{  AuthorID: args.AuthorID },{ UserID: args.UserID }]})
                 .then((records) =>{
                     if(records.length == 0) {
                         let FollowAuthorConstant = new FollowAuthor({

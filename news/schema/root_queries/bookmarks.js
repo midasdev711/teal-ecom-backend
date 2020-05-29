@@ -6,13 +6,18 @@
 
 const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt } = require('graphql'),
       Bookmarks = require('../../models/bookmarks'),
-      { ArticleBookmarkType } = require('../types/constant');
+      { ArticleBookmarkType } = require('../types/constant'),
+      { verifyToken } = require('../middleware/middleware');
 
     // get all bookmarks
     const GetAllBookmarks = {
       type: new GraphQLList(ArticleBookmarkType),
       args: {  UserID: { type: GraphQLInt } },
-      resolve(parent, args) { return Bookmarks.find({$and: [{ UserID: args.UserID },{Status:1}]}); }
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) args.UserID = id.UserID
+         return Bookmarks.find({$and: [{ UserID: args.UserID },{Status:1}]});
+       }
     };
 
   const BookMarkArray = { GetAllBookmarks };

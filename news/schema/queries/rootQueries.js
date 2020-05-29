@@ -5,8 +5,8 @@
 */
 
 const { GraphQLObjectType } = require('graphql'),
-      { Article, ArticlesAll, GetParserArticleList, ArticleBySlug, ArticleByID, DashboardKeywordSerach, PopularArticleList, TrendingArticleList, GetFeaturedImage,MyArticleList,GetAdminArticleList }  = require('../root_queries/articles'),
-      { ArticleByCategoryID,ArticleCategoryAll,GetParentCategories,GetCategoriesByIDs } = require('../root_queries/categories'),
+      { GetPremiumArticles,GetFreeArticles,Article, ArticlesAll, GetParserArticleList, ArticleBySlug, ArticleByID, DashboardKeywordSerach, PopularArticleList, TrendingArticleList, GetFeaturedImage,MyArticleList,GetAdminArticleList }  = require('../root_queries/articles'),
+      { GetCategoryByType,ArticleByCategoryID,ArticleCategoryAll,GetParentCategories,GetCategoriesByIDs } = require('../root_queries/categories'),
       { GetAuthorProfileDetails,GetTotalUserBalance,User,UserAll,GetUserByID,GetUserProfile, SignInObject,FaceBookSignInObject,GoogleSignInObject,IsEmailExist,RewardsProgress,IsResetURLValid,LoginObject } = require('../root_queries/users'),
       { Role , RoleAll } = require('../root_queries/roles'),
       { MyCheersList } = require('../root_queries/article_ratings'),
@@ -35,9 +35,10 @@ const RootQuery = new GraphQLObjectType({
       getAllArticles : GetParserArticleList,
       getArticleByID : ArticleByID,
       getAuthorProfileDetails : GetAuthorProfileDetails,
-
+      // getHotStoriesList : GetHotStoriesList,
       getMyCheerList : MyCheersList, // article ratings i.e clap count list
-
+      getFreeArticles : GetFreeArticles,
+      getPremiumArticles : GetPremiumArticles,
       getUsersNotifications :getUsersNotifications, // get login users notification
 
 
@@ -75,6 +76,7 @@ const RootQuery = new GraphQLObjectType({
 
       article_category:ArticleByCategoryID, // get article cateory by id
       article_categories: ArticleCategoryAll, // get all article cateory where statis 1
+      getCategoryByType : GetCategoryByType,
 
       isResetURLValid : IsResetURLValid,
       getSiteList : AllSites,
@@ -83,7 +85,6 @@ const RootQuery = new GraphQLObjectType({
       getUsersWalletDetails : GetUsersBalanceDetails,
       myDonationtransactionDetails : MyDonationtransactionDetails,
       donationRecivedTransaction : DonationRecivedTransaction,
-
     }
   });
 

@@ -8,8 +8,8 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean } = requ
       {  GraphQLEmail } = require('graphql-custom-types'),
       Creators = require('../../models/creators'),
       { CreatorType } = require('../types/constant'),
-      uniqid = require('uniqid');
-
+      uniqid = require('uniqid'),
+      { verifyToken } = require('../middleware/middleware');
 
   // creator SignUp
   const CreatorSignUp = {

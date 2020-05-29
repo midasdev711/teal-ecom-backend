@@ -15,7 +15,7 @@ const { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean ,GraphQL
 const { GraphQLEmail } = require('graphql-custom-types');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
 const {BASE_URL ,EmailCredentials } = require("../../constant");
-
+const { verifyToken } = require('../middleware/middleware');
 
 /**
     * Adding Reviews & rating  to the product by user
@@ -34,7 +34,8 @@ const AddProductReviewRating = {
         rating : {type: GraphQLInt},
         reviewDetails : {type: GraphQLString },
     },
-    resolve: async (parent, args ) => {
+    resolve: async (parent, args, context) => {
+           const id = await verifyToken(context);
 
            let ProductReviewConstant = new ProductReview({
                 productId : args.productId,
@@ -64,7 +65,8 @@ const AddProductReviewRating = {
                _id : {type: GraphQLString },
                isAdminApproved :{type :GraphQLBoolean}
           },
-          resolve: async (parent, args) => {
+          resolve: async (parent, args, context) => {
+            const id = await verifyToken(context);
              const review_updates  = await  ProductReview.findOneAndUpdate(
                   { _id: args._id },
                   { $set: { isAdminApproved: args.isAdminApproved } },

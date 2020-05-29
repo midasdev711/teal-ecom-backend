@@ -14,7 +14,7 @@ const isBase64 = require('is-base64');
 const fs   = require('fs');
 const UploadBase64OnS3 = require('../../../upload/base64_upload'),
     { AWSCredentails } = require('../../../upload/aws_constants');
-
+const { verifyToken } = require('../middleware/middleware');
 
 
 const ProductCategoryInputType = new GraphQLInputObjectType({
@@ -129,7 +129,8 @@ const CreateProductsDetailByMerchant = {
     ProductAttributes:{ type :  new GraphQLList(ProductsAttribute) }
 
   },
-  resolve: async (parent, args) => {
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
 
     let imageArray = [] ;
     let ProductFeaturedImage = await UploadBase64OnS3(args.ProductFeaturedImage, AWSCredentails.AWS_PRODUCT_THUMBNAIL);
@@ -245,7 +246,8 @@ const UpdateProductDetail = {
       type: GraphQLString
     },
   },
-  resolve: async (parent, args) => {
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
     if (isBase64(args.ProductFeaturedImage, {
         allowMime: true
       })) {

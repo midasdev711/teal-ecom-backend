@@ -7,7 +7,8 @@
 const ReportArticle = require('../../models/report_article'),
       BlockAuthor = require('../../models/block_author'),
       { ReportArticleType } = require('../types/constant'),
-      { GraphQLID,GraphQLList , GraphQLString,GraphQLInt,GraphQLNonNull,GraphQLBoolean } = require('graphql');
+      { GraphQLID,GraphQLList , GraphQLString,GraphQLInt,GraphQLNonNull,GraphQLBoolean } = require('graphql'),
+      { verifyToken } = require('../middleware/middleware');
 
   // report this article
   const ReportThisArticle = {
@@ -19,8 +20,10 @@ const ReportArticle = require('../../models/report_article'),
           ReasonType: { type: GraphQLString },
           isAuthorBlocked :{ type: GraphQLBoolean }
           },
-    resolve(parent, args) {
-      if(typeof args.isAuthorBlocked != "undefined" && args.isAuthorBlocked ) {
+          resolve: async (parent, args, context) => {
+            const id = await verifyToken(context);
+            if(id.UserID) args.UserID = id.UserID
+            if(typeof args.isAuthorBlocked != "undefined" && args.isAuthorBlocked ) {
               BlockAuthor.deleteMany( {$and: [{ UserID: args.UserID },{ AuthorID: args.AuthorID }]}).then((t) =>{ console.log(t);});
               let BlockAuthorConstant = new BlockAuthor({
                     ArticleID: args.ArticleID,

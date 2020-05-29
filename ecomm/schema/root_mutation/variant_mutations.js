@@ -7,7 +7,7 @@ const isBase64 = require('is-base64');
 const fs   = require('fs');
 const UploadBase64OnS3 = require('../../../upload/base64_upload'),
     { AWSCredentails } = require('../../../upload/aws_constants');
-
+const { verifyToken } = require('../middleware/middleware');
 
 /**
     * Admin Login
@@ -38,7 +38,8 @@ const AddProductVariant = {
           VariantImage : { type : GraphQLString },
           ProductVariants :{ type: new GraphQLList(VariantsAttribute) }
        },
-      resolve: async (parent, args ) => {
+       resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
           if(args._id){
            let imagePath = await UploadBase64OnS3(args.VariantImage, AWSCredentails.AWS_PRODUCT_THUMBNAIL );  
            return await Variants.findOneAndUpdate(
@@ -79,7 +80,8 @@ const RemoveProductVariant = {
     ProductID: { type: GraphQLString } ,
     MerchantID:{type: GraphQLString }
   },
-  resolve: async (parent, args ) => {
+  resolve: async (parent, args, context) => {
+             const id = await verifyToken(context);
              if(args._id){
               return await Attributes.findOneAndDelete(
                      { _id: args._id,ProductID:args.ProductID,

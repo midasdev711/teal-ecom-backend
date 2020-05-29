@@ -11,6 +11,8 @@ const AdminType = new GraphQLObjectType({
     fields: () => ({
         _id: {type: GraphQLString},
         ID: { type: new GraphQLNonNull(GraphQLInt) },
+        token: { type: GraphQLString },
+        refreshToken: { type: GraphQLString },
         Name: { type: new GraphQLNonNull(GraphQLString) },
         Email : { type: new GraphQLNonNull(GraphQLEmail) },
         Password: { type: GraphQLString },

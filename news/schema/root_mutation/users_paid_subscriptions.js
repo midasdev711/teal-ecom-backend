@@ -16,8 +16,8 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
       { AmountType,DonationStatusConst } = require('../constant'),
       uniqid = require('uniqid'),
       sendSubscriptionMailToUser = require("../mail/user_subscription"),
-      await = require('await');
-
+      await = require('await'),
+      { verifyToken } = require('../middleware/middleware');
 
   // set users subscription to author
   const SetUsersSubscription = {
@@ -36,7 +36,9 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
         Days : {type : GraphQLInt },
         ModifiedDate:  { type: GraphQLDate }
       },
-      async resolve( parent, args ) {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);    
+        if(id.UserID) args.UserID = id.UserID
           sendSubscriptionMailToUser( args );
           args = await  calculateSubscriptionDates( args );
           addToUserWallet( args );

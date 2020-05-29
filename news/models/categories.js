@@ -18,6 +18,7 @@ const CategoriesSchema = new Schema({
 	isParent : Boolean,
 	ParentCategoryID : {  type: Number,  required: true, default: 0 },
 	Status :  { type: Number, default: 1 },
+  Type :{ type : Number, enum : [1,2],default :1 },
 	CreatedDate:  { type: Date, default: Date.now },
 	ModifiedDate:  { type: Date, default: Date.now },
 	CreatedBy: { type: Number, default: 1 },

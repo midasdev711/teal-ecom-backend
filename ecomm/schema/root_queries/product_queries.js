@@ -2,7 +2,7 @@
 const ProductCatgory = require('../../models/products');
 const { ProductType } = require('../types/product_constant');
 const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt }= require('graphql');
-
+const { verifyToken } = require('../middleware/middleware');
 
 
 /**
@@ -13,7 +13,9 @@ const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt }= require('graphql');
 
 const ProductCatgoryAll = {
   type: new GraphQLList(ProductType),
-  resolve(parent, args) { return ProductCatgory.find({}); }
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
+    return ProductCatgory.find({}); }
 };
 
 
@@ -25,7 +27,9 @@ const ProductCatgoryAll = {
 
 const TopProduct = {
   type: new GraphQLList(ProductType),
-  resolve(parent, args) { return ProductCatgory.find({}).sort({_id:1}).limit(3) }
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
+    return ProductCatgory.find({}).sort({_id:1}).limit(3) }
 };
 
 
@@ -38,7 +42,9 @@ const TopProduct = {
   const ProductDetailsByID = {
     type: new GraphQLList(ProductType),
      args: { _id: {type: GraphQLString } },
-    resolve(parent, args) { return ProductCatgory.find({ _id: args._id }); }
+     resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      return ProductCatgory.find({ _id: args._id }); }
   };
 
 
@@ -51,7 +57,8 @@ const TopProduct = {
   const GetProductDetailByProductID = {
     type : ProductType,
     args : { ProductID : { type: GraphQLString } },
-    resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
        return ProductCatgory.findOne({  _id : args.ProductID });
     }
   };
@@ -72,7 +79,8 @@ const TopProduct = {
         SortField :{type:GraphQLString},
         Order :{type:GraphQLString}
       },
-      resolve: async (parent, args ) => {
+      resolve: async (parent, args, context) => {
+         const id = await verifyToken(context);
          let shopList;
          let sortField = args.SortField;
          let order  =  args.Order;
@@ -122,7 +130,8 @@ const MerchantProductList = {
                Search: {type: GraphQLString },
                MerchantID : {type :GraphQLInt}
           },
-        resolve(parent, args) {
+          resolve: async (parent, args, context) => {
+           const id = await verifyToken(context);
            if(args.Search == undefined ){
               return ProductCatgory.find({ ProductMerchantID:args.MerchantID, Status: 1 }).sort({_id: -1});
            }else{

@@ -6,7 +6,7 @@ const Users = require('../../../news/models/users');
 const { UserType } = require('../../../news/schema/types/constant');
 const Categories = require('../../../news/models/categories');
 const { CategoryType } = require('../../../news/schema/types/constant');
-
+const { verifyToken } = require('../middleware/middleware');
 
 
 /**
@@ -23,7 +23,8 @@ const UserCategoryWithPagination = {
         Skip:  {type: GraphQLInt },
         Search: {type: GraphQLString }
     },
-  resolve(parent, args) {
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
     const limit = args.Limit;
     const offset = limit * (args.Skip-1);
        if(limit == undefined){
@@ -54,7 +55,8 @@ const UserCategoryAll = {
   args: {
          Search: {type: GraphQLString },
     },
-  resolve(parent, args) {
+  resolve: async (parent, args, context) => {
+     const id = await verifyToken(context);
      if(args.Search == undefined ){
         return Users.find({ Status: 1 }).sort({_id: -1});
      }else{
@@ -78,7 +80,9 @@ const UserCategoryAll = {
 const UserDetailByID = {
   type: new GraphQLList(UserType),
   args: { _id: {type: GraphQLString } },
-  resolve(parent, args) { return Users.find({ _id: args._id }); }
+  resolve: async (parent, args, context) => {
+    const id = await verifyToken(context);
+    return Users.find({ _id: args._id }); }
 };
 
 

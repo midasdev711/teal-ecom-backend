@@ -12,14 +12,16 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
       UserSettings = require('../../models/user_settings'),
       ForgotPasswordLogs = require('../../models/forgot_passwords_log'),
       { UserType,PasswordInfo,EmailLogType,ProfileImageInfo } = require('../types/constant'),
+      {  AuthPayloadType }= require("../types/authorise"),
       uniqid = require('uniqid'),
       sendMailToUser = require('../mail/signup'),
       sentForgotPasswordMail = require('../mail/forgot_password'),
-      { RoleObject,MAIL_DETAILS,AWSCredentails } = require('../constant'),
+      { RoleObject,MAIL_DETAILS,AWSCredentails,TOKEN_SECRET_KEY } = require('../constant'),
       passwordHash = require('password-hash'),
       fs       = require('fs'),
-      UploadBase64OnS3 = require('../../../upload/base64_upload');
-
+      { generateToken,regenerateToken, regenerateCreativeToken } = require("../middleware/middleware"),
+      UploadBase64OnS3 = require('../../../upload/base64_upload'),
+      { verifyToken } = require('../middleware/middleware');
 
   // only profile picture update
   const ProfilePictureUpdate = {
@@ -28,8 +30,9 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
         UserID: { type: GraphQLInt },
         ProfileImage : {type : GraphQLString },
       },
-    async resolve(parent, args) {
-      var AwsUrl = await UploadBase64OnS3( args.ProfileImage, AWSCredentails.AWS_USER_IMG_PATH );
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        var AwsUrl = await UploadBase64OnS3( args.ProfileImage, AWSCredentails.AWS_USER_IMG_PATH );
         var Message = {};
         if( typeof args.UserID != "undefined" && args.UserID != 0 ) {
             Users.updateOne(
@@ -49,6 +52,7 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
         ID: { type: GraphQLInt },
         Name: { type: GraphQLString },
         ParentCategoryID: { type: GraphQLInt },
+        Type: { type: GraphQLInt },
       })
   });
 
@@ -57,7 +61,8 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
       name : "UsersParentCategoryInput",
       fields: () => ({
         ID: { type: GraphQLInt },
-        Name: { type: GraphQLString }
+        Name: { type: GraphQLString },
+        Type: { type: GraphQLInt },
       })
   });
 
@@ -80,30 +85,35 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
         IpAddress : { type : GraphQLString }
     },
     async resolve(parent, args,context) {
+      var UserData = [];
       args.Description = args.Name+"--"+args.Email;
       args.UniqueID = uniqid();
       args.RoleID = RoleObject.user;
+
       if( typeof args.Name != "undefined" )
             args.UserName = await generateUserName( args.Name );
       // SaveUserSettings( args,result.ID );
 
       if(typeof args.SignUpMethod  != "undefined" && args.SignUpMethod == "Site" && typeof args.Password != "undefined" ) {
         args.Password = passwordHash.generate(args.Password);
-         return await Users.create( args ).then((result) => {
+         UserData = await Users.create( args ).then((result) => {
             sendMailToUser(args.Name,args.Email,args.Name+"--"+args.Email);
             SaveUserSettings( args,result.ID ); return result;
          });
       } else if(typeof args.SignUpMethod  != "undefined" && args.SignUpMethod == "Facebook") {
-          return await Users.create( args ).then((result) => {
+          UserData = await Users.create( args ).then((result) => {
              sendMailToUser(args.Name,args.Email,args.Name+"--"+args.Email);
              SaveUserSettings( args,result.ID );return result;
           });
       } else if(typeof args.SignUpMethod  != "undefined" && args.SignUpMethod == "Google") {
-          return await Users.create( args ).then((result) => {
+          UserData = await Users.create( args ).then((result) => {
              sendMailToUser(args.Name,args.Email,args.Name+"--"+args.Email);
              SaveUserSettings( args,result.ID );return result;
           });
-      } else return [];
+      }
+      console.log(UserData,"UserDataUserDataUserDataUserData");
+      return await generateToken(context, UserData );
+      // return UserData;
     }
   };
 
@@ -131,7 +141,8 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
                 UserID : UserID,
                 Account : {
                   Name : args.Name,
-                  Email : args.Email
+                  Email : args.Email,
+                  UserName : args.UserName
                 }
             });
 
@@ -217,7 +228,8 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
   args : {
       ID: { type: GraphQLInt }
   },
-  resolve(root, params) {
+  resolve: async (parent, params, context) => {
+    const id = await verifyToken(context);
       return Users.update({ ID: params.ID },{ $set: { Status: 0 } },{ new: true })
              .catch(err => new Error(err));
     }
@@ -249,9 +261,11 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
            Status: { type: GraphQLInt },
            FaceBookUrl : { type: GraphQLString },
            isPaidSubscription : { type : GraphQLBoolean },
-           PaidSubscription : {type : new GraphQLList(PaidSubscriptionInputType) }
+           PaidSubscription : {type : new GraphQLList(PaidSubscriptionInputType) },
+           UserName: {type: GraphQLString}
        },
-       async resolve(root, params) {
+       resolve: async (parent, params, context) => {
+        const id = await verifyToken(context);
          if(typeof params.Avatar != "undefined")
            params.Avatar = await UploadBase64OnS3( params.Avatar , AWSCredentails.AWS_USER_IMG_PATH  );
 
@@ -260,4 +274,25 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
          }
    };
 
-  module.exports = { UserSignUp,ForgotPassword,ResetPassword,ProfilePictureUpdate,DeleteUser,UpdateUser };
+   const RegenerateToken = {
+     type : UserType,
+     args :{
+       refreshToken : { type : GraphQLString }
+     },
+     async resolve( parent, args,context ) {
+       console.log("i am");
+        return await regenerateToken( context, args );
+     }
+   };
+
+   const RegenerateCreativeToken = {
+     type : UserType,
+     args :{
+       domain : { type : GraphQLString }
+     },
+     async resolve( parent, args,context ) {
+        return await regenerateCreativeToken( context, args );
+     }
+   };
+
+  module.exports = { RegenerateCreativeToken,RegenerateToken,UserSignUp,ForgotPassword,ResetPassword,ProfilePictureUpdate,DeleteUser,UpdateUser };

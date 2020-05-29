@@ -7,7 +7,8 @@
 
 const UserCategory = require('../../models/users_categories'),
       { UserCategoryType } = require('../types/constant'),
-      {  GraphQLInt,GraphQLNonNull,GraphQLList } = require('graphql');
+      {  GraphQLInt,GraphQLNonNull,GraphQLList } = require('graphql'),
+      { verifyToken } = require('../middleware/middleware');
 
       // add users categories
   const AddUserCategory = {
@@ -16,7 +17,9 @@ const UserCategory = require('../../models/users_categories'),
         CategoryID: { type:new GraphQLList(GraphQLInt) },
         UserID: { type: new GraphQLNonNull(GraphQLInt) }
       },
-      resolve(parent, args) {
+      resolve: async (parent, args, context) => {
+        const id = await verifyToken(context);
+        if(id.UserID) args.UserID = id.UserID
           let UserCategoryConstant = new UserCategory({ CategoryID: args.CategoryID,UserID: args.UserID });
           UserCategory.updateOne(
                 {$and: [{ UserID: args.UserID },{ Status: 1 }]},

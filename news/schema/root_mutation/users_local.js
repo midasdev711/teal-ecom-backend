@@ -16,7 +16,7 @@ const { RoleObject,MAIL_DETAILS,ImagePath,client } = require('../constant');
 var passwordHash = require('password-hash');
 var base64Img = require('base64-img');
 const fs = require('fs');
-
+const { verifyToken } = require('../middleware/middleware');
 
 const ProfilePictureUpdate = {
   type : ProfileImageInfo,
@@ -24,7 +24,8 @@ const ProfilePictureUpdate = {
       UserID: { type: GraphQLInt },
       ProfileImage : {type : GraphQLString },
     },
-      async resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
         var Message = {};
         args = await  uploadProfileImage( args );
         if( typeof args.UserID != "undefined" && args.UserID != 0 ) {

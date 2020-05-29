@@ -13,7 +13,7 @@ const { ProductType } = require('../types/product_constant');
 const { MerchantType } = require('../types/merchant_constant');
 const { GraphQLID,GraphQLList , GraphQLString,GraphQLInt }= require('graphql');
 const { GraphQLEmail } = require('graphql-custom-types');
-
+const { verifyToken } = require('../middleware/middleware');
 
 
 /**
@@ -29,7 +29,8 @@ const { GraphQLEmail } = require('graphql-custom-types');
            TypeOfSerach: {type: GraphQLString },
            MerchantId : {type: GraphQLInt }
       },
-    resolve(parent, args) {
+    resolve: async (parent, args, context) => {
+       const id = await verifyToken(context);
        if(args.TypeOfSerach == undefined ){
           return Attributes.find({ MerchantId: args.MerchantId }).sort({_id: -1});
        } else if(args.TypeOfSerach == "producttype"){

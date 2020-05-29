@@ -6,12 +6,15 @@
 
 const { GraphQLInt,GraphQLList , GraphQLString } = require('graphql'),
       Sites = require('../../models/sites'),
-      { SiteType } = require('../types/constant');
+      { SiteType } = require('../types/constant'),
+      { verifyToken } = require('../middleware/middleware');
 
   // get all sites parsers artilcle
   const AllSites = {
     type: new GraphQLList(SiteType),
-    resolve(parent, args) { return Sites.find({ Status : 1 }); }
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      return Sites.find({ Status : 1 }); }
   };
 
 

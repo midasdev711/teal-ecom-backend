@@ -14,7 +14,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 const emailTemplates = require('email-templates');
 const {BASE_URL ,EmailCredentials ,STRIPE_KEY , NMI_KEY , NMI_MERCHAT_URL } = require("../../constant");
-
+const { verifyToken } = require('../middleware/middleware');
 
 /* setting up the email */
 
@@ -119,7 +119,8 @@ const UpdateUserDetail = {
        Name: { type: GraphQLString },
        Email : {type : GraphQLEmail }
    },
-resolve: async (parent, args) => {
+resolve: async (parent, args, context) => {
+const id = await verifyToken(context);
 const user_updates  = await  UserSchema.findOneAndUpdate(
      { _id: args._id },
       { $set: {

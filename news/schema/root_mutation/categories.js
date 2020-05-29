@@ -6,7 +6,8 @@
 
 const Categories = require('../../models/categories'),
       { CategoryType } = require('../types/constant'),
-      { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean } = require('graphql');
+      { GraphQLInt,GraphQLID,GraphQLList , GraphQLString,GraphQLBoolean } = require('graphql'),
+      { verifyToken } = require('../middleware/middleware');
 
   // add cateogry
   const AddArticleCategory = {
@@ -17,18 +18,21 @@ const Categories = require('../../models/categories'),
         Slug: { type: GraphQLString },
         FeatureImage : { type: GraphQLString },
         isParent : { type: GraphQLBoolean },
-        ParentCategoryID : { type: GraphQLInt }
+        ParentCategoryID : { type: GraphQLInt },
+        Type : { type: GraphQLInt },
     },
-    resolve(parent, args) {
-        let ArticleCategoryConstant = new Categories({
-                Name: args.Name,
-                Description: args.Description,
-                Slug: args.Slug,
-                FeatureImage: args.FeatureImage,
-                isParent: args.isParent,
-                ParentCategoryID: args.ParentCategoryID
-        });
-        return ArticleCategoryConstant.save();
+    resolve: async (parent, args, context) => {
+      const id = await verifyToken(context);
+      let ArticleCategoryConstant = new Categories({
+              Name: args.Name,
+              Description: args.Description,
+              Slug: args.Slug,
+              FeatureImage: args.FeatureImage,
+              isParent: args.isParent,
+              ParentCategoryID: args.ParentCategoryID,
+              Type : args.Type
+      });
+      return ArticleCategoryConstant.save();
     }
   };
 
@@ -38,14 +42,15 @@ const Categories = require('../../models/categories'),
    args : {
        ID: { type: GraphQLID }
    },
-   resolve(root, params) {
-       return Categories.update(
-           { ID: params.ID },
-           { $set: { Status: 0 } },
-           { new: true }
-       )
-       .catch(err => new Error(err));
-     }
+   resolve: async (parent, params, context) => {
+      const id = await verifyToken(context);
+      return Categories.update(
+          { ID: params.ID },
+          { $set: { Status: 0 } },
+          { new: true }
+      )
+      .catch(err => new Error(err));
+    }
  };
 
 // update cateogry
@@ -59,24 +64,19 @@ const Categories = require('../../models/categories'),
        Status: { type: GraphQLID },
        FeatureImage : { type: GraphQLString },
        isParent : { type: GraphQLBoolean },
-       ParentCategoryID : { type: GraphQLInt }
+       ParentCategoryID : { type: GraphQLInt },
+       Type : { type: GraphQLInt },
    },
-   resolve(root, params) {
-     if(params.Name == "") delete params.Name;
-     if(params.Description == "") delete params.Description;
-     if(params.Slug == "") delete params.Slug;
-     if(params.Status == "") delete params.Status;
-     if(params.FeatureImage == "") delete params.FeatureImage;
-     if(params.isParent == "") delete params.isParent;
-     if(params.ParentCategoryID == "") delete params.ParentCategoryID;
+   resolve: async (parent, params, context) => {
+      const id = await verifyToken(context);
 
-       return Categories.updateOne(
-           { ID: params.ID },
-           params,
-           { new: true }
-       )
-       .catch(err => new Error(err));
-     }
+      return Categories.updateOne(
+          { ID: params.ID },
+          params,
+          { new: true }
+      )
+      .catch(err => new Error(err));
+    }
  };
 
   const CategoryArray = { AddArticleCategory , DeleteArticleCategory,UpdateArticleCategory };
