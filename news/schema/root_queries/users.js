@@ -19,7 +19,8 @@ const Users = require('../../models/users'),
       { RoleObject,StatusConstant,ArticleStatusConst } = require('../constant'),
       { generateToken,verifyToken } = require("../middleware/middleware"),
       {  AuthPayloadType }= require("../types/authorise"),
-      passwordHash = require('password-hash');
+      passwordHash = require('password-hash'),
+      emailValidator = require("email-validator");
 
 // get user profile details
 const GetUserProfile = {
@@ -230,17 +231,35 @@ const IsEmailExist = {
     type: new GraphQLList(UserType),
     Description : "ReturnUniqueID",
     args: {
-      Email: { type: GraphQLEmail },
+      // Email: { type: GraphQLEmail },
+      Email: { type: GraphQLString },
       MobileNo : { type : GraphQLString }
     },
     async resolve(parent,args) {
+      console.log('email or username', args.Email);
+      let valid = emailValidator.validate(args.Email);
+      console.log('valid', valid);
+      
       var Result = [];
       var Result1 = [];
       if(typeof args.Email != "undefined" && args.Email != "" && args.Email != null) {
-      await   Users.find({ Email:args.Email,Status :1},{_id:false, UniqueID : true } )
-         .then(async (isEmail) =>{
-            Result = await isEmail; Result = Result.concat(isEmail);
-         });
+        if(valid == true) {
+          await   Users.find({ Email:{ $regex: new RegExp(`^${args.Email}$`, 'i') },Status :1},{_id:false, UniqueID : true, Email: true } )
+             .then(async (isEmail) =>{
+               console.log('isEmailExists', isEmail);
+               
+                Result = await isEmail; Result = Result.concat(isEmail);
+             });
+
+        } else if(valid == false) {
+          await   Users.find({ UserName:{ $regex: new RegExp(`^${args.Email}$`, 'i') },Status :1},{_id:false, UniqueID : true, Email: true } )
+             .then(async (isEmail) =>{
+               console.log('isUsernameExists', isEmail);
+               
+                Result = await isEmail; Result = Result.concat(isEmail);
+             });
+        }
+
       }
 
       if(typeof args.MobileNo != "undefined" && args.MobileNo != "" && args.MobileNo != null) {
