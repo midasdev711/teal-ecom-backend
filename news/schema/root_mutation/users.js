@@ -262,7 +262,9 @@ const { GraphQLInt,GraphQLID,GraphQLList ,GraphQLFloat, GraphQLString,GraphQLBoo
            FaceBookUrl : { type: GraphQLString },
            isPaidSubscription : { type : GraphQLBoolean },
            PaidSubscription : {type : new GraphQLList(PaidSubscriptionInputType) },
-           UserName: {type: GraphQLString}
+           UserName: {type: GraphQLString},
+           ParentCategories : { type : new GraphQLList(ParentCategoryInputType) },
+           SubCategories : { type : new GraphQLList(SubcategoriesInputType) }
        },
        resolve: async (parent, params, context) => {
         const id = await verifyToken(context);
