@@ -39,5 +39,5 @@ const CategoryType = new GraphQLObjectType({
 
 
 // export all the constants
-const SchemaArray = { ProductType };
+const SchemaArray = { CategoryType };
 module.exports = SchemaArray;

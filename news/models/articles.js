@@ -42,7 +42,8 @@ const ArticleSchema = new Schema({
         CreatedDate:  { type: Date, default: Date.now },
         ModifiedDate:  { type: Date, default: Date.now },
         CreatedBy: Number,
-        ModifiedBy: Number
+        ModifiedBy: Number,
+		Urls: { type: String, default: ""},
 });
 
 

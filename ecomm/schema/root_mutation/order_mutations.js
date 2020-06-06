@@ -48,6 +48,7 @@ const CreateShoppingCart = {
   resolve: async (parent, args, context) => {
      const id = await verifyToken(context);
      let totalCartPrice = 0;
+	 let currentCartProduct = [];
       let userShoppingCard = await ShoppingCartSchema.find({ UserId: args.UserID ,OrderId : null });
        if(userShoppingCard.length > 0)
        {
@@ -58,29 +59,58 @@ const CreateShoppingCart = {
             if(item.ProductVariantObject === undefined || item.ProductVariantObject === null )
              { 
                 const product = await ProductSchema.find({ _id: item._id});
-                args.CartItems[index].ProductSalePrice = product[0].ProductSalePrice;
-                args.CartItems[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * product[0].ProductSalePrice;
+				  
+				currentCartProduct[index] = existingShoppingCard[0].Products[index];
+				console.log("one",currentCartProduct[index]);
+                currentCartProduct[index].ProductSalePrice = product[0].ProductSalePrice;
+                currentCartProduct[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * product[0].ProductSalePrice;
                 totalCartPrice  = totalCartPrice + (product[0].ProductSalePrice*item.ProductTotalQuantity)
-                return product
+				currentCartProduct[index].ProductSKU = product[0].ProductSKU;
+				currentCartProduct[index].ProductMerchantID = product[0].ProductMerchantID;
+				currentCartProduct[index].ProductTitle = product[0].ProductTitle;
+				currentCartProduct[index].ProductID = product[0].ProductID;
+				currentCartProduct[index].ProductTotalQuantity = args.CartItems[index].ProductTotalQuantity;
+				console.log("product dispaly");
+                return currentCartProduct;
              }
              else
              {
                 const productVariant = await VariantsSchema.find({ _id: item.ProductVariantObject._id});
+				currentCartProduct = existingShoppingCard[0].Products;
                 totalCartPrice  = totalCartPrice + (productVariant[0].SellingPrice * item.ProductTotalQuantity);
-                args.CartItems[index].ProductVariantID = productVariant[0]._id;
-                args.CartItems[index].ProductSalePrice = productVariant[0].SellingPrice;
-                args.CartItems[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * productVariant[0].SellingPrice;
-                return productVariant
+                currentCartProduct[index].ProductVariantID = productVariant[0]._id;
+                currentCartProduct[index].ProductSalePrice = productVariant[0].SellingPrice;
+                currentCartProduct[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * productVariant[0].SellingPrice;
+				
+				currentCartProduct[index].ProductSKU = productVariant[0].VariantSKU;
+				currentCartProduct[index].ProductMerchantID = productVariant[0].MerchantID;
+				currentCartProduct[index].ProductTitle = productVariant[0].ProductVariants[0].Name;
+				currentCartProduct[index].ProductID = productVariant[0].ProductID;
+				currentCartProduct[index].ProductTotalQuantity = args.CartItems[index].ProductTotalQuantity;
+                return currentCartProduct;
              }
          });
 
-         await Promise.all(promises);
-
+         let promising = await Promise.all(promises);
+        
+		  
          if(existingShoppingCard.length > 0 )
          {
-           let updatedShoppingCard  = await ShoppingCartDetailSchema.findOneAndUpdate(
+			
+			let itemsadded  = [];
+				console.log("index",promising[0][1]);
+				let returnedTarget=[]
+			promising[0].map(async (item,index) => {
+				console.log("index",index);
+				 returnedTarget =  returnedTarget.concat(item);
+				//itemsadded.push(item);
+				//console.log("inside update",item[index]);
+            
+			})
+			console.log("itemsadded",returnedTarget);
+			let updatedShoppingCard  = await ShoppingCartDetailSchema.findOneAndUpdate(
                { ShoppingCartId: userShoppingCard[0]._id },
-               { $set: {Products: args.CartItems,  ItemTotalPrice : totalCartPrice , TotalCartItem : args.TotalCartItem } } ,
+               { $set: {Products: returnedTarget,  ItemTotalPrice : totalCartPrice , TotalCartItem : args.TotalCartItem } } ,
                { new: true}
             );
            return updatedShoppingCard;
@@ -88,7 +118,7 @@ const CreateShoppingCart = {
          else
          {
            let ShoppingCartAddDetailsConstant = new ShoppingCartDetailSchema({
-               Products: args.CartItems,
+               Products: promising[0], //args.CartItems,
                ShoppingCartId : userShoppingCard[0]._id,
                ItemTotalPrice : totalCartPrice ,
                TotalCartItem : args.TotalCartItem
@@ -101,6 +131,8 @@ const CreateShoppingCart = {
        }
       else
       {
+		   console.log("inside other this",args.CartItems);
+		let currentCartProduct = [];
         let ShoppingCartCreateConstant = new ShoppingCartSchema({
               UserId :args.UserID,
               OrderId :null
@@ -108,30 +140,45 @@ const CreateShoppingCart = {
         let shoppingCartID = await ShoppingCartCreateConstant.save();
 
         let promises = args.CartItems.map(async (item,index) => {
-        
+           console.log("variant",item.ProductVariantObject);
           if(item.ProductVariantObject === undefined || item.ProductVariantObject === null )
           {
+			 console.log("super inside");
              const product = await ProductSchema.find({ _id: item._id});
-             args.CartItems[index].ProductSalePrice = product[0].ProductSalePrice;
-             args.CartItems[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * product[0].ProductSalePrice;
-             totalCartPrice  = totalCartPrice + (product[0].ProductSalePrice*item.ProductTotalQuantity)
-             return product
+			 var newschema = new ShoppingCartDetailSchema();
+			 console.log("newschema",newschema);
+			 currentCartProduct = product
+                currentCartProduct[index].ProductSalePrice = product[0].ProductSalePrice;
+                currentCartProduct[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * product[0].ProductSalePrice;
+                totalCartPrice  = totalCartPrice + (product[0].ProductSalePrice*item.ProductTotalQuantity);
+				currentCartProduct[index].ProductSKU = product[0].ProductSKU;
+				currentCartProduct[index].ProductMerchantID = product[0].ProductMerchantID;
+				currentCartProduct[index].ProductTitle = product[0].ProductTitle;
+				currentCartProduct[index].ProductID = product[0].ProductID;
+			    currentCartProduct[index].ProductTotalQuantity =  args.CartItems[index].ProductTotalQuantity;
+             return currentCartProduct
           }
           else
           {
              const productVariant = await VariantsSchema.find({ _id: item.ProductVariantObjects._id});
+			 currentCartProduct = productVariant;
              totalCartPrice  = totalCartPrice + (productVariant[0].SellingPrice * item.ProductTotalQuantity);
-             args.CartItems[index].ProductVariantID = productVariant[0]._id;
-             args.CartItems[index].ProductSalePrice = productVariant[0].SellingPrice;
-             args.CartItems[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * productVariant[0].SellingPrice;
-             return productVariant
+             currentCartProduct[index].ProductVariantID = productVariant[0]._id;
+                currentCartProduct[index].ProductSalePrice = productVariant[0].SellingPrice;
+                currentCartProduct[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * productVariant[0].SellingPrice;
+				currentCartProduct[index].ProductSKU = productVariant[0].VariantSKU;
+				currentCartProduct[index].ProductMerchantID = productVariant[0].MerchantID;
+				currentCartProduct[index].ProductTitle = productVariant[0].ProductVariants[0].Name;
+				currentCartProduct[index].ProductID = productVariant[0].ProductID; 
+				currentCartProduct[index].ProductTotalQuantity =  args.CartItems[index].ProductTotalQuantity;
+             return currentCartProduct
           }
        });
 
-        await Promise.all(promises);
-
+        let promising = await Promise.all(promises);
+        console.log("promising",promising[0]);
         let ShoppingCartAddDetailsConstant = new ShoppingCartDetailSchema({
-            Products: args.CartItems,
+            Products: promising[0],
             ShoppingCartId : shoppingCartID._id,
             ItemTotalPrice : totalCartPrice ,
             TotalCartItem : args.TotalCartItem
@@ -199,6 +246,12 @@ const UpdateShoppingCart = {
                           currentCartProduct[index].ProductTotalQuantity =  currentCartProduct[index].ProductTotalQuantity + obj.ProductTotalQuantity;
                           currentCartProduct[index].ProductTotalPrice = currentCartProduct[index].ProductTotalQuantity * product[0].ProductSalePrice;
                           currentCartProduct[index].ProductSalePrice = product[0].ProductSalePrice;
+						  currentCartProduct[index].ProductSKU = product[0].ProductSKU;
+						  currentCartProduct[index].ProductMerchantID = product[0].ProductMerchantID;
+						  currentCartProduct[index].ProductTitle = product[0].ProductTitle;
+						  currentCartProduct[index].ProductID = product[0].ProductID;
+						 
+						  //return product;
                         }
                         else
                         {   
@@ -208,6 +261,11 @@ const UpdateShoppingCart = {
                             currentCartProduct[index].ProductTotalQuantity =  currentCartProduct[index].ProductTotalQuantity + obj.ProductTotalQuantity;
                             currentCartProduct[index].ProductTotalPrice = currentCartProduct[index].ProductTotalQuantity * productVariant[0].SellingPrice;
                             currentCartProduct[index].ProductSalePrice = productVariant[0].SellingPrice;
+							currentCartProduct[index].ProductSKU = productVariant[0].VariantSKU;
+							currentCartProduct[index].ProductMerchantID = productVariant[0].MerchantID;
+							currentCartProduct[index].ProductTitle = productVariant[0].ProductVariants[0].Name;
+							currentCartProduct[index].ProductID = productVariant[0].ProductID;
+							//return productVariant;
                         }
                       }else{
                         
@@ -217,6 +275,11 @@ const UpdateShoppingCart = {
                               totalCartPrice  = totalCartPrice + (product[0].ProductSalePrice * obj.ProductTotalQuantity)
                               obj.ProductTotalPrice = obj.ProductTotalQuantity * product[0].ProductSalePrice;
                               obj.ProductSalePrice = product[0].ProductSalePrice;
+						
+							  obj.ProductSKU = product[0].ProductSKU;
+						      obj.ProductMerchantID = product[0].ProductMerchantID;
+						      obj.ProductTitle = product[0].ProductTitle;
+						      obj.ProductID = product[0].ProductID;
                               currentCartProduct.push(obj)
                             }
                             else
@@ -226,17 +289,22 @@ const UpdateShoppingCart = {
                                 obj.ProductVariantID = productVariant[0]._id;
                                 obj.ProductTotalPrice = obj.ProductTotalQuantity * productVariant[0].SellingPrice;
                                 obj.ProductSalePrice = productVariant[0].SellingPrice;
+					
+							    obj.ProductSKU = productVariant[0].VariantSKU;
+							    obj.ProductMerchantID = productVariant[0].MerchantID;
+							    obj.ProductTitle = productVariant[0].ProductVariants[0].Name;
+							    obj.ProductID = productVariant[0].ProductID;
                                 currentCartProduct.push(obj)
                             }
                       }
                    return currentCartProduct
                });
 
-               await Promise.all(promises);
-
+               let promising = await Promise.all(promises);
+               console.log("promisssssssssssss",promising);
                const updatedShoppingCard  = await ShoppingCartDetailSchema.findOneAndUpdate(
                    { ShoppingCartId: userShoppingCard[0]._id },
-                   { $set: { Products: currentCartProduct,  ItemTotalPrice : totalCartPrice , TotalCartItem : totalCartItem } } ,
+                   { $set: { Products: promising[0],  ItemTotalPrice : totalCartPrice , TotalCartItem : totalCartItem } } ,
                    { new: true}
                 );
 
@@ -251,26 +319,38 @@ const UpdateShoppingCart = {
               if(item.ProductVariantObject === undefined || item.ProductVariantObject === null )
                { 
                   const product = await ProductSchema.find({ _id: item._id});
-                  args.CartItems[index].ProductSalePrice = product[0].ProductSalePrice;
-                  args.CartItems[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * product[0].ProductSalePrice;
+				  currentCartProduct = product;
+                  currentCartProduct[index].ProductSalePrice = product[0].ProductSalePrice;
+                  currentCartProduct[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * product[0].ProductSalePrice;
                   totalCartPrice  = totalCartPrice + (product[0].ProductSalePrice*item.ProductTotalQuantity)
-                  return product
+				  currentCartProduct[index].ProductTotalQuantity = args.CartItems[index].ProductTotalQuantity;
+				  currentCartProduct[index].ProductSKU = product[0].ProductSKU;
+				  currentCartProduct[index].ProductMerchantID = product[0].ProductMerchantID;
+				  currentCartProduct[index].ProductTitle = product[0].ProductTitle;
+				  currentCartProduct[index].ProductID = product[0].ProductID;
+                  return currentCartProduct
                }
                else
                {
                   const productVariant = await VariantsSchema.find({ _id: item.ProductVariantObject._id});
+				  currentCartProduct = productVariant;
                   totalCartPrice  = totalCartPrice + (productVariant[0].SellingPrice * item.ProductTotalQuantity);
-                  args.CartItems[index].ProductVariantID = productVariant[0]._id;
-                  args.CartItems[index].ProductSalePrice = productVariant[0].SellingPrice;
-                  args.CartItems[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * productVariant[0].SellingPrice;
-                  return productVariant
+				  currentCartProduct[index].ProductTotalQuantity = args.CartItems[index].ProductTotalQuantity;
+                  currentCartProduct[index].ProductVariantID = productVariant[0]._id;
+                  currentCartProduct[index].ProductSalePrice = productVariant[0].SellingPrice;
+                  currentCartProduct[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * productVariant[0].SellingPrice;
+	             currentCartProduct[index].ProductSKU = productVariant[0].VariantSKU;
+				 currentCartProduct[index].ProductMerchantID = productVariant[0].MerchantID;
+				 currentCartProduct[index].ProductTitle = productVariant[0].ProductVariants[0].Name;
+				 currentCartProduct[index].ProductID = productVariant[0].ProductID;
+                  return currentCartProduct
                }
            });
 
-             await Promise.all(promises);
+             let promising = await Promise.all(promises);
 
              let ShoppingCartAddDetailsConstant = new ShoppingCartDetailSchema({
-                 Products: args.CartItems,
+                 Products: promising[0],
                  ShoppingCartId : userShoppingCard[0]._id,
                  ItemTotalPrice : totalCartPrice ,
                  TotalCartItem : args.TotalCartItem
@@ -296,26 +376,36 @@ const UpdateShoppingCart = {
           if(item.ProductVariantObject === undefined || item.ProductVariantObject === null )
            { 
               const product = await ProductSchema.find({ _id: item._id});
-              args.CartItems[index].ProductSalePrice = product[0].ProductSalePrice;
-              args.CartItems[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * product[0].ProductSalePrice;
-              totalCartPrice  = totalCartPrice + (product[0].ProductSalePrice*item.ProductTotalQuantity)
+			  currentCartProduct = product;
+              currentCartProduct[index].ProductSalePrice = product[0].ProductSalePrice;
+             currentCartProduct[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * product[0].ProductSalePrice;
+             totalCartPrice  = totalCartPrice + (product[0].ProductSalePrice*item.ProductTotalQuantity)
+			 currentCartProduct[index].ProductSKU = product[0].ProductSKU;
+			 currentCartProduct[index].ProductMerchantID = product[0].ProductMerchantID;
+			 currentCartProduct[index].ProductTitle = product[0].ProductTitle;
+			 currentCartProduct[index].ProductID = product[0].ProductID;
               return product
            }
            else
            {
               const productVariant = await VariantsSchema.find({ _id: item.ProductVariantObject._id});
+			  currentCartProduct = productVariant;
               totalCartPrice  = totalCartPrice + (productVariant[0].SellingPrice * item.ProductTotalQuantity);
-              args.CartItems[index].ProductVariantID = productVariant[0]._id;
-              args.CartItems[index].ProductSalePrice = productVariant[0].SellingPrice;
-              args.CartItems[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * productVariant[0].SellingPrice;
+              currentCartProduct[index].ProductVariantID = productVariant[0]._id;
+              currentCartProduct[index].ProductSalePrice = productVariant[0].SellingPrice;
+              currentCartProduct[index].ProductTotalPrice = args.CartItems[index].ProductTotalQuantity * productVariant[0].SellingPrice;
+			  currentCartProduct[index].ProductSKU = productVariant[0].VariantSKU;
+			  currentCartProduct[index].ProductMerchantID = productVariant[0].MerchantID;
+			  currentCartProduct[index].ProductTitle = productVariant[0].ProductVariants[0].Name;
+			  currentCartProduct[index].ProductID = productVariant[0].ProductID;
               return productVariant
            }
        });
 
-          await Promise.all(promises);
+          let promising = await Promise.all(promises);
 
           let ShoppingCartAddDetailsConstant = new ShoppingCartDetailSchema({
-              Products: args.CartItems,
+              Products: promising[0],
               ShoppingCartId : shoppingCartID._id,
               ItemTotalPrice : totalCartPrice ,
               TotalCartItem : args.TotalCartItem
@@ -738,7 +828,7 @@ const PlaceOrderMutation = {
          }
          else
          {
-             throw new Error('shiping card doesnot exits ');
+             throw new Error('shopping card does not exists ');
          }
       }
     };

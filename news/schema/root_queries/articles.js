@@ -208,7 +208,7 @@ const TrendingArticleList = {
 
 // manipulate the data to get the trandending article list
     async function  getAllTrendingArticles( args, limit, offset,ArgsUserID,query ) {
-      var sortOptions = { ViewCount: -1, TotalClapCount: -1   },
+      var sortOptions = { ID:-1, ViewCount: -1, TotalClapCount: -1   },
           Data = {};
           // , ID : { $nin : args.ArticleIds }
       var IntrestData = [];

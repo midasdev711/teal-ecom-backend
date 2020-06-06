@@ -13,6 +13,7 @@ const ShoppingCartDetailSchema = new Schema({
     ID: {  type: Number,  required: true, exists: false, unique : true },
     ShoppingCartId :{type :Schema.Types.ObjectId , required: true},
     Products:[{
+		_id: {type :Schema.Types.ObjectId , required: true},
         ProductID :  {type: Number },
         ProductTitle : String,
         ProductSKU : String,

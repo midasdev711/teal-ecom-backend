@@ -20,7 +20,7 @@ const EmailCredentials = {
                             PASSWORD : 'Yashyashco@52'
                          };
 
-const STRIPE_KEY = "sk_test_gWHaEB22LdcNtRzPyY9JmxmJ00fs4XzILl";
+const STRIPE_KEY = "sk_test_0SvBsJ6wV1eDvwoBnWNshDf7002leQIWgB";  //"sk_test_gWHaEB22LdcNtRzPyY9JmxmJ00fs4XzILl";
 
 const NMI_KEY = "6457Thfj624V5r7WUwc5v6a68Zsd6YEm";
 

@@ -17,7 +17,7 @@ const { AllProductCategoryList, AllProductSubCategoryList,
 
 const { GetUserShoppingCartDetailsByID ,GetOrderDetailsByID ,
         GetOrderDetailsByUserID ,GetUserShoppingCartDetailsByShoppingCardID,
-        MerchantCancelledOrderList , MerchantActiveOrderList ,LastOrderActivity
+        MerchantCancelledOrderList , MerchantActiveOrderList ,LastOrderActivity, DisplayOrderListToAdmin
       } = require('../root_queries/order_queries');
 
 const { ProductCatgoryAll , TopProduct , ProductDetailsByID ,
@@ -67,6 +67,7 @@ const RootQuery = new GraphQLObjectType({
                     merchantCancelledOrderList:MerchantCancelledOrderList,
                     getUserShoppingCartDetailsByShoppingID : GetUserShoppingCartDetailsByShoppingCardID,
                     getLastOrder:LastOrderActivity,
+					getOrderListToAdmin:DisplayOrderListToAdmin,
 
           /* ------------------------------------Product Queries------------------------------- */
                     getAllProducts : ProductCatgoryAll,

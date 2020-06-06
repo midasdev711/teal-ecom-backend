@@ -171,7 +171,7 @@ const GetOrderDetailsByUserID = {
         type : new  GraphQLList(OrderType),
         resolve: async (parent, args, context) => {
           const id = await verifyToken(context);
-          return Orders.find({ });
+          return OrderSchema.find({}).sort({_id:-1})
         }
     };
 
@@ -217,6 +217,6 @@ const GetOrderDetailsByUserID = {
 
 const OrderArray = { GetUserShoppingCartDetailsByID ,GetOrderDetailsByID ,
   GetOrderDetailsByUserID ,GetUserShoppingCartDetailsByShoppingCardID ,
-MerchantCancelledOrderList , MerchantActiveOrderList , LastOrderActivity };
+MerchantCancelledOrderList , MerchantActiveOrderList , LastOrderActivity , DisplayOrderListToAdmin };
 
 module.exports = OrderArray;
