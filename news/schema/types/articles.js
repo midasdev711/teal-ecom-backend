@@ -51,6 +51,7 @@ const ArticleType = new GraphQLObjectType({
         Description: { type: GraphQLString },
         Slug: { type: new GraphQLNonNull(GraphQLString) },
         Sequence: { type: GraphQLID },
+		Urls : { type: GraphQLString },
         CreatedDate :{
           type:GraphQLDate,
           resolve(parent){
