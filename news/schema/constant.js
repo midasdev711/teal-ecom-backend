@@ -6,14 +6,24 @@
 
 
 
+// const MAIL_DETAILS = {
+//     "service" : "gmail",
+//     "Port" : 443,
+//     "User" : "solace.pune1@gmail.com",
+//     "Password" :'Solace@2020',
+//     // "HTTP_RESET_URL" : "http://localhost/demo/node_mail.html"
+//     // "HTTP_RESET_URL" : "http://localhost:3000/resetpassword"
+//     "HTTP_RESET_URL" : "https://teal.com/resetpassword"
+// };
+
 const MAIL_DETAILS = {
-    "service" : "gmail",
-    "Port" : 443,
-    "User" : "solace.pune1@gmail.com",
-    "Password" :'Solace@2020',
-    // "HTTP_RESET_URL" : "http://localhost/demo/node_mail.html"
-    // "HTTP_RESET_URL" : "http://localhost:3000/resetpassword"
-    "HTTP_RESET_URL" : "https://teal.com/resetpassword"
+  "service" : "gmail",
+  "Port" : 443,
+  "User" : "mohitmali759@gmail.com",
+  "Password" :'account@321',
+  // "HTTP_RESET_URL" : "http://localhost/demo/node_mail.html"
+  // "HTTP_RESET_URL" : "http://localhost:3000/resetpassword"
+  "HTTP_RESET_URL" : "https://teal.com/resetpassword"
 };
 
 
