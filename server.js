@@ -21,7 +21,7 @@ const express = require('express'),
            NewsSchema
          ]
        });
-      app.use(cors());
+      app.use(cors({origin: '*'}));
       app.use(bodyParser.text({type: 'application/graphql'}));
       app.use(bodyParser.json({limit: '250mb'}));
       app.use(bodyParser.urlencoded({limit: '250mb', extended: true}));
