@@ -53,7 +53,7 @@ app.use(
 
 app.get("/playground", expressPlayground({ endpoint: "/ecomm" }));
 
-app.listen(443, () => {
+app.listen(9200, () => {
   console.log("now listening for requests on port 9200");
   console.log("access web url:-  http://localhost:9200/graphql");
 });
