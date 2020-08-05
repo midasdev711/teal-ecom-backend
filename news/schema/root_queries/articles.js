@@ -32,7 +32,7 @@ const ArticleBySlug = {
   type: new GraphQLList(ArticleType),
   args: { Slug: { type: GraphQLString }, UserID: { type: GraphQLInt } },
   resolve: async (parent, args, context) => {
-    const id = "";
+    let id = "";
     if (context.headers.authorization) {
       id = await verifyToken(context);
     }
