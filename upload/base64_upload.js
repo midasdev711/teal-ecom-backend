@@ -1,46 +1,55 @@
-/*
-  * Created By : Ankita Solace
-  * Created Date : 02-01-2019
-  * Purpose : Base 64 image upload on aws
-*/
+const uniqid = require("uniqid");
+var AWS = require("aws-sdk"),
+  fs = require("fs"),
+  { AWSNewCredentials } = require("./aws_constants");
 
-const uniqid = require('uniqid');
-var AWS      = require('aws-sdk'),
-    fs       = require('fs'),
-    { AWSCredentails }  = require('./aws_constants');
+async function UploadBase64OnS3(ImageString, Path, fileName) {
+  try {
+    AWS.config.setPromisesDependency(require("bluebird"));
+    AWS.config.update({
+      accessKeyId: AWSNewCredentials.credentials.accessKeyId,
+      secretAccessKey: AWSNewCredentials.credentials.secretAccessKey,
+      region: AWSNewCredentials.Region,
+    });
 
+    var s3Bucket = new AWS.S3();
 
+    const base64Data = new Buffer.from(
+      ImageString.replace(/^data:image\/\w+;base64,/, ""),
+      "base64"
+    );
 
-  function  UploadBase64OnS3( ImageString, Path, fileName ) {
-      try {
-        AWS.config.update({credentials: AWSCredentails.credentials, region: AWSCredentails.Region});
-        AWS.config.httpOptions = {timeout: AWSCredentails.Timeout};
-        var s3Bucket = new AWS.S3( { params: { Bucket: AWSCredentails.Bucket } } );
-            fileName = ( typeof fileName != "undefined") ?  fileName : uniqid();
+    const Extension = ImageString.split(";")[0].split("/")[1];
 
-        var Image = ImageString.split(";"),
-            Extension = Image[0].split("/")[1],
-            Image = Image[1].replace("base64,",""),
-            buf = Buffer.from(Image, 'base64'),
-            AWS_KEY = Path+"/"+fileName+"."+Extension;
+    fileName = typeof fileName != "undefined" ? fileName : uniqid();
 
-        var data = {
-            Key: AWS_KEY,
-            Body: buf,
-            ACL: AWSCredentails.ACL,
-            ContentEncoding: AWSCredentails.ContentEncoding,
-            ContentType: AWSCredentails.ContentType
-        };
+    const params = {
+      Bucket: AWSNewCredentials.Bucket,
+      Key: `${Path}/${fileName}.${Extension}`, // type is not required
+      Body: base64Data,
+      ACL: "public-read",
+      ContentEncoding: "base64", // required
+      ContentType: `image/${Extension}`, // required. Notice the back ticks
+    };
 
-        s3Bucket.putObject(data, function(err, data){});
-        return AWSCredentails.AWS_BASE_URL+AWS_KEY;
+    let location = "";
+    let key = "";
+    try {
+      const { Location, Key } = await s3Bucket.upload(params).promise();
+      location = Location;
+      key = Key;
+    } catch (error) {
+      console.log(error);
+    }
 
-      } catch (e) {
-        console.log(e);
-      }
+    // Save the Location (url) to your database and Key if needs be.
+    // As good developers, we should return the url and let other function do the saving to database etc
+    console.log(location, key);
+    return location;
+    // return AWSNewCredentials.AWS_BASE_URL + AWS_KEY;
+  } catch (e) {
+    console.log(e);
   }
-
-
-
+}
 
 module.exports = UploadBase64OnS3;
