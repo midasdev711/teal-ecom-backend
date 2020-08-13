@@ -33,6 +33,7 @@
     "graphql-playground-middleware-express": "^1.7.14",
     "graphql-tools": "^4.0.8",
     "graphql-type-json": "^0.3.1",
+    "http-status-codes": "^1.4.0",
     "image-thumbnail": "^1.0.6",
     "is-base64": "^1.0.0",
     "jsonwebtoken": "^8.5.1",

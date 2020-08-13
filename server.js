@@ -9,7 +9,6 @@ const express = require("express"),
   mongoose = require("mongoose"),
   EcommSchema = require("./ecomm/schema/schema"),
   NewsSchema = require("./news/schema/schema"),
-  expressPlayground = require("graphql-playground-middleware-express").default,
   cors = require("cors"),
   autoIncrement = require("mongoose-auto-increment"),
   bodyParser = require("body-parser"),
@@ -41,19 +40,13 @@ mongoose.connection.once("open", () => {
   console.log("conneted to database");
 });
 
-app.use("/uploads", express.static("uploads"));
-// bind express with graphql
-app.use(
-  "/graphql",
-  graphqlHTTP({
-    schema,
-    graphiql: true,
-  })
-);
-
-app.get("/playground", expressPlayground({ endpoint: "/ecomm" }));
+loadRoutes();
 
 app.listen(9200, () => {
   console.log("now listening for requests on port 9200");
   console.log("access web url:-  http://localhost:9200/graphql");
 });
+
+function loadRoutes() {
+  require("./news/src/config/routes")(app);
+}
