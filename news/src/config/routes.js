@@ -1,12 +1,3 @@
-// import auth from '../controllers/authController';
-// import customerCtrl from '../controllers/customerController';
-// import typeDefs from './graphqlTypeDefs';
-// import rootResolver from '../graphql/rootResolver';
-// import graphqlHTTP from 'express-graphql';
-// import { makeExecutableSchema } from 'graphql-tools';
-// import { sendFeedbackToMail } from '../controllers/contactController';
-// import HttpStatus from 'http-status-codes';
-// import { get } from 'lodash';
 const express = require("express"),
   expressPlayground = require("graphql-playground-middleware-express").default,
   graphTools = require("graphql-tools"),
@@ -14,7 +5,8 @@ const express = require("express"),
   HttpStatus = require("http-status-codes"),
   rootResolver = require("../graphql/rootResolver"),
   typeDefs = require("./graphqlTypeDefs"),
-  graphqlHTTP = require("express-graphql");
+  graphqlHTTP = require("express-graphql"),
+  { verifyToken } = require("../controllers/authController");
 
 module.exports = function (app) {
   app.get("/", function (req, res) {

@@ -1,18 +1,9 @@
-const ArticleResolver = require("./rootResolver");
+const ArticleResolver = require("./articleResolver");
 const root = {
   Query: {
     articles: ArticleResolver.index,
   },
-  Mutation: {},
-  Asset: {
-    __resolveType(obj, context, info) {
-      if (obj.kind === "Note") {
-        return "Note";
-      } else if (obj.kind === "Highlight") {
-        return "Highlight";
-      }
-    },
-  },
+  // Mutation: {},
 };
 
 module.exports = root;
