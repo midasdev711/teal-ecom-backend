@@ -1,6 +1,9 @@
 const Articles = require("../models/articles");
+const Users = require("../models/users");
+const BlockAuthor = require("../models/block_author");
 const { verifyToken } = require("../controllers/authController");
-const { ArticleStatusConst } = require("../constant")
+const { ArticleStatusConst } = require("../constant");
+const get = require('lodash/get');
 
 module.exports = {
   index: async (root, args, context) => {
@@ -14,14 +17,62 @@ module.exports = {
       args.UserID = id.UserID;
     }
 
-    let data = await Articles.getArticles({ user: id, args });
-    return data;
-  },
-  getOne: async (root, args, context) => {
-    return Articles.find({
-      ID: args.ID,
-      Status: { $ne: ArticleStatusConst.inActive },
-    });
-  },
+    const findQuery = await buildFindQuery({ args: args.filters });
 
+    let data = await Articles.find(findQuery);
+    return data;
+  }
 };
+
+const buildFindQuery = async ({ args }) => {
+
+  const blockedAuthorIds = await queryForBlockedAuthors({ args });
+  let query = { $and: [] };
+
+  query.$and.push({ Status: 2 });
+  query.$and.push({ isPublish: true });
+
+  if (blockedAuthorIds) {
+    query.$and.push({ AuthorID: { $nin: blockedAuthorIds } });
+  }
+
+  if (get(args, 'articleIds')) {
+    query.$and.push({ ID: { $in: get(args, 'articleIds') } });
+  }
+
+  if (get(args, 'ignoreArticleIds')) {
+    query.$and.push({ ID: { $nin: get(args, 'ignoreArticleIds') } });
+  }
+
+  if (get(args, 'AuthorUserName')) {
+    args.AuthorUserName = args.AuthorUserName.trim();
+    const AuthorDetails = await Users.findOne({ Status: 1, UserName: args.AuthorUserName });
+    if (AuthorDetails) {
+      args.AuthorID = AuthorDetails.ID;
+    }
+    query.$and.push({ Status: 2 });
+    query.$and.push({ ArticleScope: 1 });
+  }
+
+  if (get(args, 'Slug')) {
+    query.$and.push({ Slug: args.Slug });
+  }
+
+  if (get(args, 'isPopular')) {
+    query.$and.push({ Status: ArticleStatusConst.Approved });
+  }
+  return query;
+
+}
+
+const queryForBlockedAuthors = async ({ args }) => {
+  const blockedAuthor = await BlockAuthor.find(
+    { UserID: args.UserID, Status: 0 },
+    { AuthorID: 1, _id: 0 });
+
+  if (!blockedAuthor) {
+    return [];
+  }
+
+  return blockedAuthor.map((ID) => ID.AuthorID)
+}
