@@ -47,6 +47,7 @@ type DefSubCategory{
 
 type Query {
     articles(ids: [ID], limit: Int, page: Int):[Article]
+    article(ID: Int): Article
 }
 
   

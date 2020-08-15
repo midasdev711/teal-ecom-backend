@@ -5,18 +5,18 @@
  */
 
 const express = require("express"),
-  graphqlHTTP = require("express-graphql"),
+  // graphqlHTTP = require("express-graphql"),
   mongoose = require("mongoose"),
-  EcommSchema = require("./ecomm/schema/schema"),
-  NewsSchema = require("./news/schema/schema"),
+  // EcommSchema = require("./ecomm/schema/schema"),
+  // NewsSchema = require("./news/schema/schema"),
   cors = require("cors"),
-  autoIncrement = require("mongoose-auto-increment"),
+  // autoIncrement = require("mongoose-auto-increment"),
   bodyParser = require("body-parser"),
   app = express();
 const { mergeSchemas } = require("graphql-tools");
-const schema = mergeSchemas({
-  schemas: [EcommSchema, NewsSchema],
-});
+// const schema = mergeSchemas({
+//   schemas: [EcommSchema, NewsSchema],
+// });
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.text({ type: "application/graphql" }));
 app.use(bodyParser.json({ limit: "250mb" }));

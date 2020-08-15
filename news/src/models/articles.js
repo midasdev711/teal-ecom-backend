@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const SchemaType = Schema.Types;
+const BlockAuthor = require("./block_author");
+
 const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose);
+
 
 const ArticleSchema = new Schema({
   ID: { type: Number, required: true, exists: false, unique: true },
@@ -49,40 +52,6 @@ const ArticleSchema = new Schema({
   Urls: { type: String, default: "" },
 });
 
-class Article {
-  static getArticles({ user, args }) {
-    //     const userId = user.UserID;
-    //     const { page, limit, ids: articleIds } = args;
-    //     const option = {
-    //       limit: limit || 10,
-    //       page: page || 1,
-    //       sort: {
-    //         createdAt: -1,
-    //       },
-    //     };
-    //     let query = {};
-    //     if (userId && !articlesId.length) {
-    //       const author = await BlockAuthor.find(
-    //         { UserID: userId, Status: 0 },
-    //         { AuthorID: 1, _id: 0 }
-    //       );
-    //       if (author.length > 0) {
-    //         query = {
-    //           AuthorID: { $nin: author.map((ID) => ID.AuthorID) },
-    //           Status: 1,
-    //           isPublish: true,
-    //         };
-    //       }
-    //     }
-    //     if (articlesId) {
-    //       query = { _id: { $in: articlesId } };
-    //     }
-    //     return this.find(query);
-  }
-}
-
-ArticleSchema.loadClass(Article);
-
 ArticleSchema.plugin(autoIncrement.plugin, {
   model: "articles",
   field: "ID",
@@ -93,4 +62,39 @@ ArticleSchema.plugin(autoIncrement.plugin, {
   field: "Sequence",
   startAt: 1,
 });
+
+class Article {
+  static async getArticles({ user, args }) {
+    const userId = user.UserID;
+    const { page, limit, ids: articleIds } = args;
+    const option = {
+      limit: limit || 10,
+      page: page || 1,
+      sort: {
+        createdAt: -1,
+      },
+    };
+    let query = {};
+    if (userId && !articleIds.length) {
+      const author = await BlockAuthor.find(
+        { UserID: userId, Status: 0 },
+        { AuthorID: 1, _id: 0 }
+      );
+      if (author.length > 0) {
+        query = {
+          AuthorID: { $nin: author.map((ID) => ID.AuthorID) },
+          Status: 1,
+          isPublish: true,
+        };
+      }
+    }
+    if (articleIds) {
+      query = { _id: { $in: articleIds } };
+    }
+    return this.find(query);
+  }
+}
+
+ArticleSchema.loadClass(Article);
+
 module.exports = mongoose.model("articles", ArticleSchema);
