@@ -52,6 +52,17 @@ const ArticleSchema = new Schema({
   Urls: { type: String, default: "" },
 });
 
+
+class Article {
+  update(attributes) {
+    this.set(attributes);
+    return this.save();
+  }
+}
+
+ArticleSchema.loadClass(Article);
+
+
 ArticleSchema.plugin(autoIncrement.plugin, {
   model: "articles",
   field: "ID",
