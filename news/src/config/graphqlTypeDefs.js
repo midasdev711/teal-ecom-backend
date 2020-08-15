@@ -1,7 +1,6 @@
 const typeDefs = `
 
 type Article {
-
       ID: ID!
       id : ID
       Title: String!
@@ -47,7 +46,8 @@ type DefSubCategory{
 }
 
 input ArticleFilters {
-  ids: [ID]
+  articleIds: [ID]
+  ignoreArticleIds:[ID]
   AuthorID: Int
   UserID: Int
   AuthorUserName: String

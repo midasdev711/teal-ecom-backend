@@ -36,6 +36,14 @@ const buildFindQuery = async ({ args }) => {
     query.$and.push({ AuthorID: { $nin: blockedAuthorIds } });
   }
 
+  if (get(args, 'articleIds')) {
+    query.$and.push({ ID: { $in: get(args, 'articleIds') } });
+  }
+
+  if (get(args, 'ignoreArticleIds')) {
+    query.$and.push({ ID: { $nin: get(args, 'ignoreArticleIds') } });
+  }
+
   if (get(args, 'AuthorUserName')) {
     args.AuthorUserName = args.AuthorUserName.trim();
     const AuthorDetails = await Users.findOne({ Status: 1, UserName: args.AuthorUserName });

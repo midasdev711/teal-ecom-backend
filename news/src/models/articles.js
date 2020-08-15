@@ -63,38 +63,4 @@ ArticleSchema.plugin(autoIncrement.plugin, {
   startAt: 1,
 });
 
-class Article {
-  static async getArticles({ user, args }) {
-    const userId = user.UserID;
-    const { page, limit, ids: articleIds } = args;
-    const option = {
-      limit: limit || 10,
-      page: page || 1,
-      sort: {
-        createdAt: -1,
-      },
-    };
-    let query = {};
-    if (userId && !articleIds.length) {
-      const author = await BlockAuthor.find(
-        { UserID: userId, Status: 0 },
-        { AuthorID: 1, _id: 0 }
-      );
-      if (author.length > 0) {
-        query = {
-          AuthorID: { $nin: author.map((ID) => ID.AuthorID) },
-          Status: 1,
-          isPublish: true,
-        };
-      }
-    }
-    if (articleIds) {
-      query = { _id: { $in: articleIds } };
-    }
-    return this.find(query);
-  }
-}
-
-ArticleSchema.loadClass(Article);
-
 module.exports = mongoose.model("articles", ArticleSchema);
