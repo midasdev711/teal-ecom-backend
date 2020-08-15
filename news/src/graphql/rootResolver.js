@@ -1,9 +1,12 @@
 const ArticleResolver = require("./articleResolver");
+
 const root = {
   Query: {
-    articles: ArticleResolver.index
+    articles: ArticleResolver.index,
   },
-  // Mutation: {},
+  Mutation: {
+    upsertArticle: ArticleResolver.upsert
+  },
 };
 
 module.exports = root;
