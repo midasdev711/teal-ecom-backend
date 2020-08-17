@@ -10,6 +10,16 @@ const ImagePath = {
   // SERVER_IMG_FOLDER : "/www/"
 };
 
+const MAIL_DETAILS = {
+  service: "gmail",
+  Port: 443,
+  User: "mohitmali759@gmail.com",
+  Password: "account@321",
+  // "HTTP_RESET_URL" : "http://localhost/demo/node_mail.html"
+  // "HTTP_RESET_URL" : "http://localhost:3000/resetpassword"
+  HTTP_RESET_URL: "https://teal.com/resetpassword",
+};
+
 const StatusConst = { inActive: 0, Active: 1, Approved: 2, Rejected: 3 };
 
 const BASE_URL = "http://115.166.143.10:3009/";
@@ -27,6 +37,7 @@ const NMI_MERCHAT_URL = "https://secure.networkmerchants.com/api/transact.php";
 
 const AUTHORIZE_NAME = "49N2ntFRg ";
 const AUTHORIZE_TRANSACTION_KEY = "6yEQ27c8hF6W8UCr";
+const RoleObject = { admin: 1, moderator: 2, user: 3 };
 
 const ConstantArray = {
   StatusConst,
@@ -40,6 +51,8 @@ const ConstantArray = {
   NMI_MERCHAT_URL,
   AUTHORIZE_NAME,
   AUTHORIZE_TRANSACTION_KEY,
+  RoleObject,
+  MAIL_DETAILS,
 };
 
 module.exports = ConstantArray;

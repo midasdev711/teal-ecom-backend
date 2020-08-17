@@ -1,9 +1,3 @@
-/*
- * Created By : Ankita Solace
- * Created Date : 14-12-2019
- * Purpose : Declare all users schema methods
- */
-
 const Users = require("../../models/users"),
   EmailLogs = require("../../models/email_logs"),
   Articles = require("../../models/articles"),

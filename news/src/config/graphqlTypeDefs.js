@@ -124,16 +124,122 @@ input CategoryFilters {
   ignoreCategoryIds: [ID]
 }
 
+type User {
+  ID: Int
+  token: String
+  refreshToken: String
+  CreativeToken: String
+  Name: String
+  UserName : String
+  Email : String
+  Description: String
+  Status: Int
+  Password: String
+  oleID : Int
+  Avatar: String
+  isVerified : Boolean
+  SignUpMethod: String 
+  FaceBookUrl : String
+  UserCounter  : Int
+  TotalWalletAmount : Float
+  isPaidSubscription : Boolean
+  PaidSubscription : [PaidSubscriptionType]
+  Following : Int
+  Follower : Int
+  ParentCategories : [UserParentCategory]
+  SubCategories : [SubCategories]
+  CreatedDate :  String
+  ModifiedDate :  String
+  MobileNo : String
+  Dob : String
+  Gender : String
+  UniqueID : String
+  ReferenceID : String
+  FreeArticles : [Article]
+  PremiumArticles : [Article]
+  ActivityLog : ActivityLogUsers
+  IpAddress : String
+  isFollowing : Boolean
+  isSubscriptionAllowed : Boolean
+}
+
+input UserInput {
+  Name: String
+  Email : String
+  Password: String
+  Avatar: String
+  SignUpMethod: String 
+  FaceBookUrl : String
+  MobileNo : String
+  Dob : String
+  Gender : String
+  ParentCategories : [UsersParentCategoryInput]
+  SubCategories : [SubcategoriesInput]
+  ReferenceID : String
+}
+
+type SubCategories {
+  ID: Int
+  Name: String
+  ParentCategoryID: Int
+  Type: Int
+}
+
+type UserParentCategory {
+  ID: Int
+  Name: String
+  Type: Int
+}
+
+input UsersParentCategoryInput {
+  ID: Int
+  Name: String
+  Type: Int
+}
+
+input SubcategoriesInput {
+  ID: Int
+  Name: String
+  ParentCategoryID: Int
+  Type: Int
+}
+
+type PaidSubscriptionType {
+    SubscriptionID : Int
+    Name : String
+    Amount : Float
+    Description : String
+    Days : Int
+    Status : Int
+  }
+
+type ActivityLogUsers {
+      LatestArticles : [Article]
+      ClapedArticles : [Article]
+      RecentlyVisited : [Article]
+      BookmarkedArticles : [Article]
+}
+
+
+input UserFilters {
+  userIds: [ID]
+  ignoreUserIds:[ID]
+  Email : String
+  limit: Int
+  page: Int
+}
 
 
 type Query {
     articles(filters: ArticleFilters):[Article]
     categories(filters: CategoryFilters):[Category]
+    users(filters: UserFilters):[User]
 }
 
 type Mutation {
   upsertArticle(article: ArticleInput): Article
-  upsertCategory(article: ArticleInput): Category 
+  upsertCategory(category: CategoryInput): Category 
+  upsestUser(user: UserInput) : User
 }
 `;
 module.exports = typeDefs;

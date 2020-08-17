@@ -4,8 +4,8 @@ const SchemaType = Schema.Types;
 const BlockAuthor = require("./block_author");
 
 const autoIncrement = require("mongoose-auto-increment");
+const mongoosePaginate = require("mongoose-paginate");
 autoIncrement.initialize(mongoose);
-
 
 const ArticleSchema = new Schema({
   ID: { type: Number, required: true, exists: false, unique: true },
@@ -52,7 +52,6 @@ const ArticleSchema = new Schema({
   Urls: { type: String, default: "" },
 });
 
-
 class Article {
   update(attributes) {
     this.set(attributes);
@@ -61,7 +60,6 @@ class Article {
 }
 
 ArticleSchema.loadClass(Article);
-
 
 ArticleSchema.plugin(autoIncrement.plugin, {
   model: "articles",
@@ -73,5 +71,6 @@ ArticleSchema.plugin(autoIncrement.plugin, {
   field: "Sequence",
   startAt: 1,
 });
+ArticleSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model("articles", ArticleSchema);
