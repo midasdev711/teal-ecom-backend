@@ -225,6 +225,7 @@ input UserFilters {
   userIds: [ID]
   ignoreUserIds:[ID]
   Email : String
+  Password: String
   limit: Int
   page: Int
 }
