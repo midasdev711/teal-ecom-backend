@@ -21,8 +21,8 @@ module.exports = {
     const findQuery = await buildFindQuery({ args: args.filters });
 
     let options = {
-      limit: args.limit || 10,
-      page: args.page || 1,
+      limit: args.filters.limit || 10,
+      page: args.filters.page || 1,
       $sort: {
         createdAt: -1,
       },
