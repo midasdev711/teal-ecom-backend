@@ -122,7 +122,7 @@ const userQuery = async ({ args }) => {
     });
   }
 
-  if (get(args.Email)) {
+  if (get(args, "Email")) {
     let valid = emailValidator.validate(args.Email);
     if (valid) {
       var Result = [];
