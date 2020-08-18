@@ -135,7 +135,7 @@ type User {
   Description: String
   Status: Int
   Password: String
-  oleID : Int
+  RoleID : Int
   Avatar: String
   isVerified : Boolean
   SignUpMethod: String 
@@ -235,12 +235,14 @@ type Query {
     articles(filters: ArticleFilters):[Article]
     categories(filters: CategoryFilters):[Category]
     users(filters: UserFilters):[User]
+    auth(Email: String Password: String) : User
 }
 
 type Mutation {
   upsertArticle(article: ArticleInput): Article
   upsertCategory(category: CategoryInput): Category 
-  upsestUser(user: UserInput) : User
+  upsertUser(user: UserInput) : User
+  upsertAuth(auth: UserInput) : User
 }
 `;
 module.exports = typeDefs;

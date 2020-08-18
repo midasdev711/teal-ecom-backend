@@ -8,12 +8,13 @@ const root = {
     articles: ArticleResolver.index,
     categories: CategoryResolver.index,
     users: UserResolver.index,
-    auth: AuthResolver,
+    auth: AuthResolver.index,
   },
   Mutation: {
     upsertArticle: ArticleResolver.upsert,
     upsertCategory: CategoryResolver.upsert,
-    upsestUser: UserResolver.upsert,
+    upsertUser: UserResolver.upsert,
+    upsertAuth: AuthResolver.upsert,
   },
 };
 
