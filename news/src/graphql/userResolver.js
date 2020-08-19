@@ -104,8 +104,12 @@ async function makeid(length) {
 }
 
 const userQuery = async ({ args }) => {
+  if (get(args, "userIds")) {
+    return Users.find({ ID: { $in: get(args, "userIds") } });
+  }
+
   if (get(args, "AuthorID")) {
-    return await Users.findOne({ Status: 1, ID: args.AuthorID }).then(
+    return Users.findOne({ Status: 1, ID: args.AuthorID }).then(
       async (user) => {
         if (user != null) return userDetailsPromise(user, args);
       }
@@ -138,7 +142,7 @@ const userQuery = async ({ args }) => {
   }
 
   if (get(args, "UserId")) {
-    return await Users.findOne({ Status: 1, ID: args.UserID }).then(
+    return await Users.findOne({ Status: 1, ID: args.UserId }).then(
       async (user) => {
         return await getFollowerFollowingForUserProfile(user);
       }
@@ -310,7 +314,7 @@ async function getFollowerFollowingForUserProfile(user) {
     AuthorID: user.ID,
     Status: 1,
   }).countDocuments();
-  return await user;
+  return [await user];
 }
 
 const formatString = (str) => {

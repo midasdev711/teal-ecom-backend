@@ -2,20 +2,32 @@ const Articles = require("../models/articles");
 const Users = require("../models/users");
 const BlockAuthor = require("../models/block_author");
 const { verifyToken } = require("../controllers/authController");
-const { ArticleStatusConst } = require("../constant");
+const {
+  SubTitleMaxLen,
+  TitleMaxLen,
+  ArticleStatusConst,
+  RoleObject,
+  PremiumContentLen,
+  SubscribeCdnUrl,
+} = require("../constant");
 const get = require("lodash/get");
 const UploadBase64OnS3 = require("../upload/base64_upload");
 const { AWSCredentails } = require("../upload/aws_constants");
+const UsersPaidSubscriptions = require("../models/users_paid_subscriptions");
+const ArticleClickDetails = require("../models/article_click_details");
+const FollowAuthor = require("../models/follow_author");
+const ArticleBookmarks = require("../models/bookmarks");
 
 module.exports = {
   index: async (root, args, context) => {
+    console.log("arguments", args);
     let id = {};
+
     if (context.headers.authorization) {
       id = await verifyToken(context);
-    }
-
-    if (id.UserID) {
-      args.UserID = id.UserID;
+      if (id.UserID) {
+        args.UserID = id.UserID;
+      }
     }
 
     const findQuery = await buildFindQuery({ args: args.filters });
@@ -29,7 +41,46 @@ module.exports = {
     };
 
     let data = await Articles.paginate(findQuery, options);
-    return data.docs;
+
+    articleData = data.docs;
+    if (get(args.filters, "Slug")) {
+      if (
+        articleData[0].ArticleScope == 2 &&
+        args.UserID != articleData[0].AuthorID
+      )
+        articleData = await calculateSubscribeContent(args, articleData);
+
+      await updateViewCount(args.filters, args.UserID);
+
+      if (get(args.filters, "UserID")) {
+        await Promise.all(
+          articleData.map(async (data) => {
+            return Promise.all([
+              getBookMarkCount(data, args),
+              getFollowAuthorCount(data, args),
+            ]).then(function (values) {
+              data.isBookmark = values[0] == 1;
+              data.isFollowed = values[1] == 1;
+            });
+          })
+        );
+      } else {
+        articleData[0].isBookmark = false;
+        articleData[0].isFollowed = false;
+      }
+      if (get(articleData[0], "SubTitle")) {
+        if (get(articleData[0], "Description")) {
+          articleData[0].SubTitle = articleData[0].Description.replace(
+            /(<([^>]+)>)/gi,
+            ""
+          );
+          articleData[0].SubTitle =
+            articleData[0].SubTitle.substring(0, SubTitleMaxLen) + "....";
+        }
+      }
+      await articleData;
+    }
+    return articleData;
   },
 
   upsert: async (root, args, context) => {
@@ -122,8 +173,12 @@ const buildFindQuery = async ({ args }) => {
   query.$and.push({ Status: 2 });
   query.$and.push({ isPublish: true });
 
-  if (blockedAuthorIds) {
+  if (get(args, "blockedAuthorIds")) {
     query.$and.push({ AuthorID: { $nin: blockedAuthorIds } });
+  }
+
+  if (get(args, "Slug")) {
+    query.$and.push({ Slug: args.Slug, ArticleScope: { $ne: 0 } });
   }
 
   if (get(args, "articleIds")) {
@@ -145,10 +200,6 @@ const buildFindQuery = async ({ args }) => {
     }
     query.$and.push({ Status: 2 });
     query.$and.push({ ArticleScope: 1 });
-  }
-
-  if (get(args, "Slug")) {
-    query.$and.push({ Slug: args.Slug });
   }
 
   if (get(args, "isPopular")) {
@@ -179,3 +230,79 @@ const formatString = (str) => {
     .replace(/\s+/g, "-")
     .toLowerCase();
 };
+
+async function calculateSubscribeContent(args, lor) {
+  if (get(lor[0], "ArticleScope") == 2) {
+    if (get(args, "UserID")) {
+      if ((await checkUserSubscription(args, lor[0].AuthorID)) <= 0) {
+        lor[0].Description =
+          lor[0].Description.substring(0, PremiumContentLen) +
+          ' <img src="' +
+          SubscribeCdnUrl +
+          '">';
+        lor[0].isContentAllowed = false;
+      } else lor[0].isContentAllowed = true;
+    } else {
+      lor[0].isContentAllowed = false;
+      lor[0].Description =
+        lor[0].Description.substring(0, PremiumContentLen) +
+        ' <img src="' +
+        SubscribeCdnUrl +
+        '">';
+    }
+  }
+  return await lor;
+}
+
+async function checkUserSubscription(args, AuthorID) {
+  return UsersPaidSubscriptions.findOne({
+    $and: [
+      { AuthorID: AuthorID },
+      { Status: { $ne: 0 } },
+      { UserID: args.UserID },
+      { EndDate: { $gte: new Date() } },
+    ],
+  }).countDocuments();
+}
+
+async function updateViewCount(args, userID) {
+  Articles.updateOne(
+    { $and: [{ Slug: args.Slug }] },
+    { $inc: { ViewCount: 1 } },
+    { new: true }
+  ).then((w) => {
+    return w;
+  });
+  if (typeof userID != "undefined" && userID != null && userID != 0) {
+    updateArticleClickDetails(args);
+  }
+}
+
+async function updateArticleClickDetails(args) {
+  let ClickData = {};
+  Articles.findOne({ Slug: args.Slug }).then((data) => {
+    ClickData.ArticleID = data.ID;
+    ClickData.UserID = args.UserID;
+    ClickData.AuthorID = data.AuthorID;
+    ClickData.Slug = args.Slug;
+    ClickData.ArticleTitle = data.Title;
+    ArticleClickDetails.create(ClickData);
+  });
+}
+
+async function getBookMarkCount(data, args) {
+  return ArticleBookmarks.find({
+    ArticleID: data.ID,
+    UserID: args.UserID,
+    Status: 1,
+  }).countDocuments();
+}
+
+async function getFollowAuthorCount(data, args) {
+  return FollowAuthor.find({
+    AuthorID: data.AuthorID,
+    UserID: args.UserID,
+    Status: 1,
+    isFollowed: true,
+  }).countDocuments();
+}

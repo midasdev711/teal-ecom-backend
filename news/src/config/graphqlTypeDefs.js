@@ -52,7 +52,7 @@ const typeDefs = `
     Categories : DefCategory
     TotalArticleCount : Int
     AcceptDonation : Boolean
-    MinimumDonationAmount : Int
+    MinimumDonationAmount : String
     isBookmark : Boolean
     isFollowed : Boolean
     isClicked : Boolean
@@ -225,7 +225,7 @@ input UserFilters {
   userIds: [ID]
   ignoreUserIds:[ID]
   Email : String
-  Password: String
+  UserId : Int
   limit: Int
   page: Int
 }
