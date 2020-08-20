@@ -1,7 +1,6 @@
-const Articles = require("../models/articles");
-const Users = require("../models/users");
-const BlockAuthor = require("../models/block_author");
-const { verifyToken } = require("../controllers/authController");
+const Articles = require('../models/articles');
+const Users = require('../models/users');
+const BlockAuthor = require('../models/block_author');
 const {
   SubTitleMaxLen,
   TitleMaxLen,
@@ -9,29 +8,20 @@ const {
   RoleObject,
   PremiumContentLen,
   SubscribeCdnUrl,
-} = require("../constant");
-const get = require("lodash/get");
-const UploadBase64OnS3 = require("../upload/base64_upload");
-const { AWSCredentails } = require("../upload/aws_constants");
-const UsersPaidSubscriptions = require("../models/users_paid_subscriptions");
-const ArticleClickDetails = require("../models/article_click_details");
-const FollowAuthor = require("../models/follow_author");
-const ArticleBookmarks = require("../models/bookmarks");
+} = require('../constant');
+const get = require('lodash/get');
+const UploadBase64OnS3 = require('../upload/base64_upload');
+const { AWSCredentails } = require('../upload/aws_constants');
+const UsersPaidSubscriptions = require('../models/users_paid_subscriptions');
+const ArticleClickDetails = require('../models/article_click_details');
+const FollowAuthor = require('../models/follow_author');
+const ArticleBookmarks = require('../models/bookmarks');
 
 module.exports = {
   index: async (root, args, context) => {
-    console.log("arguments", args);
-    let id = {};
-
-    if (context.headers.authorization) {
-      id = await verifyToken(context);
-      if (id.UserID) {
-        args.UserID = id.UserID;
-      }
-    }
-
     const findQuery = await buildFindQuery({ args: args.filters });
 
+    // user object can be from apollo server context.user check if this is null
     let options = {
       limit: args.filters.limit || 10,
       page: args.filters.page || 1,
@@ -43,7 +33,7 @@ module.exports = {
     let data = await Articles.paginate(findQuery, options);
 
     articleData = data.docs;
-    if (get(args.filters, "Slug")) {
+    if (get(args.filters, 'Slug')) {
       if (
         articleData[0].ArticleScope == 2 &&
         args.UserID != articleData[0].AuthorID
@@ -52,7 +42,7 @@ module.exports = {
 
       await updateViewCount(args.filters, args.UserID);
 
-      if (get(args.filters, "UserID")) {
+      if (get(args.filters, 'UserID')) {
         await Promise.all(
           articleData.map(async (data) => {
             return Promise.all([
@@ -68,14 +58,14 @@ module.exports = {
         articleData[0].isBookmark = false;
         articleData[0].isFollowed = false;
       }
-      if (get(articleData[0], "SubTitle")) {
-        if (get(articleData[0], "Description")) {
+      if (get(articleData[0], 'SubTitle')) {
+        if (get(articleData[0], 'Description')) {
           articleData[0].SubTitle = articleData[0].Description.replace(
             /(<([^>]+)>)/gi,
-            ""
+            ''
           );
           articleData[0].SubTitle =
-            articleData[0].SubTitle.substring(0, SubTitleMaxLen) + "....";
+            articleData[0].SubTitle.substring(0, SubTitleMaxLen) + '....';
         }
       }
       await articleData;
@@ -86,25 +76,25 @@ module.exports = {
   upsert: async (root, args, context) => {
     const id = await verifyToken(context);
 
-    let attributes = get(args, "article");
+    let attributes = get(args, 'article');
     if (id.UserID) {
       attributes.AuthorID = id.UserID;
     }
 
-    if (get(args, "Title")) {
+    if (get(args, 'Title')) {
       const title = args.Title;
       attributes.TitleSlug = formatString(attributes.Title);
       attributes.AmpSlug = formatString(attributes.Title);
     }
 
-    if (get(attributes, "FeatureImage")) {
+    if (get(attributes, 'FeatureImage')) {
       attributes.FeatureImage = await uploadFeaturedImage(
         attributes.FeatureImage,
         attributes.Slug
       );
     }
 
-    if (get(attributes, "Description")) {
+    if (get(attributes, 'Description')) {
       attributes.Description = await uploadDescriptionImagesOnS3(
         attributes.Description
       );
@@ -173,23 +163,23 @@ const buildFindQuery = async ({ args }) => {
   query.$and.push({ Status: 2 });
   query.$and.push({ isPublish: true });
 
-  if (get(args, "blockedAuthorIds")) {
+  if (get(args, 'blockedAuthorIds')) {
     query.$and.push({ AuthorID: { $nin: blockedAuthorIds } });
   }
 
-  if (get(args, "Slug")) {
+  if (get(args, 'Slug')) {
     query.$and.push({ Slug: args.Slug, ArticleScope: { $ne: 0 } });
   }
 
-  if (get(args, "articleIds")) {
-    query.$and.push({ ID: { $in: get(args, "articleIds") } });
+  if (get(args, 'articleIds')) {
+    query.$and.push({ ID: { $in: get(args, 'articleIds') } });
   }
 
-  if (get(args, "ignoreArticleIds")) {
-    query.$and.push({ ID: { $nin: get(args, "ignoreArticleIds") } });
+  if (get(args, 'ignoreArticleIds')) {
+    query.$and.push({ ID: { $nin: get(args, 'ignoreArticleIds') } });
   }
 
-  if (get(args, "AuthorUserName")) {
+  if (get(args, 'AuthorUserName')) {
     args.AuthorUserName = args.AuthorUserName.trim();
     const AuthorDetails = await Users.findOne({
       Status: 1,
@@ -202,7 +192,7 @@ const buildFindQuery = async ({ args }) => {
     query.$and.push({ ArticleScope: 1 });
   }
 
-  if (get(args, "isPopular")) {
+  if (get(args, 'isPopular')) {
     query.$and.push({ Status: ArticleStatusConst.Approved });
   }
   return query;
@@ -223,17 +213,17 @@ const queryForBlockedAuthors = async ({ args }) => {
 
 const formatString = (str) => {
   return str
-    .replace(/<p>/g, "")
-    .replace(/<\/p>/g, "")
+    .replace(/<p>/g, '')
+    .replace(/<\/p>/g, '')
     .trim()
-    .replace(/[^a-zA-Z0-9-. ]/g, "")
-    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9-. ]/g, '')
+    .replace(/\s+/g, '-')
     .toLowerCase();
 };
 
 async function calculateSubscribeContent(args, lor) {
-  if (get(lor[0], "ArticleScope") == 2) {
-    if (get(args, "UserID")) {
+  if (get(lor[0], 'ArticleScope') == 2) {
+    if (get(args, 'UserID')) {
       if ((await checkUserSubscription(args, lor[0].AuthorID)) <= 0) {
         lor[0].Description =
           lor[0].Description.substring(0, PremiumContentLen) +
@@ -273,7 +263,7 @@ async function updateViewCount(args, userID) {
   ).then((w) => {
     return w;
   });
-  if (typeof userID != "undefined" && userID != null && userID != 0) {
+  if (typeof userID != 'undefined' && userID != null && userID != 0) {
     updateArticleClickDetails(args);
   }
 }

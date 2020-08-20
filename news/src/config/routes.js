@@ -7,6 +7,12 @@ module.exports = function (app) {
   const server = new ApolloServer({
     typeDefs,
     resolvers: rootResolver,
+    context: ({ req }) => {
+      // get user object from here for the resolvers.
+      // const token = req.headers.authorization || '';
+      // user = getUser(token);
+      // return user;
+    },
   });
 
   app.get('/', function (req, res) {
