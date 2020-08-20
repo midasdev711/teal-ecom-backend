@@ -38,8 +38,7 @@ const typeDefs = `
     Sequence: ID
     Urls :String
     CreatedDate : String
-    AuthorID : [User]
-    Author : String
+    Author : [User]
     isPublish : Boolean
     AmpSlug: String
     FeatureImage : String

@@ -37,7 +37,7 @@ module.exports = {
         from: "users",
         localField: "AuthorID",
         foreignField: "ID",
-        as: "AuthorID",
+        as: "Author",
       },
     });
 
@@ -55,7 +55,6 @@ module.exports = {
     let data = await Articles.aggregate(aggregate);
 
     articleData = data[0].data;
-    console.log(JSON.stringify(articleData));
 
     if (get(args.filters, "Slug")) {
       if (

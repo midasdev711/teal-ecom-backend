@@ -1,7 +1,7 @@
-const express = require('express'),
-  { ApolloServer } = require('apollo-server-express'),
-  rootResolver = require('../graphql/rootResolver'),
-  typeDefs = require('./graphqlTypeDefs');
+const express = require("express"),
+  { ApolloServer } = require("apollo-server-express"),
+  rootResolver = require("../graphql/rootResolver"),
+  typeDefs = require("./graphqlTypeDefs");
 
 module.exports = function (app) {
   const server = new ApolloServer({
@@ -15,11 +15,12 @@ module.exports = function (app) {
     },
   });
 
-  app.get('/', function (req, res) {
-    res.send('API is up!');
+  app.get("/", function (req, res) {
+    // console.log(JSON.stringify(req));
+    res.send("API is up!");
   });
 
-  app.use('/uploads', express.static('uploads'));
+  app.use("/uploads", express.static("uploads"));
 
   server.applyMiddleware({ app });
 };
