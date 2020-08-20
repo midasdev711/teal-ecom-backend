@@ -39,7 +39,7 @@ const typeDefs = `
     Urls :String
     CreatedDate : String
     AuthorID : Int
-    Authors : [String]
+    Author : String
     isPublish : Boolean
     AmpSlug: String
     FeatureImage : String
