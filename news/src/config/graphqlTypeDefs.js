@@ -245,7 +245,7 @@ type Mutation {
   upsertCategory(category: CategoryInput): Category 
   upsertAuth(auth: UserInput) : User
   userAPIKey : User
-
 }
 `;
+
 module.exports = typeDefs;

@@ -5,22 +5,11 @@ const get = require("lodash/get");
 
 module.exports = {
   index: async (root, args, context) => {
-    let id = {};
-    if (context.headers.authorization) {
-      id = await verifyToken(context);
-    }
-
-    if (id.UserID) {
-      args.UserID = id.UserID;
-    }
-
     const findQuery = await buildFindQuery({ args: args.filters });
     let data = await Category.find(findQuery);
     return data;
   },
   upsert: async (root, args, context) => {
-    const id = await verifyToken(context);
-
     let attributes = get(args, "category");
 
     let category = await Category.findOne({ ID: attributes.ID });

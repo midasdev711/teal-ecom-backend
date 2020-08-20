@@ -1,7 +1,6 @@
 const Articles = require("../models/articles");
 const Users = require("../models/users");
 const BlockAuthor = require("../models/block_author");
-const { verifyToken } = require("../controllers/authController");
 const {
   SubTitleMaxLen,
   TitleMaxLen,
@@ -20,19 +19,10 @@ const ArticleBookmarks = require("../models/bookmarks");
 
 module.exports = {
   index: async (root, args, context) => {
-    console.log("arguments", args);
-    let id = {};
-    console.log(context.headers);
-
-    if (context.headers.authorization) {
-      id = await verifyToken(context);
-      if (id.UserID) {
-        args.UserID = id.UserID;
-      }
-    }
-
+    console.log(args);
     const findQuery = await buildFindQuery({ args: args.filters });
 
+    // user object can be from apollo server context.user check if this is null
     let options = {
       limit: args.filters.limit || 10,
       page: args.filters.page || 1,
@@ -168,7 +158,7 @@ async function getBlobImageObject(DescriptionString) {
 }
 
 const buildFindQuery = async ({ args }) => {
-  const blockedAuthorIds = await queryForBlockedAuthors({ args });
+  // const blockedAuthorIds = await queryForBlockedAuthors({ args });
   let query = { $and: [] };
 
   query.$and.push({ Status: 2 });

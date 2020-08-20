@@ -20,15 +20,7 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
-    let id = {};
-    if (context.headers.authorization) {
-      id = await verifyToken(context);
-    }
-
-    if (id.UserID) {
-      args.auth.ID = id.UserId;
-    }
-
+    console.log(args);
     if (get(args.auth, "Name") && get(args.auth, "Email")) {
       args.auth.Description = args.auth.Name + "--" + args.auth.Email;
     }
