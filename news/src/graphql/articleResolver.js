@@ -30,10 +30,33 @@ module.exports = {
         createdAt: -1,
       },
     };
+    let aggregate = [{ $match: findQuery }];
 
-    let data = await Articles.paginate(findQuery, options);
+    aggregate.push({
+      $lookup: {
+        from: "users",
+        localField: "AuthorID",
+        foreignField: "ID",
+        as: "AuthorID",
+      },
+    });
 
-    articleData = data.docs;
+    aggregate.push({
+      $facet: {
+        data: [
+          { $sort: { createdAt: -1 } },
+          { $skip: parseInt(args.filters.page) },
+          { $limit: parseInt(args.filters.limit) },
+        ],
+        pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+      },
+    });
+
+    let data = await Articles.aggregate(aggregate);
+
+    articleData = data[0].data;
+    console.log(JSON.stringify(articleData));
+
     if (get(args.filters, "Slug")) {
       if (
         articleData[0].ArticleScope == 2 &&

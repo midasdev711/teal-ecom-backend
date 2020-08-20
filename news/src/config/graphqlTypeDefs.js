@@ -38,7 +38,7 @@ const typeDefs = `
     Sequence: ID
     Urls :String
     CreatedDate : String
-    AuthorID : Int
+    AuthorID : [User]
     Author : String
     isPublish : Boolean
     AmpSlug: String
@@ -232,6 +232,10 @@ input UserFilters {
   page: Int
 }
 
+type APIKey{
+  APIKey: String
+}
+
 
 type Query {
     articles(filters: ArticleFilters):[Article]
@@ -244,7 +248,7 @@ type Mutation {
   upsertArticle(article: ArticleInput): Article
   upsertCategory(category: CategoryInput): Category 
   upsertAuth(auth: UserInput) : User
-  userAPIKey : User
+  userAPIKey(UserID:ID!): String
 }
 `;
 

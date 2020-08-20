@@ -49,23 +49,23 @@ module.exports = {
   },
 
   createAPIKey: async (root, args, context) => {
-    id = await verifyToken(context);
-
-    if (id.UserID) {
-      args.auth.ID = id.UserId;
-    }
-
     let user = {};
-    if (args.UserId) user = await Users.findOne({ ID: args.UserId });
-
+    let id = parseInt(args);
+    if (args.UserID) user = await Users.findOne({ ID: args.UserID });
+    console.log(id, args);
     if (user) {
       const uniqueId = uniqid();
       const timeStamp = await getTimeStamp();
-      const APIKey = `${uniqueId}${user._id}${timeStamp}${user.ID}`;
-      user.APIKey = await bcrypt.hashSync(APIKey, 12);
-      user = new Users(user);
-      user = await user.save();
-      return APIKey;
+      let APIKey = `Teal${uniqueId}${user._id}${timeStamp}${user.ID}`;
+      const data = APIKey;
+      APIKey = await bcrypt.hashSync(APIKey, 12);
+      let user1 = await Users.findOneAndUpdate(
+        { ID: args.UserID },
+        { $set: { APIKey: APIKey } },
+        { new: true }
+      );
+      console.log(user1);
+      return data;
     } else {
       return "User not found";
     }
