@@ -13,8 +13,8 @@ const root = {
   Mutation: {
     upsertArticle: ArticleResolver.upsert,
     upsertCategory: CategoryResolver.upsert,
-    upsertUser: UserResolver.upsert,
     upsertAuth: AuthResolver.upsert,
+    userAPIKey: AuthResolver.createAPIKey,
   },
 };
 

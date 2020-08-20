@@ -8,6 +8,7 @@ const { get } = require("lodash");
 const sendMailToUser = require("../mail/signup");
 const UserSettings = require("../../models/user_settings");
 const passwordHash = require("password-hash");
+const bcrypt = require("bcrypt");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -54,7 +55,35 @@ module.exports = {
       return await generateToken(UserData);
     }
   },
+
+  createAPIKey: async (root, args, context) => {
+    id = await verifyToken(context);
+
+    if (id.UserID) {
+      args.auth.ID = id.UserId;
+    }
+
+    let user = {};
+    if (args.UserId) user = await Users.findOne({ ID: args.UserId });
+
+    if (user) {
+      const uniqueId = uniqid();
+      const timeStamp = await getTimeStamp();
+      const APIKey = `${uniqueId}${user._id}${timeStamp}${user.ID}`;
+      user.APIKey = await bcrypt.hashSync(APIKey, 12);
+      user = new Users(user);
+      user = await user.save();
+      return APIKey;
+    } else {
+      return "User not found";
+    }
+  },
 };
+
+function getTimeStamp() {
+  const date = new Date();
+  return (timestamp = date.getTime());
+}
 
 async function SaveUserSettings(args, UserID) {
   let UserSettingsConstant = new UserSettings({

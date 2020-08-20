@@ -161,6 +161,7 @@ type User {
   IpAddress : String
   isFollowing : Boolean
   isSubscriptionAllowed : Boolean
+  APIKey : String
 }
 
 input UserInput {
@@ -226,6 +227,7 @@ input UserFilters {
   ignoreUserIds:[ID]
   Email : String
   UserId : Int
+  APIKey : String
   limit: Int
   page: Int
 }
@@ -241,8 +243,9 @@ type Query {
 type Mutation {
   upsertArticle(article: ArticleInput): Article
   upsertCategory(category: CategoryInput): Category 
-  upsertUser(user: UserInput) : User
   upsertAuth(auth: UserInput) : User
+  userAPIKey : User
+
 }
 `;
 module.exports = typeDefs;

@@ -22,6 +22,7 @@ module.exports = {
   index: async (root, args, context) => {
     console.log("arguments", args);
     let id = {};
+    console.log(context.headers);
 
     if (context.headers.authorization) {
       id = await verifyToken(context);
