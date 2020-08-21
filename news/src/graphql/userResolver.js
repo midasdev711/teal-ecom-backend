@@ -19,22 +19,6 @@ const passwordHash = require("password-hash");
 
 module.exports = {
   index: async (root, args, context) => {
-    let userAuthenticate = await authenticateRequest(args, context);
-    if (!userAuthenticate) {
-      return {
-        responseCode: 404,
-        responseMessage: "Forbidden Access",
-      };
-    }
-    let id = {};
-    if (context.headers.authorization) {
-      id = await verifyToken(context);
-    }
-
-    if (id.UserID) {
-      args.UserID = id.UserID;
-    }
-
     const data = await userQuery({ args: args.filters });
 
     // let data = await Users.find(findQuery);
@@ -113,31 +97,31 @@ const userQuery = async ({ args }) => {
     return Users.find({ ID: { $in: get(args, "userIds") } });
   }
 
-  if (get(args, "AuthorID")) {
-    return Users.findOne({ Status: 1, ID: args.AuthorID }).then(
+  if (get(args, "authorID")) {
+    return Users.findOne({ status: 1, ID: args.authorID }).then(
       async (user) => {
         if (user != null) return userDetailsPromise(user, args);
       }
     );
   }
 
-  if (get(args, "AuthorUserName")) {
-    args.AuthorUserName = args.AuthorUserName.trim();
+  if (get(args, "authorUserName")) {
+    args.authorUserName = args.authorUserName.trim();
     return await Users.findOne({
-      Status: 1,
-      UserName: args.AuthorUserName,
+      status: 1,
+      userName: args.authorUserName,
     }).then(async (user) => {
       if (user != null) return userDetailsPromise(user, args);
     });
   }
 
-  if (get(args, "Email")) {
-    let valid = emailValidator.validate(args.Email);
+  if (get(args, "email")) {
+    let valid = emailValidator.validate(args.email);
     if (valid) {
       var Result = [];
       await Users.find(
-        { Email: { $regex: new RegExp(`^${args.Email}$`, "i") }, Status: 1 },
-        { _id: false, UniqueID: true, Email: true }
+        { email: { $regex: new RegExp(`^${args.email}$`, "i") }, etatus: 1 },
+        { _id: false, uniqueID: true, email: true }
       ).then(async (isEmail) => {
         Result = await isEmail;
         Result = Result.concat(isEmail);
@@ -146,30 +130,20 @@ const userQuery = async ({ args }) => {
     }
   }
 
-  if (get(args, "UserId")) {
-    return await Users.findOne({ Status: 1, ID: args.UserId }).then(
+  if (get(args, "userId")) {
+    return await Users.findOne({ status: 1, ID: args.userId }).then(
       async (user) => {
         return await getFollowerFollowingForUserProfile(user);
       }
     );
   }
 
-  if (get(args, "UserName")) {
-    return await Users.findOne({ Status: 1, UserName: args.UserName }).then(
+  if (get(args, "userName")) {
+    return await Users.findOne({ status: 1, userName: args.userName }).then(
       async (user) => {
         return await getFollowerFollowingForUserProfile(user);
       }
     );
-  }
-
-  if (get(args, "AuthorUserName")) {
-    args.AuthorUserName = args.AuthorUserName.trim();
-    return await Users.findOne({
-      Status: 1,
-      UserName: args.AuthorUserName,
-    }).then(async (user) => {
-      if (user != null) return userDetailsPromise(user, args);
-    });
   }
 };
 
@@ -215,26 +189,26 @@ async function userDetailsPromise(user, args) {
   }).countDocuments();
   const ActivityLog = {};
   return Promise.all([
-    Following,
-    Follower,
-    FreeArticles,
-    PremiumArticles,
-    LatestArticles,
-    ClapedArticles,
-    RecentlyVisited,
-    BookmarkedArticles,
+    following,
+    follower,
+    freeArticles,
+    premiumArticles,
+    latestArticles,
+    clapedArticles,
+    recentlyVisited,
+    bookmarkedArticles,
     isFollowing,
     isSubscriptionAllowed,
   ]).then(function (values, i) {
-    user.Following = values[0];
-    user.Follower = values[1];
-    user.FreeArticles = values[2];
-    user.PremiumArticles = values[3];
-    ActivityLog.LatestArticles = values[4];
-    ActivityLog.ClapedArticles = values[5];
-    ActivityLog.RecentlyVisited = values[6];
-    ActivityLog.BookmarkedArticles = values[7];
-    user.ActivityLog = ActivityLog;
+    user.following = values[0];
+    user.follower = values[1];
+    user.freeArticles = values[2];
+    user.premiumArticles = values[3];
+    ActivityLog.latestArticles = values[4];
+    ActivityLog.clapedArticles = values[5];
+    ActivityLog.recentlyVisited = values[6];
+    ActivityLog.bookmarkedArticles = values[7];
+    user.activityLog = ActivityLog;
     user.isFollowing = values[8] == 1;
     user.isSubscriptionAllowed = values[9] > 0;
     return user;
@@ -311,11 +285,11 @@ async function getBookmarkedArticle(args, user) {
 }
 
 async function getFollowerFollowingForUserProfile(user) {
-  user.Following = await FollowAuthor.find({
+  user.following = await FollowAuthor.find({
     UserID: user.ID,
     Status: 1,
   }).countDocuments();
-  user.Follower = await FollowAuthor.find({
+  user.follower = await FollowAuthor.find({
     AuthorID: user.ID,
     Status: 1,
   }).countDocuments();

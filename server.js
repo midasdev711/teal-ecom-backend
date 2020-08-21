@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ limit: "250mb", extended: true }));
 
 //global
 mongoose.connect(
-  "mongodb+srv://admin:teal2020@cluster0-qz34h.mongodb.net/teal?replicaSet=rs",
+  "mongodb+srv://fuckcovid:Li5D0vvZTVvyo0V9@cluster0.oml6y.mongodb.net/teal?retryWrites=true&w=majority",
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,

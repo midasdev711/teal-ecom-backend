@@ -19,7 +19,6 @@ const ArticleBookmarks = require("../models/bookmarks");
 
 module.exports = {
   index: async (root, args, context) => {
-    console.log(context);
     if (context.userAuthenticate) {
       if (context.APIKey) {
         let arr = context.APIKey.split("_");
@@ -33,46 +32,48 @@ module.exports = {
       UserID: args.UserID,
     });
     // user object can be from apollo server context.user check if this is null
-
+    console.log(findQuery);
     let data = await Articles.aggregate(findQuery);
 
     articleData = data[0].data;
 
-    if (get(args.filters, "Slug")) {
-      if (
-        articleData[0].ArticleScope == 2 &&
-        args.UserID != articleData[0].AuthorID
-      )
-        articleData = await calculateSubscribeContent(args, articleData);
-      await updateViewCount(args.filters, args.UserID);
+    if (articleData) {
+      if (get(args.filters, "slug")) {
+        if (
+          articleData[0].articleScope == 2 &&
+          args.UserID != articleData[0].authorID
+        )
+          articleData = await calculateSubscribeContent(args, articleData);
+        await updateViewCount(args.filters, args.UserID);
 
-      if (get(args.filters, "UserID")) {
-        await Promise.all(
-          articleData.map(async (data) => {
-            return Promise.all([
-              getBookMarkCount(data, args),
-              getFollowAuthorCount(data, args),
-            ]).then(function (values) {
-              data.isBookmark = values[0] == 1;
-              data.isFollowed = values[1] == 1;
-            });
-          })
-        );
-      } else {
-        articleData[0].isBookmark = false;
-        articleData[0].isFollowed = false;
-      }
-      if (get(articleData[0], "SubTitle")) {
-        if (get(articleData[0], "Description")) {
-          articleData[0].SubTitle = articleData[0].Description.replace(
-            /(<([^>]+)>)/gi,
-            ""
+        if (get(args.filters, "UserID")) {
+          await Promise.all(
+            articleData.map(async (data) => {
+              return Promise.all([
+                getBookMarkCount(data, args),
+                getFollowAuthorCount(data, args),
+              ]).then(function (values) {
+                data.isBookmark = values[0] == 1;
+                data.isFollowed = values[1] == 1;
+              });
+            })
           );
-          articleData[0].SubTitle =
-            articleData[0].SubTitle.substring(0, SubTitleMaxLen) + "....";
+        } else {
+          articleData[0].isBookmark = false;
+          articleData[0].isFollowed = false;
         }
+        if (get(articleData[0], "SubTitle")) {
+          if (get(articleData[0], "Description")) {
+            articleData[0].subTitle = articleData[0].description.replace(
+              /(<([^>]+)>)/gi,
+              ""
+            );
+            articleData[0].subTitle =
+              articleData[0].subTitle.substring(0, subTitleMaxLen) + "....";
+          }
+        }
+        await articleData;
       }
-      await articleData;
     }
     return articleData;
   },
@@ -82,25 +83,25 @@ module.exports = {
 
     let attributes = get(args, "article");
     if (id.UserID) {
-      attributes.AuthorID = id.UserID;
+      attributes.authorID = id.UserID;
     }
 
-    if (get(args, "Title")) {
-      const title = args.Title;
-      attributes.TitleSlug = formatString(attributes.Title);
-      attributes.AmpSlug = formatString(attributes.Title);
+    if (get(args, "title")) {
+      const title = args.title;
+      attributes.titleSlug = formatString(attributes.title);
+      attributes.ampSlug = formatString(attributes.title);
     }
 
-    if (get(attributes, "FeatureImage")) {
-      attributes.FeatureImage = await uploadFeaturedImage(
-        attributes.FeatureImage,
-        attributes.Slug
+    if (get(attributes, "featureImage")) {
+      attributes.featureImage = await uploadFeaturedImage(
+        attributes.featureImage,
+        attributes.slug
       );
     }
 
-    if (get(attributes, "Description")) {
-      attributes.Description = await uploadDescriptionImagesOnS3(
-        attributes.Description
+    if (get(attributes, "description")) {
+      attributes.description = await uploadDescriptionImagesOnS3(
+        attributes.description
       );
     }
 
@@ -109,8 +110,8 @@ module.exports = {
     if (article) {
       return Articles.update(args);
     } else {
-      attributes.Slug = uniqid(Date.now());
-      attributes.AmpSlug = `amp/${attributes.Slug}`;
+      attributes.slug = uniqid(Date.now());
+      attributes.ampSlug = `amp/${attributes.slug}`;
 
       return Articles.create(attributes);
     }
@@ -161,18 +162,19 @@ async function getBlobImageObject(DescriptionString) {
 }
 
 const buildFindQuery = async ({ args, UserID }) => {
-  // const blockedAuthorIds = await queryForBlockedAuthors({ args });
+  const blockedAuthorIds = await queryForBlockedAuthors({ args });
   let query = { $and: [] };
 
-  query.$and.push({ Status: 2 });
+  query.$and.push({ status: 2 });
   query.$and.push({ isPublish: true });
 
   if (get(args, "blockedAuthorIds")) {
-    query.$and.push({ AuthorID: { $nin: blockedAuthorIds } });
+    query.$and.push({ authorID: { $nin: blockedAuthorIds } });
   }
 
-  if (get(args, "Slug")) {
-    query.$and.push({ Slug: args.Slug, ArticleScope: { $ne: 0 } });
+  if (get(args, "slug")) {
+    console.log("object");
+    query.$and.push({ slug: args.slug, articleScope: { $ne: 0 } });
   }
 
   if (get(args, "articleIds")) {
@@ -183,21 +185,21 @@ const buildFindQuery = async ({ args, UserID }) => {
     query.$and.push({ ID: { $nin: get(args, "ignoreArticleIds") } });
   }
 
-  if (get(args, "AuthorUserName")) {
-    args.AuthorUserName = args.AuthorUserName.trim();
+  if (get(args, "authorUserName")) {
+    args.authorUserName = args.authorUserName.trim();
     const AuthorDetails = await Users.findOne({
-      Status: 1,
-      UserName: args.AuthorUserName,
+      status: 1,
+      userName: args.authorUserName,
     });
     if (AuthorDetails) {
-      args.AuthorID = AuthorDetails.ID;
+      args.authorID = AuthorDetails.ID;
     }
-    query.$and.push({ Status: 2 });
-    query.$and.push({ ArticleScope: 1 });
+    query.$and.push({ status: 2 });
+    query.$and.push({ articleScope: 1 });
   }
 
   if (get(args, "isPopular")) {
-    query.$and.push({ Status: ArticleStatusConst.Approved });
+    query.$and.push({ status: articleStatusConst.approved });
   }
 
   let aggregate = [{ $match: query }];
@@ -205,22 +207,22 @@ const buildFindQuery = async ({ args, UserID }) => {
   aggregate.push({
     $lookup: {
       from: "users",
-      localField: "AuthorID",
+      localField: "authorID",
       foreignField: "ID",
-      as: "Author",
+      as: "author",
     },
   });
 
   if (UserID) {
-    aggregate.push({ $match: { "Author.ID": parseInt(UserID) } });
+    aggregate.push({ $match: { "author.ID": parseInt(UserID) } });
   }
 
   aggregate.push({
     $facet: {
       data: [
         { $sort: { createdAt: -1 } },
-        { $skip: parseInt(args.page) },
-        { $limit: parseInt(args.limit) },
+        { $skip: parseInt(args.page) - 1 || 0 },
+        { $limit: parseInt(args.limit) || 10 },
       ],
       pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
     },
@@ -252,11 +254,11 @@ const formatString = (str) => {
 };
 
 async function calculateSubscribeContent(args, lor) {
-  if (get(lor[0], "ArticleScope") == 2) {
-    if (get(args, "UserID")) {
-      if ((await checkUserSubscription(args, lor[0].AuthorID)) <= 0) {
-        lor[0].Description =
-          lor[0].Description.substring(0, PremiumContentLen) +
+  if (get(lor[0], "articleScope") == 2) {
+    if (get(args, "userID")) {
+      if ((await checkUserSubscription(args, lor[0].authorID)) <= 0) {
+        lor[0].description =
+          lor[0].description.substring(0, PremiumContentLen) +
           ' <img src="' +
           SubscribeCdnUrl +
           '">';
@@ -264,8 +266,8 @@ async function calculateSubscribeContent(args, lor) {
       } else lor[0].isContentAllowed = true;
     } else {
       lor[0].isContentAllowed = false;
-      lor[0].Description =
-        lor[0].Description.substring(0, PremiumContentLen) +
+      lor[0].description =
+        lor[0].description.substring(0, PremiumContentLen) +
         ' <img src="' +
         SubscribeCdnUrl +
         '">';
@@ -287,8 +289,8 @@ async function checkUserSubscription(args, AuthorID) {
 
 async function updateViewCount(args, userID) {
   Articles.updateOne(
-    { $and: [{ Slug: args.Slug }] },
-    { $inc: { ViewCount: 1 } },
+    { $and: [{ slug: args.slug }] },
+    { $inc: { viewCount: 1 } },
     { new: true }
   ).then((w) => {
     return w;
@@ -300,12 +302,12 @@ async function updateViewCount(args, userID) {
 
 async function updateArticleClickDetails(args) {
   let ClickData = {};
-  Articles.findOne({ Slug: args.Slug }).then((data) => {
-    ClickData.ArticleID = data.ID;
-    ClickData.UserID = args.UserID;
-    ClickData.AuthorID = data.AuthorID;
-    ClickData.Slug = args.Slug;
-    ClickData.ArticleTitle = data.Title;
+  Articles.findOne({ slug: args.slug }).then((data) => {
+    ClickData.articleID = data.ID;
+    ClickData.userID = args.userID;
+    ClickData.authorID = data.authorID;
+    ClickData.slug = args.slug;
+    ClickData.articleTitle = data.title;
     ArticleClickDetails.create(ClickData);
   });
 }

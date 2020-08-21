@@ -1,119 +1,119 @@
 const typeDefs = `
   input ArticleInput { 
     ID: Int
-    Title: String
-    SubTitle : String
-    Description: String
-    AuthorID : Int
-    FeatureImage: String
-    ReadMinutes : String
-    Tags: [String]
+    title: String
+    subTitle : String
+    description: String
+    authorID : Int
+    featureImage: String
+    readMinutes : String
+    tags: [String]
     isPublish : Boolean
-    Categories: ArticleCategoryInput,
-    AcceptDonation : Boolean
-    MinimumDonationAmount : Float
+    categories: ArticleCategoryInput,
+    acceptDonation : Boolean
+    minimumDonationAmount : Float
     isPaidSubscription : Boolean
-    ArticleScope : Int
+    articleScope : Int
   }
 
   input ArticleCategoryInput {
     ID: Int
-    Name: String
-    SubCategories :[SubCategoriesInput]
+    name: String
+    subCategories :[SubCategoriesInput]
   }
 
   input SubCategoriesInput {
     ID: Int
-    Name: String
+    name: String
   }
 
   type Article {
     ID: ID!
     id : ID
-    Title: String!
-    SubTitle: String
-    TitleSlug: String 
-    Description:String
-    Slug: String!
-    Sequence: ID
-    Urls :String
-    CreatedDate : String
-    Author : [User]
+    title: String!
+    subTitle: String
+    titleSlug: String 
+    description:String
+    slug: String!
+    sequence: ID
+    urls :String
+    createdDate : String
+    author : [User]
     isPublish : Boolean
-    AmpSlug: String
-    FeatureImage : String
-    Thumbnail: String
-    ReadMinutes: String
-    ViewCount: Int
-    Tags:[String]
-    Status:Int
-    TotalClapCount :Int 
-    Categories : DefCategory
-    TotalArticleCount : Int
-    AcceptDonation : Boolean
-    MinimumDonationAmount : String
+    ampSlug: String
+    featureImage : String
+    thumbnail: String
+    readMinutes: String
+    viewCount: Int
+    tags:[String]
+    status:Int
+    totalClapCount :Int 
+    categories : DefCategory
+    totalArticleCount : Int
+    acceptDonation : Boolean
+    minimumDonationAmount : String
     isBookmark : Boolean
     isFollowed : Boolean
     isClicked : Boolean
     isContentAllowed : Boolean
-    ArticleScope :Int
+    articleScope :Int
   }
 
 type DefCategory{
     ID: Int
-    Name : String
-    SubCategories: DefSubCategory
+    name : String
+    subCategories: DefSubCategory
 }
 
 type DefSubCategory{
   ID: Int
-  Name : String
+  name : String
 }
 
 input CategoryInput{
-    Name: String
-    Description: String 
-    Slug: String
+    name: String
+    description: String 
+    slug: String
     isParent: Boolean 
-    FeatureImage : String
-    ParentCategoryID : Int
-    Sequence : Int
-    Type : Int
-    SubCategories : [SubCategoryInput]
+    featureImage : String
+    parentCategoryID : Int
+    sequence : Int
+    type : Int
+    subCategories : [SubCategoryInput]
 }
 
 input SubCategoryInput{
   ID: Int
-  Name: String
-  ParentCategoryID: Int
-  Type: Int
+  name: String
+  parentCategoryID: Int
+  type: Int
 } 
 
 type Category{
   ID: ID!
   id: ID
-  Name: String
-  Description: String 
-  Status: Int 
-  Slug: String
+  name: String
+  description: String 
+  status: Int 
+  slug: String
   isParent: Boolean 
-  FeatureImage : String
-  ParentCategoryID : Int
-  CreatedDate :  String
-  ModifiedDate :  String
-  Sequence : Int
-  Type : Int
-  SubCategories : [Category]
+  featureImage : String
+  parentCategoryID : Int
+  createdDate :  String
+  modifiedDate :  String
+  sequence : Int
+  type : Int
+  subCategories : [Category]
 }
 
 input ArticleFilters {
   articleIds: [ID]
   ignoreArticleIds:[ID]
-  AuthorID: Int
-  UserID: Int
-  AuthorUserName: String
+  authorID: Int
+  userID: Int
+  authorUserName: String
   isPopular: Boolean
-  Slug: String
+  slug: String
   limit: Int
   page: Int
 }
@@ -127,112 +127,111 @@ type User {
   ID: Int
   token: String
   refreshToken: String
-  CreativeToken: String
-  Name: String
-  UserName : String
-  Email : String
-  Description: String
-  Status: Int
-  Password: String
-  RoleID : Int
-  Avatar: String
+  creativeToken: String
+  name: String
+  userName : String
+  email : String
+  description: String
+  status: Int
+  password: String
+  roleID : Int
+  avatar: String
   isVerified : Boolean
-  SignUpMethod: String 
-  FaceBookUrl : String
-  UserCounter  : Int
-  TotalWalletAmount : Float
+  signUpMethod: String 
+  faceBookUrl : String
+  userCounter  : Int
+  totalWalletAmount : Float
   isPaidSubscription : Boolean
-  PaidSubscription : [PaidSubscriptionType]
-  Following : Int
-  Follower : Int
-  ParentCategories : [UserParentCategory]
-  SubCategories : [SubCategories]
-  CreatedDate :  String
-  ModifiedDate :  String
-  MobileNo : String
-  Dob : String
-  Gender : String
-  UniqueID : String
-  ReferenceID : String
-  FreeArticles : [Article]
-  PremiumArticles : [Article]
-  ActivityLog : ActivityLogUsers
-  IpAddress : String
+  paidSubscription : [PaidSubscriptionType]
+  following : Int
+  follower : Int
+  parentCategories : [UserParentCategory]
+  subCategories : [SubCategories]
+  createdDate :  String
+  modifiedDate :  String
+  mobileNo : String
+  dob : String
+  gender : String
+  uniqueID : String
+  referenceID : String
+  freeArticles : [Article]
+  premiumArticles : [Article]
+  activityLog : ActivityLogUsers
+  ipAddress : String
   isFollowing : Boolean
   isSubscriptionAllowed : Boolean
-  APIKey : String
 }
 
 input UserInput {
-  Name: String
-  Email : String
-  Password: String
-  Avatar: String
-  SignUpMethod: String 
-  FaceBookUrl : String
-  MobileNo : String
-  Dob : String
-  Gender : String
-  ParentCategories : [UsersParentCategoryInput]
-  SubCategories : [SubcategoriesInput]
-  ReferenceID : String
+  name: String
+  email : String
+  password: String
+  avatar: String
+  signUpMethod: String 
+  faceBookUrl : String
+  mobileNo : String
+  dob : String
+  gender : String
+  parentCategories : [UsersParentCategoryInput]
+  subCategories : [SubcategoriesInput]
+  referenceID : String
 }
 
 type SubCategories {
   ID: Int
-  Name: String
-  ParentCategoryID: Int
-  Type: Int
+  name: String
+  parentCategoryID: Int
+  type: Int
 }
 
 type UserParentCategory {
   ID: Int
-  Name: String
-  Type: Int
+  name: String
+  type: Int
 }
 
 input UsersParentCategoryInput {
   ID: Int
-  Name: String
-  Type: Int
+  name: String
+  type: Int
 }
 
 input SubcategoriesInput {
   ID: Int
-  Name: String
-  ParentCategoryID: Int
-  Type: Int
+  name: String
+  parentCategoryID: Int
+  type: Int
 }
 
 type PaidSubscriptionType {
-    SubscriptionID : Int
-    Name : String
-    Amount : Float
-    Description : String
-    Days : Int
-    Status : Int
+    subscriptionID : Int
+    name : String
+    amount : Float
+    description : String
+    days : Int
+    status : Int
   }
 
 type ActivityLogUsers {
-      LatestArticles : [Article]
-      ClapedArticles : [Article]
-      RecentlyVisited : [Article]
-      BookmarkedArticles : [Article]
+      latestArticles : [Article]
+      clapedArticles : [Article]
+      recentlyVisited : [Article]
+      bookmarkedArticles : [Article]
 }
 
 
 input UserFilters {
   userIds: [ID]
   ignoreUserIds:[ID]
-  Email : String
-  UserId : Int
-  APIKey : String
+  email : String
+  userId : Int
+  apiKey : String
   limit: Int
   page: Int
 }
 
 type APIKey{
-  APIKey: String
+  apiKey: String
 }
 
 

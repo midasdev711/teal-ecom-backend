@@ -57,7 +57,7 @@ module.exports = {
     if (user) {
       const uniqueId = uniqid();
       const timeStamp = await getTimeStamp();
-      let APIKey = `Teal${uniqueId}${user._id}${timeStamp}_${user.ID}`;
+      let APIKey = `teal.com%${uniqueId}${user._id}${timeStamp}_${user.ID}`;
       let obj = {
         APIKey: APIKey,
         UserID: user.ID,

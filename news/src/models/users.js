@@ -10,68 +10,67 @@ autoIncrement.initialize(mongoose);
 
 const UserSchema = new Schema({
   ID: { type: Number, exists: false, unique: true },
-  Name: { type: String, required: true },
-  UserName: { type: String, exists: false, unique: true },
-  Description: String,
-  Email: {
+  name: { type: String, required: true },
+  userName: { type: String, exists: false, unique: true },
+  description: String,
+  email: {
     type: String,
     required: "email id is required",
     exists: false,
     unique: true,
   },
-  Password: { type: String },
+  password: { type: String },
   isVerified: { type: Boolean, default: true },
-  SignUpMethod: {
+  signUpMethod: {
     type: String,
     required: true,
     enum: ["Site", "Facebook", "Google", "Mobile"],
     default: "Site",
   },
-  MobileNo: { type: String, exists: false, unique: true },
-  RoleID: { type: Number },
-  Dob: { type: Date },
-  Gender: {
+  mobileNo: { type: String, exists: false, unique: true },
+  roleID: { type: Number },
+  dob: { type: Date },
+  gender: {
     type: String,
     // , enum : ["Male","Female", "Other"]
   },
-  ParentCategories: [
+  parentCategories: [
     {
       ID: Number,
-      Name: String,
-      Type: Number,
+      name: String,
+      type: Number,
     },
   ],
-  SubCategories: [
+  subCategories: [
     {
       ID: Number,
-      Name: String,
-      ParentCategoryID: Number,
-      Type: Number,
+      name: String,
+      parentCategoryID: Number,
+      type: Number,
     },
   ],
-  Avatar: { type: String, default: "" },
-  UniqueID: { type: String, exists: false, unique: true },
-  ReferenceID: { type: String },
-  Status: { type: Number, default: 1 },
-  CreatedDate: { type: Date, default: Date.now },
-  ModifiedDate: { type: Date, default: Date.now },
+  avatar: { type: String, default: "" },
+  uniqueID: { type: String, exists: false, unique: true },
+  referenceID: { type: String },
+  status: { type: Number, default: 1 },
+  createdDate: { type: Date, default: Date.now },
+  modifiedDate: { type: Date, default: Date.now },
 
-  UserCounter: { type: Number, default: 1 },
-  FaceBookUrl: { type: String, default: "" },
-  TotalWalletAmount: { type: SchemaType.Decimal128, default: "0.00" },
+  userCounter: { type: Number, default: 1 },
+  faceBookUrl: { type: String, default: "" },
+  totalWalletAmount: { type: SchemaType.Decimal128, default: "0.00" },
   isPaidSubscription: { type: Boolean, default: false },
-  PaidSubscription: [
+  paidSubscription: [
     {
-      SubscriptionID: { type: Number },
-      Name: { type: String },
-      Amount: { type: SchemaType.Decimal128, default: "0.00" },
-      Description: { type: String },
-      Days: { type: Number },
-      Status: { type: Number, default: 1 },
+      subscriptionID: { type: Number },
+      name: { type: String },
+      amount: { type: SchemaType.Decimal128, default: "0.00" },
+      description: { type: String },
+      days: { type: Number },
+      status: { type: Number, default: 1 },
     },
   ],
-  IpAddress: { type: String },
-  APIKey: { type: String },
+  ipAddress: { type: String },
 });
 
 //
