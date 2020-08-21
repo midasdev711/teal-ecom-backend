@@ -5,14 +5,18 @@ const get = require("lodash/get");
 
 module.exports = {
   index: async (root, args, context) => {
-    let userAuthenticate = await authenticateRequest(args, context);
-    if (!userAuthenticate) {
-      return {
-        responseCode: 404,
-        responseMessage: "Forbidden Access",
-      };
+    if (context.userAuthenticate) {
+      if (context.APIKey) {
+        let arr = context.APIKey.split("_");
+        args.UserID = arr[1];
+      } else {
+        args.UserID = null;
+      }
     }
-    const findQuery = await buildFindQuery({ args: args.filters });
+    const findQuery = await buildFindQuery({
+      args: args.filters,
+      UserID: args.UserID,
+    });
     let data = await Category.find(findQuery);
     return data;
   },
@@ -36,7 +40,7 @@ module.exports = {
   },
 };
 
-const buildFindQuery = async ({ args }) => {
+const buildFindQuery = async ({ args, UserID }) => {
   let query = { $and: [] };
 
   query.$and.push({ Status: 1 });

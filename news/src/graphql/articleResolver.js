@@ -16,29 +16,24 @@ const UsersPaidSubscriptions = require("../models/users_paid_subscriptions");
 const ArticleClickDetails = require("../models/article_click_details");
 const FollowAuthor = require("../models/follow_author");
 const ArticleBookmarks = require("../models/bookmarks");
-const { authenticateRequest } = require("../controllers/authController");
 
 module.exports = {
   index: async (root, args, context) => {
-    console.log(args);
-    let userAuthenticate = await authenticateRequest(args, context);
-    if (!userAuthenticate) {
-      return {
-        responseCode: 404,
-        responseMessage: "Forbidden Access",
-      };
+    console.log(context);
+    if (context.userAuthenticate) {
+      if (context.APIKey) {
+        let arr = context.APIKey.split("_");
+        args.UserID = arr[1];
+      } else {
+        args.UserID = null;
+      }
     }
-    console.log(root, args, context);
-    const findQuery = await buildFindQuery({ args: args.filters });
-
+    const findQuery = await buildFindQuery({
+      args: args.filters,
+      UserID: args.UserID,
+    });
     // user object can be from apollo server context.user check if this is null
-    let options = {
-      limit: args.filters.limit || 10,
-      page: args.filters.page || 1,
-      $sort: {
-        createdAt: -1,
-      },
-    };
+
     let aggregate = [{ $match: findQuery }];
 
     aggregate.push({
@@ -106,13 +101,6 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
-    let userAuthenticate = await authenticateRequest(args, context);
-    if (!userAuthenticate) {
-      return {
-        responseCode: 404,
-        responseMessage: "Forbidden Access",
-      };
-    }
     const id = await verifyToken(context);
 
     let attributes = get(args, "article");
@@ -195,12 +183,16 @@ async function getBlobImageObject(DescriptionString) {
   return await urls;
 }
 
-const buildFindQuery = async ({ args }) => {
+const buildFindQuery = async ({ args, UserID }) => {
   // const blockedAuthorIds = await queryForBlockedAuthors({ args });
   let query = { $and: [] };
 
   query.$and.push({ Status: 2 });
   query.$and.push({ isPublish: true });
+
+  if (UserID) {
+    query.$and.push({ AuthorID: UserID });
+  }
 
   if (get(args, "blockedAuthorIds")) {
     query.$and.push({ AuthorID: { $nin: blockedAuthorIds } });

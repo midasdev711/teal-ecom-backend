@@ -74,25 +74,26 @@ const regenerateCreativeToken = async (context, refresh) => {
   }
 };
 
-const authenticateRequest = async (args, context) => {
-  console.log(context.headers);
-  const host = context.headers.host;
-  if (
-    host != "teal.com" ||
-    host != "localhost:9200" ||
-    host != "api.teal.com"
-  ) {
-    if (context.headers.APIKey) {
+const authenticateRequest = async (req) => {
+  const host = req.headers.origin;
+  console.log(host);
+  let userAuthenticate = false;
+  if (host != "http://localhost:9200") {
+    if (req.headers.APIKey) {
       let data = await apiKeys.findOne({
-        APIKey: context.headers.APIKey,
+        APIKey: req.headers.APIKey,
         isExpired: false,
       });
-      if (data) args.UserAuthenticate = true;
-      else args.UserAuthenticate = false;
+      if (data) userAuthenticate = true;
+      else userAuthenticate = false;
+      return { userAuthenticate, APIKey: req.headers.APIKey };
     }
-    res.send("API is up!");
+    return { userAuthenticate };
   } else {
-    args.UserAuthenticate = true;
+    userAuthenticate = true;
+    let obj = { userAuthenticate, APIKey: "" };
+    if (req.headers.APIKey) obj.APIKey = req.headers.APIKey;
+    return obj;
   }
 };
 
