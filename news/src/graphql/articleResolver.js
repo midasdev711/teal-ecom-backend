@@ -34,29 +34,7 @@ module.exports = {
     });
     // user object can be from apollo server context.user check if this is null
 
-    let aggregate = [{ $match: findQuery }];
-
-    aggregate.push({
-      $lookup: {
-        from: "users",
-        localField: "AuthorID",
-        foreignField: "ID",
-        as: "Author",
-      },
-    });
-
-    aggregate.push({
-      $facet: {
-        data: [
-          { $sort: { createdAt: -1 } },
-          { $skip: parseInt(args.filters.page) },
-          { $limit: parseInt(args.filters.limit) },
-        ],
-        pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
-      },
-    });
-
-    let data = await Articles.aggregate(aggregate);
+    let data = await Articles.aggregate(findQuery);
 
     articleData = data[0].data;
 
@@ -66,7 +44,6 @@ module.exports = {
         args.UserID != articleData[0].AuthorID
       )
         articleData = await calculateSubscribeContent(args, articleData);
-
       await updateViewCount(args.filters, args.UserID);
 
       if (get(args.filters, "UserID")) {
@@ -190,10 +167,6 @@ const buildFindQuery = async ({ args, UserID }) => {
   query.$and.push({ Status: 2 });
   query.$and.push({ isPublish: true });
 
-  if (UserID) {
-    query.$and.push({ AuthorID: UserID });
-  }
-
   if (get(args, "blockedAuthorIds")) {
     query.$and.push({ AuthorID: { $nin: blockedAuthorIds } });
   }
@@ -226,7 +199,33 @@ const buildFindQuery = async ({ args, UserID }) => {
   if (get(args, "isPopular")) {
     query.$and.push({ Status: ArticleStatusConst.Approved });
   }
-  return query;
+
+  let aggregate = [{ $match: query }];
+
+  aggregate.push({
+    $lookup: {
+      from: "users",
+      localField: "AuthorID",
+      foreignField: "ID",
+      as: "Author",
+    },
+  });
+
+  if (UserID) {
+    aggregate.push({ $match: { "Author.ID": parseInt(UserID) } });
+  }
+
+  aggregate.push({
+    $facet: {
+      data: [
+        { $sort: { createdAt: -1 } },
+        { $skip: parseInt(args.page) },
+        { $limit: parseInt(args.limit) },
+      ],
+      pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
+    },
+  });
+  return aggregate;
 };
 
 const queryForBlockedAuthors = async ({ args }) => {

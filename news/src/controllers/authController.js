@@ -76,23 +76,22 @@ const regenerateCreativeToken = async (context, refresh) => {
 
 const authenticateRequest = async (req) => {
   const host = req.headers.origin;
-  console.log(host);
   let userAuthenticate = false;
   if (host != "http://localhost:9200") {
-    if (req.headers.APIKey) {
+    if (req.headers.apikey) {
       let data = await apiKeys.findOne({
         APIKey: req.headers.APIKey,
         isExpired: false,
       });
       if (data) userAuthenticate = true;
       else userAuthenticate = false;
-      return { userAuthenticate, APIKey: req.headers.APIKey };
+      return { userAuthenticate, APIKey: req.headers.apikey };
     }
     return { userAuthenticate };
   } else {
     userAuthenticate = true;
     let obj = { userAuthenticate, APIKey: "" };
-    if (req.headers.APIKey) obj.APIKey = req.headers.APIKey;
+    if (req.headers.apikey) obj.APIKey = req.headers.apikey;
     return obj;
   }
 };

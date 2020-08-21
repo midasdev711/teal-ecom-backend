@@ -15,8 +15,7 @@ module.exports = function (app) {
       // user = getUser(token);
       // return user;
       let userAuthenticate = await authenticateRequest(req);
-      console.log(userAuthenticate);
-      return { userAuthenticate };
+      return userAuthenticate;
     },
   });
 
