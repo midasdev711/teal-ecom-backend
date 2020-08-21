@@ -26,30 +26,23 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
-    let userAuthenticate = await authenticateRequest(args, context);
-    if (!userAuthenticate) {
-      return {
-        responseCode: 404,
-        responseMessage: "Forbidden Access",
-      };
-    }
-    if (get(args.user, "Name") && get(args.user, "Email")) {
-      args.user.Description = args.user.Name + "--" + args.user.Email;
+    if (get(args.user, "name") && get(args.user, "email")) {
+      args.user.description = args.user.name + "--" + args.user.email;
     }
 
-    args.user.UniqueID = uniqid();
+    args.user.uniqueID = uniqid();
 
-    args.user.RoleID = RoleObject.user;
+    args.user.roleID = RoleObject.user;
 
-    if (get(args.user, "Name"))
-      args.user.UserName = await generateUserName(args.user.Name);
+    if (get(args.user, "name"))
+      args.user.userName = await generateUserName(args.user.name);
 
-    if (get(args.user, "SignUpMethod") && get(args.user, "Password")) {
-      args.user.Password = passwordHash.generate(args.user.Password);
+    if (get(args.user, "signUpMethod") && get(args.user, "password")) {
+      args.user.password = passwordHash.generate(args.user.password);
     }
 
     let user = {};
-    if (args.UserId) user = await Users.findOne({ ID: args.UserId });
+    if (args.userId) user = await Users.findOne({ ID: args.userId });
 
     if (get(user, "name")) {
       return Users.update(args.user);
