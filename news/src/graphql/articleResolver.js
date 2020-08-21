@@ -16,10 +16,19 @@ const UsersPaidSubscriptions = require("../models/users_paid_subscriptions");
 const ArticleClickDetails = require("../models/article_click_details");
 const FollowAuthor = require("../models/follow_author");
 const ArticleBookmarks = require("../models/bookmarks");
+const { authenticateRequest } = require("../controllers/authController");
 
 module.exports = {
   index: async (root, args, context) => {
     console.log(args);
+    let userAuthenticate = await authenticateRequest(args, context);
+    if (!userAuthenticate) {
+      return {
+        responseCode: 404,
+        responseMessage: "Forbidden Access",
+      };
+    }
+    console.log(root, args, context);
     const findQuery = await buildFindQuery({ args: args.filters });
 
     // user object can be from apollo server context.user check if this is null
@@ -97,6 +106,13 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
+    let userAuthenticate = await authenticateRequest(args, context);
+    if (!userAuthenticate) {
+      return {
+        responseCode: 404,
+        responseMessage: "Forbidden Access",
+      };
+    }
     const id = await verifyToken(context);
 
     let attributes = get(args, "article");

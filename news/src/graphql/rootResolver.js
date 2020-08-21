@@ -2,7 +2,6 @@ const ArticleResolver = require("./articleResolver");
 const CategoryResolver = require("./categoryResolver");
 const UserResolver = require("./userResolver");
 const AuthResolver = require("./authResolver");
-
 const root = {
   Query: {
     articles: ArticleResolver.index,

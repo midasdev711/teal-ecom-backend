@@ -1,6 +1,6 @@
-const jwt = require("jsonwebtoken"),
-  { TOKEN_SECRET_KEY } = require("../constant");
+const jwt = require("jsonwebtoken");
 var fs = require("fs");
+const apiKeys = require("../models/api_key");
 
 const generateToken = async (context, UserData) => {
   var data = {};
@@ -74,9 +74,32 @@ const regenerateCreativeToken = async (context, refresh) => {
   }
 };
 
+const authenticateRequest = async (args, context) => {
+  console.log(context.headers);
+  const host = context.headers.host;
+  if (
+    host != "teal.com" ||
+    host != "localhost:9200" ||
+    host != "api.teal.com"
+  ) {
+    if (context.headers.APIKey) {
+      let data = await apiKeys.findOne({
+        APIKey: context.headers.APIKey,
+        isExpired: false,
+      });
+      if (data) args.UserAuthenticate = true;
+      else args.UserAuthenticate = false;
+    }
+    res.send("API is up!");
+  } else {
+    args.UserAuthenticate = true;
+  }
+};
+
 module.exports = {
   generateToken,
   verifyToken,
   regenerateToken,
   regenerateCreativeToken,
+  authenticateRequest,
 };

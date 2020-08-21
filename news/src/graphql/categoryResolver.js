@@ -5,11 +5,25 @@ const get = require("lodash/get");
 
 module.exports = {
   index: async (root, args, context) => {
+    let userAuthenticate = await authenticateRequest(args, context);
+    if (!userAuthenticate) {
+      return {
+        responseCode: 404,
+        responseMessage: "Forbidden Access",
+      };
+    }
     const findQuery = await buildFindQuery({ args: args.filters });
     let data = await Category.find(findQuery);
     return data;
   },
   upsert: async (root, args, context) => {
+    let userAuthenticate = await authenticateRequest(args, context);
+    if (!userAuthenticate) {
+      return {
+        responseCode: 404,
+        responseMessage: "Forbidden Access",
+      };
+    }
     let attributes = get(args, "category");
 
     let category = await Category.findOne({ ID: attributes.ID });

@@ -6,9 +6,10 @@ const emailValidator = require("email-validator");
 const uniqid = require("uniqid");
 const { get } = require("lodash");
 const sendMailToUser = require("../mail/signup");
-const UserSettings = require("../../models/user_settings");
+const UserSettings = require("../models/user_settings");
 const passwordHash = require("password-hash");
 const bcrypt = require("bcrypt");
+const apiKeys = require("../models/api_key");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -56,16 +57,21 @@ module.exports = {
     if (user) {
       const uniqueId = uniqid();
       const timeStamp = await getTimeStamp();
-      let APIKey = `Teal${uniqueId}${user._id}${timeStamp}${user.ID}`;
-      const data = APIKey;
-      APIKey = await bcrypt.hashSync(APIKey, 12);
-      let user1 = await Users.findOneAndUpdate(
-        { ID: args.UserID },
-        { $set: { APIKey: APIKey } },
-        { new: true }
+      let APIKey = `Teal${uniqueId}${user._id}${timeStamp}_${user.ID}`;
+      let obj = {
+        APIKey: APIKey,
+        UserID: user.ID,
+        user_id: user._id,
+      };
+      let updateData = await apiKeys.update(
+        { user_id: user._id },
+        { $set: { isExpired: true } },
+        { multi: true }
       );
-      console.log(user1);
-      return data;
+      console.log(updateData);
+      let data = await apiKeys.create(obj);
+      console.log(data);
+      return data.APIKey;
     } else {
       return "User not found";
     }

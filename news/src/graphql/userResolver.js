@@ -14,11 +14,18 @@ const emailValidator = require("email-validator");
 const uniqid = require("uniqid");
 const { get } = require("lodash");
 const sendMailToUser = require("../mail/signup");
-const UserSettings = require("../../models/user_settings");
+const UserSettings = require("../models/user_settings");
 const passwordHash = require("password-hash");
 
 module.exports = {
   index: async (root, args, context) => {
+    let userAuthenticate = await authenticateRequest(args, context);
+    if (!userAuthenticate) {
+      return {
+        responseCode: 404,
+        responseMessage: "Forbidden Access",
+      };
+    }
     let id = {};
     if (context.headers.authorization) {
       id = await verifyToken(context);
@@ -35,6 +42,13 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
+    let userAuthenticate = await authenticateRequest(args, context);
+    if (!userAuthenticate) {
+      return {
+        responseCode: 404,
+        responseMessage: "Forbidden Access",
+      };
+    }
     if (get(args.user, "Name") && get(args.user, "Email")) {
       args.user.Description = args.user.Name + "--" + args.user.Email;
     }
