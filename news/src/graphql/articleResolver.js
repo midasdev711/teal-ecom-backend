@@ -21,8 +21,9 @@ module.exports = {
   index: async (root, args, context) => {
     if (context.userAuthenticate) {
       if (context.APIKey) {
-        let arr = context.APIKey.split("_");
-        args.UserID = arr[1];
+        let arrID = context.APIKey.split("_");
+        let arrDomain = context.APIKey.split("%");
+        if (arrDomain[0] == "teal.com") args.UserID = arrID[1];
       } else {
         args.UserID = null;
       }

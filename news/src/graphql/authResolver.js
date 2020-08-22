@@ -22,23 +22,23 @@ module.exports = {
 
   upsert: async (root, args, context) => {
     console.log(args);
-    if (get(args.auth, "Name") && get(args.auth, "Email")) {
-      args.auth.Description = args.auth.Name + "--" + args.auth.Email;
+    if (get(args.auth, "name") && get(args.auth, "email")) {
+      args.auth.description = args.auth.name + "--" + args.auth.email;
     }
 
-    args.auth.UniqueID = uniqid();
+    args.auth.uniqueID = uniqid();
 
-    args.auth.RoleID = RoleObject.auth;
+    args.auth.roleID = RoleObject.auth;
 
-    if (get(args.auth, "Name"))
-      args.auth.UserName = await generateUserName(args.auth.Name);
+    if (get(args.auth, "name"))
+      args.auth.userName = await generateUserName(args.auth.name);
 
-    if (get(args.auth, "SignUpMethod") && get(args.auth, "Password")) {
-      args.auth.Password = passwordHash.generate(args.auth.Password);
+    if (get(args.auth, "signUpMethod") && get(args.auth, "password")) {
+      args.auth.password = passwordHash.generate(args.auth.password);
     }
 
     let user = {};
-    if (args.UserId) user = await Users.findOne({ ID: args.UserId });
+    if (args.auth.userId) user = await Users.findOne({ ID: args.auth.userId });
 
     if (get(user, "name")) {
       return Users.update(args.auth);
@@ -115,17 +115,23 @@ async function makeid(length) {
 }
 
 const userQuery = async ({ args }) => {
-  if (get(args, "Email") && get(args, "Password")) {
-    let valid = emailValidator.validate(args.Email);
+  if (get(args, "email") && get(args, "password")) {
+    let valid = emailValidator.validate(args.email);
     if (valid) {
       let data = await Users.findOne({
-        Email: args.Email,
-        Status: 1,
+        email: args.email,
+        status: 1,
         isVerified: 1,
       });
       if (data) {
-        if (passwordHash.verify(args.Password, data.Password)) {
-          console.log(data, "data");
+        if (passwordHash.verify(args.password, data.password)) {
+          let apiKey = await apiKeys.findOne({
+            userID: parseInt(data.ID),
+            isExpired: false,
+          });
+          if (get(apiKey, "APIKey")) {
+            data.apiKey = apiKey.APIKey;
+          }
           return data ? await generateToken(data) : [];
         } else throw new Error("Password does not match");
       } else throw new Error("Email does not exists");

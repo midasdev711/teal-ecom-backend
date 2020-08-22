@@ -10,7 +10,7 @@ autoIncrement.initialize(mongoose);
 const APIKeySchema = new Schema(
   {
     ID: { type: Number, exists: false, unique: true },
-    UserID: { type: Number },
+    userID: { type: Number },
     user_id: { type: Schema.Types.ObjectId, ref: "users" },
     APIKey: { type: String },
     expirationTime: { type: Date },

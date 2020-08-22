@@ -160,6 +160,7 @@ type User {
   ipAddress : String
   isFollowing : Boolean
   isSubscriptionAllowed : Boolean
+  apiKey: String
 }
 
 input UserInput {
@@ -239,7 +240,7 @@ type Query {
     articles(filters: ArticleFilters):[Article]
     categories(filters: CategoryFilters):[Category]
     users(filters: UserFilters):[User]
-    auth(Email: String Password: String) : User
+    auth(email: String password: String) : User
 }
 
 type Mutation {
