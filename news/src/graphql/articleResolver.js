@@ -20,9 +20,9 @@ const ArticleBookmarks = require("../models/bookmarks");
 module.exports = {
   index: async (root, args, context) => {
     if (context.userAuthenticate) {
-      if (context.APIKey) {
-        let arrID = context.APIKey.split("_");
-        let arrDomain = context.APIKey.split("%");
+      if (context.apiKey) {
+        let arrID = context.apiKey.split("_");
+        let arrDomain = context.apiKey.split("%");
         if (arrDomain[0] == "teal.com") args.UserID = arrID[1];
       } else {
         args.UserID = null;
@@ -233,7 +233,7 @@ const buildFindQuery = async ({ args, UserID }) => {
 
 const queryForBlockedAuthors = async ({ args }) => {
   const blockedAuthor = await BlockAuthor.find(
-    { UserID: args.UserID, Status: 0 },
+    { userID: args.UserID, Status: 0 },
     { AuthorID: 1, _id: 0 }
   );
 
@@ -280,10 +280,10 @@ async function calculateSubscribeContent(args, lor) {
 async function checkUserSubscription(args, AuthorID) {
   return UsersPaidSubscriptions.findOne({
     $and: [
-      { AuthorID: AuthorID },
-      { Status: { $ne: 0 } },
-      { UserID: args.UserID },
-      { EndDate: { $gte: new Date() } },
+      { authorID: AuthorID },
+      { status: { $ne: 0 } },
+      { userID: args.UserID },
+      { endDate: { $gte: new Date() } },
     ],
   }).countDocuments();
 }
@@ -315,17 +315,17 @@ async function updateArticleClickDetails(args) {
 
 async function getBookMarkCount(data, args) {
   return ArticleBookmarks.find({
-    ArticleID: data.ID,
-    UserID: args.UserID,
-    Status: 1,
+    articleID: data.ID,
+    userID: args.UserID,
+    status: 1,
   }).countDocuments();
 }
 
 async function getFollowAuthorCount(data, args) {
   return FollowAuthor.find({
-    AuthorID: data.AuthorID,
-    UserID: args.UserID,
-    Status: 1,
+    authorID: data.AuthorID,
+    userID: args.UserID,
+    status: 1,
     isFollowed: true,
   }).countDocuments();
 }

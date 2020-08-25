@@ -7,50 +7,55 @@ const autoIncrement = require("mongoose-auto-increment");
 const mongoosePaginate = require("mongoose-paginate");
 autoIncrement.initialize(mongoose);
 
-const ArticleSchema = new Schema({
-  ID: { type: Number, required: true, exists: false, unique: true },
-  title: { type: String, required: true },
-  subTitle: { type: String },
-  description: String,
-  titleSlug: { type: String },
-  slug: { type: String, required: true, exists: false, unique: true },
-  sequence: Number,
-  author: String,
-  authorID: Number,
-  article_SEO: [
-    {
-      metaTitle: String,
-      metaDescription: String,
-      keyPhrases: String,
-      conicalUrl: String,
+const ArticleSchema = new Schema(
+  {
+    ID: { type: Number, required: true, exists: false, unique: true },
+    title: { type: String, required: true },
+    subTitle: { type: String },
+    description: String,
+    titleSlug: { type: String },
+    slug: { type: String, required: true, exists: false, unique: true },
+    sequence: Number,
+    author: String,
+    authorID: Number,
+    article_SEO: [
+      {
+        metaTitle: String,
+        metaDescription: String,
+        keyPhrases: String,
+        conicalUrl: String,
+      },
+    ],
+    ampSlug: String,
+    imagePath: String,
+    featureImage: String,
+    thumbnail: String,
+    readMinutes: String,
+    tags: Array,
+    totalClapCount: { type: Number, default: 0 },
+    status: { type: Number, default: 1 },
+    isPublish: Boolean,
+    isBookmark: { type: Boolean, default: false },
+    viewCount: { type: Number, default: 0 },
+    categories: {
+      ID: Number,
+      name: String,
+      subCategories: [{ ID: Number, Name: String }],
     },
-  ],
-  ampSlug: String,
-  imagePath: String,
-  featureImage: String,
-  thumbnail: String,
-  readMinutes: String,
-  tags: Array,
-  totalClapCount: { type: Number, default: 0 },
-  status: { type: Number, default: 1 },
-  isPublish: Boolean,
-  isBookmark: { type: Boolean, default: false },
-  viewCount: { type: Number, default: 0 },
-  categories: {
-    ID: Number,
-    name: String,
-    subCategories: [{ ID: Number, Name: String }],
+    acceptDonation: { type: Boolean, default: false },
+    minimumDonationAmount: { type: SchemaType.Decimal128, default: "0.00" },
+    // isPaidSubscription : { type : Boolean, default : false },
+    articleScope: { type: Number, default: 0 },
+    createdDate: { type: Date, default: Date.now },
+    modifiedDate: { type: Date, default: Date.now },
+    createdBy: Number,
+    modifiedBy: Number,
+    urls: { type: String, default: "" },
   },
-  acceptDonation: { type: Boolean, default: false },
-  minimumDonationAmount: { type: SchemaType.Decimal128, default: "0.00" },
-  // isPaidSubscription : { type : Boolean, default : false },
-  articleScope: { type: Number, default: 0 },
-  createdDate: { type: Date, default: Date.now },
-  modifiedDate: { type: Date, default: Date.now },
-  createdBy: Number,
-  modifiedBy: Number,
-  urls: { type: String, default: "" },
-});
+  {
+    timestamps: true,
+  }
+);
 
 class Article {
   update(attributes) {

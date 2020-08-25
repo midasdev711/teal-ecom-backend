@@ -80,18 +80,18 @@ const authenticateRequest = async (req) => {
   if (host != "http://localhost:9200") {
     if (req.headers.apikey) {
       let data = await apiKeys.findOne({
-        APIKey: req.headers.APIKey,
+        apiKey: req.headers.apiKey,
         isExpired: false,
       });
       if (data) userAuthenticate = true;
       else userAuthenticate = false;
-      return { userAuthenticate, APIKey: req.headers.apikey };
+      return { userAuthenticate, apiKey: req.headers.apiKey };
     }
     return { userAuthenticate };
   } else {
     userAuthenticate = true;
-    let obj = { userAuthenticate, APIKey: "" };
-    if (req.headers.apikey) obj.APIKey = req.headers.apikey;
+    let obj = { userAuthenticate, apiKey: "" };
+    if (req.headers.apiKey) obj.apiKey = req.headers.apiKey;
     return obj;
   }
 };

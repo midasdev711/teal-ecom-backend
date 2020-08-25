@@ -71,7 +71,6 @@ const UserSchema = new Schema({
     },
   ],
   IpAddress: { type: String },
-  APIKey: { type: String },
 });
 
 //

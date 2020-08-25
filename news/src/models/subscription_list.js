@@ -1,23 +1,34 @@
-/*
-  * CreatedBy : Ankita Solace
-  * Purporse : subscrition list but currently not using Schema
-*/
 const mongoose = require("mongoose"),
-      Schema = mongoose.Schema,
-      autoIncrement = require('mongoose-auto-increment');
-      autoIncrement.initialize(mongoose);
+  Schema = mongoose.Schema,
+  autoIncrement = require("mongoose-auto-increment");
+autoIncrement.initialize(mongoose);
 
-const SubscriptionSchema = new Schema({
-    SubscriptionID: {  type: Number,  required: true, exists: false, unique : true },
-    Name:  {  type: String,  required: true, exists: false, unique : true },
-    Description:    {type: String},
-    Days: {type: Number},
-    Status : { type: Number, default: 1 },
-    CreatedDate:  { type: Date, default: Date.now },
-    ModifiedDate:  { type: Date, default: Date.now },
-    CreatedBy: Number,
-    ModifiedBy: Number
+const SubscriptionSchema = new Schema(
+  {
+    ID: { type: Number, exists: false, unique: true },
+    subscriptionID: {
+      type: Number,
+      required: true,
+      exists: false,
+      unique: true,
+    },
+    name: { type: String, required: true, exists: false, unique: true },
+    description: { type: String },
+    days: { type: Number },
+    status: { type: Number, default: 1 },
+    createdDate: { type: Date, default: Date.now },
+    modifiedDate: { type: Date, default: Date.now },
+    createdBy: Number,
+    modifiedBy: Number,
+  },
+  {
+    timestamps: true,
+  }
+);
+
+SubscriptionSchema.plugin(autoIncrement.plugin, {
+  model: "subscription_lists",
+  field: "SubscriptionID",
+  startAt: 1,
 });
-
-SubscriptionSchema.plugin(autoIncrement.plugin, { model: 'subscription_lists', field: 'SubscriptionID',startAt: 1 });
-module.exports = mongoose.model('subscription_lists',SubscriptionSchema );
+module.exports = mongoose.model("subscription_lists", SubscriptionSchema);

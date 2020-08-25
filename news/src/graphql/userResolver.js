@@ -56,11 +56,11 @@ module.exports = {
 
 async function SaveUserSettings(args, UserID) {
   let UserSettingsConstant = new UserSettings({
-    UserID: UserID,
-    Account: {
-      Name: args.Name,
-      Email: args.Email,
-      UserName: args.UserName,
+    userID: UserID,
+    account: {
+      name: args.Name,
+      email: args.Email,
+      userName: args.UserName,
     },
   });
 
@@ -109,13 +109,14 @@ const userQuery = async ({ args }) => {
   }
 
   if (get(args, "email")) {
+    console.log("object111");
     let valid = emailValidator.validate(args.email);
     if (valid) {
       var Result = [];
-      await Users.find(
-        { email: { $regex: new RegExp(`^${args.email}$`, "i") }, etatus: 1 },
-        { _id: false, uniqueID: true, email: true }
-      ).then(async (isEmail) => {
+      await Users.find({
+        email: { $regex: new RegExp(`^${args.email}$`, "i") },
+        status: 1,
+      }).then(async (isEmail) => {
         Result = await isEmail;
         Result = Result.concat(isEmail);
       });

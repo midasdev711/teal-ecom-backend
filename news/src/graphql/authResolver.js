@@ -59,8 +59,8 @@ module.exports = {
       const timeStamp = await getTimeStamp();
       let APIKey = `teal.com%${uniqueId}${user._id}${timeStamp}_${user.ID}`;
       let obj = {
-        APIKey: APIKey,
-        UserID: user.ID,
+        apiKey: APIKey,
+        userID: user.ID,
         user_id: user._id,
       };
       let updateData = await apiKeys.update(
@@ -71,7 +71,7 @@ module.exports = {
       console.log(updateData);
       let data = await apiKeys.create(obj);
       console.log(data);
-      return data.APIKey;
+      return data.apiKey;
     } else {
       return "User not found";
     }
@@ -85,11 +85,11 @@ function getTimeStamp() {
 
 async function SaveUserSettings(args, UserID) {
   let UserSettingsConstant = new UserSettings({
-    UserID: UserID,
-    Account: {
-      Name: args.Name,
-      Email: args.Email,
-      UserName: args.UserName,
+    userID: UserID,
+    account: {
+      name: args.Name,
+      email: args.Email,
+      userName: args.UserName,
     },
   });
 
@@ -129,8 +129,8 @@ const userQuery = async ({ args }) => {
             userID: parseInt(data.ID),
             isExpired: false,
           });
-          if (get(apiKey, "APIKey")) {
-            data.apiKey = apiKey.APIKey;
+          if (get(apiKey, "apiKey")) {
+            data.apiKey = apiKey.apiKey;
           }
           return data ? await generateToken(data) : [];
         } else throw new Error("Password does not match");

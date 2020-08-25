@@ -11,9 +11,6 @@ module.exports = function (app) {
     resolvers: rootResolver,
     context: async ({ req }) => {
       // get user object from here for the resolvers.
-      // const token = req.headers.authorization || '';
-      // user = getUser(token);
-      // return user;
       let userAuthenticate = await authenticateRequest(req);
       return userAuthenticate;
     },

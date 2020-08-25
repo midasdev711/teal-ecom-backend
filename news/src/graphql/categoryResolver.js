@@ -5,29 +5,21 @@ const get = require("lodash/get");
 
 module.exports = {
   index: async (root, args, context) => {
-    if (context.userAuthenticate) {
-      if (context.APIKey) {
-        let arr = context.APIKey.split("_");
-        args.UserID = arr[1];
-      } else {
-        args.UserID = null;
-      }
-    }
+    // if (context.userAuthenticate) {
+    //   if (context.apiKey) {
+    //     let arr = context.apiKey.split("_");
+    //     args.UserID = arr[1];
+    //   } else {
+    //     args.UserID = null;
+    //   }
+    // }
     const findQuery = await buildFindQuery({
       args: args.filters,
-      UserID: args.UserID,
     });
     let data = await Category.find(findQuery);
     return data;
   },
   upsert: async (root, args, context) => {
-    let userAuthenticate = await authenticateRequest(args, context);
-    if (!userAuthenticate) {
-      return {
-        responseCode: 404,
-        responseMessage: "Forbidden Access",
-      };
-    }
     let attributes = get(args, "category");
 
     let category = await Category.findOne({ ID: attributes.ID });
@@ -43,7 +35,7 @@ module.exports = {
 const buildFindQuery = async ({ args, UserID }) => {
   let query = { $and: [] };
 
-  query.$and.push({ Status: 1 });
+  query.$and.push({ status: 1 });
 
   if (get(args, "categoryIds")) {
     query.$and.push({ ID: { $in: get(args, "categoryIds") } });

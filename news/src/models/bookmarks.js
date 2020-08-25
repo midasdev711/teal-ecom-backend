@@ -1,23 +1,25 @@
-/*
-  * CreatedBy : Ankita Solace
-  * CreatedDate : 30-11-2019
-  * Purporse :  article bookmark schema
-*/
-
 const mongoose = require("mongoose"),
-      Schema = mongoose.Schema,
-      autoIncrement = require('mongoose-auto-increment');
-      autoIncrement.initialize(mongoose);
+  Schema = mongoose.Schema,
+  autoIncrement = require("mongoose-auto-increment");
+autoIncrement.initialize(mongoose);
 
-const BookMarkSchema = new Schema({
-    ID: {  type: Number,  required: true, exists: false, unique : true },
-    ArticleID :{  type: Number,  required: true },
-    UserID :{  type: Number,  required: true },
-    Status : { type: Number, default: 1 },
-    CreatedDate:  { type: Date, default: Date.now },
-    ModifiedDate:  { type: Date, default: Date.now }
+const BookMarkSchema = new Schema(
+  {
+    ID: { type: Number, required: true, exists: false, unique: true },
+    articleID: { type: Number, required: true },
+    userID: { type: Number, required: true },
+    status: { type: Number, default: 1 },
+    createdDate: { type: Date, default: Date.now },
+    modifiedDate: { type: Date, default: Date.now },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+BookMarkSchema.plugin(autoIncrement.plugin, {
+  model: "article_bookmarks",
+  field: "ID",
+  startAt: 1,
 });
-
-
-BookMarkSchema.plugin(autoIncrement.plugin, { model: 'article_bookmarks', field: 'ID',startAt: 1 });
-module.exports = mongoose.model('article_bookmarks',BookMarkSchema );
+module.exports = mongoose.model("article_bookmarks", BookMarkSchema);

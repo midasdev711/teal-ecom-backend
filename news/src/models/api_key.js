@@ -1,7 +1,3 @@
-/*
- * CreatedBy : Ankita Solace
- * Purporse : user paid subscrition log Schema
- */
 const mongoose = require("mongoose"),
   Schema = mongoose.Schema,
   autoIncrement = require("mongoose-auto-increment");
@@ -12,7 +8,7 @@ const APIKeySchema = new Schema(
     ID: { type: Number, exists: false, unique: true },
     userID: { type: Number },
     user_id: { type: Schema.Types.ObjectId, ref: "users" },
-    APIKey: { type: String },
+    apiKey: { type: String },
     expirationTime: { type: Date },
     isExpired: { type: Boolean, default: false },
   },
