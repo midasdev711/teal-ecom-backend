@@ -174,7 +174,6 @@ const buildFindQuery = async ({ args, UserID }) => {
   }
 
   if (get(args, "slug")) {
-    console.log("object");
     query.$and.push({ slug: args.slug, articleScope: { $ne: 0 } });
   }
 

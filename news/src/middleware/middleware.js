@@ -5,7 +5,6 @@ var fs = require("fs");
 const generateToken = async (UserData) => {
   var data = {};
   try {
-    console.log("object");
     var privateKey = fs.readFileSync("./news/schema/middleware/new.key");
     data = UserData;
     data["token"] = jwt.sign({ userId: UserData.ID }, privateKey, {
