@@ -1,4 +1,4 @@
-// const Users = require("../models/users");
+const Users = require("../models/users");
 const { GraphQLEmail } = require("graphql-custom-types");
 const { ArticleStatusConst, RoleObject } = require("../constant");
 const { generateToken, verifyToken } = require("../middleware/middleware");
@@ -11,9 +11,6 @@ const passwordHash = require("password-hash");
 const bcrypt = require("bcrypt");
 const apiKeys = require("../models/api_key");
 
-var mongoose = require("mongoose");
-var Users = mongoose.model("users");
-
 module.exports = {
   index: async (root, args, context) => {
     console.log(args);
@@ -24,6 +21,7 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
+    console.log(args);
     if (get(args.auth, "name") && get(args.auth, "email")) {
       args.auth.description = args.auth.name + "--" + args.auth.email;
     }
@@ -86,13 +84,12 @@ function getTimeStamp() {
 }
 
 async function SaveUserSettings(args, UserID) {
-  console.log("object", args);
   let UserSettingsConstant = new UserSettings({
     userID: UserID,
     account: {
-      name: args.name,
-      email: args.email,
-      userName: args.userName,
+      name: args.Name,
+      email: args.Email,
+      userName: args.UserName,
     },
   });
 

@@ -140,7 +140,7 @@ type User {
   signUpMethod: String 
   faceBookUrl : String
   userCounter  : Int
-  totalWalletAmount : Float
+  totalWalletAmount : String
   isPaidSubscription : Boolean
   paidSubscription : [PaidSubscriptionType]
   following : Int

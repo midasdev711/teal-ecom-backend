@@ -59,13 +59,13 @@ const UserSchema = new Schema(
 
     userCounter: { type: Number, default: 1 },
     faceBookUrl: { type: String, default: "" },
-    totalWalletAmount: { type: SchemaType.Decimal128, default: "0.00" },
+    totalWalletAmount: { type: String, default: "0.00" },
     isPaidSubscription: { type: Boolean, default: false },
     paidSubscription: [
       {
         subscriptionID: { type: Number },
         name: { type: String },
-        amount: { type: SchemaType.Decimal128, default: "0.00" },
+        amount: { type: String, default: "0.00" },
         description: { type: String },
         days: { type: Number },
         status: { type: Number, default: 1 },
