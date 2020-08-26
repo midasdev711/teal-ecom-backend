@@ -6,7 +6,7 @@ type ProductCategoryType {
 
 type ProductAttributeType{ 
       _id: String
-      attributsName :String
+      attributeName :String
       attributeValues :[String] 
 }
 
