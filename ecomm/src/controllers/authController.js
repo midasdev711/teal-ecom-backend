@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 var fs = require("fs");
-const apiKeys = require("../models/api_key");
+// const apiKeys = require("../models/api_key");
 
 const generateToken = async (context, UserData) => {
   var data = {};
@@ -74,32 +74,32 @@ const regenerateCreativeToken = async (context, refresh) => {
   }
 };
 
-const authenticateRequest = async (req) => {
-  const host = req.headers.origin;
-  let userAuthenticate = false;
-  if (host != "http://localhost:9200") {
-    if (req.headers.apikey) {
-      let data = await apiKeys.findOne({
-        apiKey: req.headers.apiKey,
-        isExpired: false,
-      });
-      if (data) userAuthenticate = true;
-      else userAuthenticate = false;
-      return { userAuthenticate, apiKey: req.headers.apiKey };
-    }
-    return { userAuthenticate };
-  } else {
-    userAuthenticate = true;
-    let obj = { userAuthenticate, apiKey: "" };
-    if (req.headers.apiKey) obj.apiKey = req.headers.apiKey;
-    return obj;
-  }
-};
+// const authenticateRequest = async (req) => {
+//   const host = req.headers.origin;
+//   let userAuthenticate = false;
+//   if (host != "http://localhost:9200") {
+//     if (req.headers.apikey) {
+//       let data = await apiKeys.findOne({
+//         apiKey: req.headers.apiKey,
+//         isExpired: false,
+//       });
+//       if (data) userAuthenticate = true;
+//       else userAuthenticate = false;
+//       return { userAuthenticate, apiKey: req.headers.apiKey };
+//     }
+//     return { userAuthenticate };
+//   } else {
+//     userAuthenticate = true;
+//     let obj = { userAuthenticate, apiKey: "" };
+//     if (req.headers.apiKey) obj.apiKey = req.headers.apiKey;
+//     return obj;
+//   }
+// };
 
 module.exports = {
   generateToken,
   verifyToken,
   regenerateToken,
   regenerateCreativeToken,
-  authenticateRequest,
+  // authenticateRequest,
 };

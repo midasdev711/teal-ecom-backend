@@ -2,7 +2,6 @@ const express = require("express"),
   { ApolloServer } = require("apollo-server-express"),
   rootResolver = require("../graphql/rootResolver"),
   typeDefs = require("./graphqlTypeDefs");
-const apiKeys = require("../models/api_key");
 const { authenticateRequest } = require("../controllers/authController");
 
 module.exports = function (app) {

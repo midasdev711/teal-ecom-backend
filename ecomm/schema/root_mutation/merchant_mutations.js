@@ -43,7 +43,7 @@ const transporter = nodemailer.createTransport({
     * @param {$isParent} Name
     * @param {$ParentCategoryID}  Description
     * @returns {$merchantDetails Array}
-    */
+*/
 
   const AddMerchantCategory = {
       type : MerchantType,

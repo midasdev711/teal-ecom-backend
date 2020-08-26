@@ -24,8 +24,11 @@ app.use(bodyParser.urlencoded({ limit: "250mb", extended: true }));
 //   console.log("conneted to database");
 // });
 
+// require("./mainRoutes/mainRoutes");
+
 (function loadRoutes() {
   require("./news/src/config/routes")(app);
+  // require("./ecomm/src/config/routes")(app);
 })();
 
 app.listen({ port: 9200 }, () =>
