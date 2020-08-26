@@ -54,6 +54,8 @@ module.exports = {
   },
 };
 
+uploadProfileImage: async (root, args, context) => {};
+
 async function SaveUserSettings(args, UserID) {
   let UserSettingsConstant = new UserSettings({
     userID: UserID,

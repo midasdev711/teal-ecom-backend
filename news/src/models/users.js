@@ -39,7 +39,7 @@ const UserSchema = new Schema(
       {
         ID: Number,
         name: String,
-        type: Number,
+        categoryType: { type: Number, default: 1 },
       },
     ],
     subCategories: [
@@ -47,7 +47,7 @@ const UserSchema = new Schema(
         ID: Number,
         name: String,
         parentCategoryID: Number,
-        type: Number,
+        categoryType: { type: Number, default: 0 },
       },
     ],
     avatar: { type: String, default: "" },

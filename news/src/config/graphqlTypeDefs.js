@@ -164,6 +164,7 @@ type User {
 }
 
 input UserInput {
+  userId: Int
   name: String
   email : String
   password: String
@@ -182,26 +183,26 @@ type SubCategories {
   ID: Int
   name: String
   parentCategoryID: Int
-  type: Int
+  categoryType: Int
 }
 
 type UserParentCategory {
   ID: Int
   name: String
-  type: Int
+  categoryType: Int
 }
 
 input UsersParentCategoryInput {
   ID: Int
   name: String
-  type: Int
+  categoryType: Int
 }
 
 input SubcategoriesInput {
   ID: Int
   name: String
   parentCategoryID: Int
-  type: Int
+  categoryType: Int
 }
 
 type PaidSubscriptionType {

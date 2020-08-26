@@ -10,9 +10,7 @@ const UserSettings = require("../models/user_settings");
 const passwordHash = require("password-hash");
 const bcrypt = require("bcrypt");
 const apiKeys = require("../models/api_key");
-
-var mongoose = require("mongoose");
-var Users = mongoose.model("users");
+const Users = require("../models/users");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -24,27 +22,24 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
-    if (get(args.auth, "name") && get(args.auth, "email")) {
-      args.auth.description = args.auth.name + "--" + args.auth.email;
-    }
-
-    args.auth.uniqueID = uniqid();
-
-    args.auth.roleID = RoleObject.auth;
-
-    if (get(args.auth, "name"))
-      args.auth.userName = await generateUserName(args.auth.name);
-
-    if (get(args.auth, "signUpMethod") && get(args.auth, "password")) {
-      args.auth.password = passwordHash.generate(args.auth.password);
-    }
-
     let user = {};
     if (args.auth.userId) user = await Users.findOne({ ID: args.auth.userId });
 
-    if (get(user, "name")) {
-      return Users.update(args.auth);
+    if (get(user, "ID")) {
+      return await Users.findOneAndUpdate({ ID: args.auth.userId }, args.auth, {
+        new: true,
+      });
     } else {
+      if (get(args.auth, "name") && get(args.auth, "email")) {
+        args.auth.description = args.auth.name + "--" + args.auth.email;
+      }
+      if (get(args.auth, "name"))
+        args.auth.userName = await generateUserName(args.auth.name);
+      if (get(args.auth, "signUpMethod") && get(args.auth, "password")) {
+        args.auth.password = passwordHash.generate(args.auth.password);
+      }
+      args.auth.uniqueID = uniqid();
+      args.auth.roleID = RoleObject.auth;
       UserData = await Users.create(args.auth);
       SaveUserSettings(args.auth, UserData.ID);
       return await generateToken(UserData);
