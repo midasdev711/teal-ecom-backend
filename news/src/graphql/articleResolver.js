@@ -16,6 +16,7 @@ const UsersPaidSubscriptions = require("../models/users_paid_subscriptions");
 const ArticleClickDetails = require("../models/article_click_details");
 const FollowAuthor = require("../models/follow_author");
 const ArticleBookmarks = require("../models/bookmarks");
+const ArticleRatings = require("../models/article_rating");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -47,7 +48,7 @@ module.exports = {
           articleData = await calculateSubscribeContent(args, articleData);
         await updateViewCount(args.filters, args.UserID);
 
-        if (get(args.filters, "UserID")) {
+        if (get(args.filters, "userID")) {
           await Promise.all(
             articleData.map(async (data) => {
               return Promise.all([
@@ -117,6 +118,90 @@ module.exports = {
       return Articles.create(attributes);
     }
   },
+
+  articleRating: async (root, args, context) => {
+    args = args.articleRating;
+    console.log(args);
+
+    if (typeof args.userID != "undefined" && args.userID != 0) {
+      return ArticleRatings.find({
+        articleID: args.articleID,
+        userID: args.userID,
+        status: 1,
+      }).then(async (rating) => {
+        if (rating.length == 0) {
+          let ArticleClapCountConstant = new ArticleRatings({
+            description: args.userID + "user-aritcle" + args.articleID,
+            userID: args.userID,
+            articleID: args.articleID,
+            clapCount: 1,
+          });
+
+          await Articles.updateOne(
+            { $and: [{ ID: args.articleID }, { status: { $ne: 0 } }] },
+            { $inc: { totalClapCount: 1 } },
+            { upsert: true, returnOriginal: true }
+          );
+
+          return await ArticleClapCountConstant.save();
+        } else {
+          await Articles.updateOne(
+            { $and: [{ ID: args.articleID }, { status: { $ne: 0 } }] },
+            { $inc: { totalClapCount: -1 } },
+            { upsert: true, returnOriginal: true }
+          );
+
+          return await ArticleRatings.findOneAndUpdate(
+            {
+              $and: [
+                { articleID: args.articleID },
+                { userID: args.userID },
+                { status: 1 },
+              ],
+            },
+            { $set: { status: 0 } },
+            { new: true, returnNewDocument: true }
+          );
+        }
+      });
+    } else throw new Error("Please login to continue");
+  },
+
+  articleBookmark: async (root, args, context) => {
+    args = args.articleBookmark;
+
+    if (typeof args.userID != "undefined" && args.userID != 0) {
+      let BookmarkConstant = new ArticleBookmarks({
+        articleID: args.articleID,
+        userID: args.userID,
+      });
+
+      return ArticleBookmarks.findOne({
+        $and: [
+          { articleID: args.articleID },
+          { userID: args.userID },
+          { status: 1 },
+        ],
+      })
+        .then((result) => {
+          if (result == null) return BookmarkConstant.save();
+          else {
+            return ArticleBookmarks.findOneAndUpdate(
+              {
+                articleID: args.articleID,
+                userID: args.userID,
+                status: 1,
+              },
+              { $set: { status: 0 } },
+              { new: true, returnNewDocument: true }
+            );
+          }
+        })
+        .catch((err) => {
+          return err;
+        });
+    } else throw new Error("Please login to continue");
+  },
 };
 
 const uploadFeaturedImage = (ImageBase64, Slug) => {
@@ -179,6 +264,10 @@ const buildFindQuery = async ({ args, UserID }) => {
 
   if (get(args, "articleIds")) {
     query.$and.push({ ID: { $in: get(args, "articleIds") } });
+  }
+
+  if (get(args, "articleId")) {
+    query.$and.push({ ID: parseInt(args.articleId) });
   }
 
   if (get(args, "ignoreArticleIds")) {
@@ -255,7 +344,7 @@ const formatString = (str) => {
 
 async function calculateSubscribeContent(args, lor) {
   if (get(lor[0], "articleScope") == 2) {
-    if (get(args, "userID")) {
+    if (get(args.filters, "userID")) {
       if ((await checkUserSubscription(args, lor[0].authorID)) <= 0) {
         lor[0].description =
           lor[0].description.substring(0, PremiumContentLen) +
@@ -281,7 +370,7 @@ async function checkUserSubscription(args, AuthorID) {
     $and: [
       { authorID: AuthorID },
       { status: { $ne: 0 } },
-      { userID: args.UserID },
+      { userID: args.filters.userID },
       { endDate: { $gte: new Date() } },
     ],
   }).countDocuments();
@@ -304,7 +393,7 @@ async function updateArticleClickDetails(args) {
   let ClickData = {};
   Articles.findOne({ slug: args.slug }).then((data) => {
     ClickData.articleID = data.ID;
-    ClickData.userID = args.userID;
+    ClickData.userID = args.filters.userID;
     ClickData.authorID = data.authorID;
     ClickData.slug = args.slug;
     ClickData.articleTitle = data.title;
@@ -315,7 +404,7 @@ async function updateArticleClickDetails(args) {
 async function getBookMarkCount(data, args) {
   return ArticleBookmarks.find({
     articleID: data.ID,
-    userID: args.UserID,
+    userID: args.filters.userID,
     status: 1,
   }).countDocuments();
 }
@@ -323,7 +412,7 @@ async function getBookMarkCount(data, args) {
 async function getFollowAuthorCount(data, args) {
   return FollowAuthor.find({
     authorID: data.AuthorID,
-    userID: args.UserID,
+    userID: args.filters.UserID,
     status: 1,
     isFollowed: true,
   }).countDocuments();

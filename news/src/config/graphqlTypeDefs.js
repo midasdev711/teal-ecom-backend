@@ -108,6 +108,7 @@ type Category{
 
 input ArticleFilters {
   articleIds: [ID]
+  articleId: ID
   ignoreArticleIds:[ID]
   authorID: Int
   userID: Int
@@ -236,6 +237,30 @@ type APIKey{
   apiKey: String
 }
 
+type ArticleRating{
+      ID: Int
+      description :String
+      userID : Int
+      clapCount :Int
+      upVote  : String
+      downVote : String
+      articleID : Int
+      status : String
+      article : Article
+}     
+
+input ArticleRBInput{
+      userID:Int
+      articleID: Int
+}
+
+type ArticleBookmark{
+      ID: Int
+      articleID: Int
+      userID: Int!
+      status : Int
+      article: Article
+}
 
 type Query {
     articles(filters: ArticleFilters):[Article]
@@ -249,6 +274,8 @@ type Mutation {
   upsertCategory(category: CategoryInput): Category 
   upsertAuth(auth: UserInput) : User
   userAPIKey(UserID:ID!): String
+  upsertArticleRating(articleRating: ArticleRBInput): ArticleRating
+  upsertArticleBookmark(articleBookmark: ArticleRBInput): ArticleBookmark
 }
 `;
 
