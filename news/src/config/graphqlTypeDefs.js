@@ -9,7 +9,7 @@ const typeDefs = `
     readMinutes : String
     tags: [String]
     isPublish : Boolean
-    categories: ArticleCategoryInput,
+    categories: [ArticleCategoryInput],
     acceptDonation : Boolean
     minimumDonationAmount : Float
     isPaidSubscription : Boolean
@@ -19,7 +19,6 @@ const typeDefs = `
   input ArticleCategoryInput {
     ID: Int
     name: String
-    subCategories :[SubCategoriesInput]
   }
 
   input SubCategoriesInput {

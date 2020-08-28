@@ -167,72 +167,58 @@ input ProductFilters {
     }
 
 
-    const DecimalConvertOrderAmount = new GraphQLScalarType({
-      name : "convertToDecimalOrderAmount",
-      resolve(parent){
-          return parseFloat(parent.OrderAmount);
-      }
-});
-
-const DecimalConvertItemTotalPrice = new GraphQLScalarType({
-    name : "convertToDecimalOrderProductTotalPrice",
-    resolve(parent){
-        return parseFloat(parent.ProductTotalPrice);
-    }
-});
-
-const DecimalConvertProductSalePrice = new GraphQLScalarType({
-    name : "convertToDecimalOrderProductSalePrice",
-    resolve(parent){
-        return parseFloat(parent.ProductSalePrice);
-    }
-});
-
-
-const OrderProductType {
+type OrderProductType {
         _id: String
-        status: { type: GraphQLInt },
-        productID:{type :GraphQLString},
-        productMerchantID:{type :GraphQLInt},
-        productSKU:{type :GraphQLString},
-        productTitle:{type :GraphQLString},
-        productSalePrice:{type :DecimalConvertProductSalePrice },
-        productTotalQuantity:{type :GraphQLInt},
-        productTotalPrice:{type :DecimalConvertItemTotalPrice },
-        productVariantID:{type :GraphQLString},
-        ProductVariantObject : {
-        variantType : VariantsType,
-        resolve : async (parent, args) => {
-            let variationDetails = await VariantDetails.find({ _id : parent.ProductVariantID, Status : 1 });
-            let variationData ;
-            if(variationDetails.length > 0)
-             {
-                variationData = variationDetails[0]
-             }
-            return variationData
-         }
-      },
-      ProductObject : {
-        type : ProductType,
-        resolve : async (parent, args) => {
-            let productDetails = await ProductDetails.find({ ProductID : parent.ProductID, Status : 1 });
-            let productData ;
-            if(productDetails.length > 0)
-             {
-                productData = productDetails[0];
-             }
-            return productData
-         }
-      },
-    })
-});
+        status:Int
+        productID:String
+        productMerchantID:Int
+        productSKU:String
+        productTitle:String
+        productSalePrice:String
+        productTotalQuantity:Int
+        productTotalPrice:String
+        productVariantID:String
+        productVariantObject : VariantsType
+        productObject : Product
+}
 
+input OrderProductInput {
+  productID:String
+        productMerchantID:Int
+        productSKU:String
+        productTitle:String
+        productSalePrice:String
+        productTotalQuantity:Int
+        productTotalPrice:String
+        productVariantID:String
+        productObject : ProductInput
+}
+
+type  VariantsType{
+      _id: String
+      ID: Int 
+      productID : String 
+      merchantID : String
+      costPrice  : String
+      sellingPrice  : String
+      variantStock  : String
+      variantSKU : String
+      variantImage : String
+      status : Int
+      productVariants  : VariantsAttribute
+  }
+
+  type VariantsAttribute{
+        _id: String
+       name : String
+       value : String
+}
 
 type Order{
         _id: String
         ID: Int
         status: Int
-        userID: String
+        userID: Int
         orderAmount : String
         deliveryAddress: Object
         shippingAddress : Object
@@ -242,14 +228,31 @@ type Order{
         createdAt: String
     }
 
+input OrderInput{
+  userID: Int
+  orderAmount: String
+  deliveryAddress: Object
+  shippingAddress : Object
+  products: [OrderProductType]
+}
+
+    input OrderFilters {
+      orderIds: [Int]
+      ignoreOrderIds:[Int]
+      limit: Int
+      page: Int
+    }
+
 type Query {
       products(filters: ProductFilters):[Product]
       merchants(filters: MerchantFilters):[Merchant]
+      orders(filters:OrderFilters):[Order]
   }
   
   type Mutation {
     upsertProduct(product: ProductInput): Product
     upsertMerchant(merchant: MerchantInput)
+    upsertOrder(order:OrderInput)
   }
 `;
 

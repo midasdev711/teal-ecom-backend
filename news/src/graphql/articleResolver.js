@@ -11,12 +11,13 @@ const {
 } = require("../constant");
 const get = require("lodash/get");
 const UploadBase64OnS3 = require("../upload/base64_upload");
-const { AWSCredentails } = require("../upload/aws_constants");
+const { AWSNewCredentials } = require("../upload/aws_constants");
 const UsersPaidSubscriptions = require("../models/users_paid_subscriptions");
 const ArticleClickDetails = require("../models/article_click_details");
 const FollowAuthor = require("../models/follow_author");
 const ArticleBookmarks = require("../models/bookmarks");
 const ArticleRatings = require("../models/article_rating");
+const uniqid = require("uniqid");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -81,38 +82,32 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
-    const id = await verifyToken(context);
-
     let attributes = get(args, "article");
-    if (id.UserID) {
-      attributes.authorID = id.UserID;
-    }
-
-    if (get(args, "title")) {
-      const title = args.title;
-      attributes.titleSlug = formatString(attributes.title);
-      attributes.ampSlug = formatString(attributes.title);
-    }
-
-    if (get(attributes, "featureImage")) {
-      attributes.featureImage = await uploadFeaturedImage(
-        attributes.featureImage,
-        attributes.slug
-      );
-    }
-
-    if (get(attributes, "description")) {
-      attributes.description = await uploadDescriptionImagesOnS3(
-        attributes.description
-      );
-    }
+    console.log(args);
 
     let article = await Articles.findOne({ ID: attributes.ID });
 
     if (article) {
-      return Articles.update(args);
+      return Articles.update(attributes);
     } else {
       attributes.slug = uniqid(Date.now());
+      if (get(args, "title")) {
+        attributes.titleSlug = formatString(attributes.title);
+        attributes.ampSlug = formatString(attributes.title);
+      }
+
+      if (get(attributes, "featureImage")) {
+        attributes.featureImage = await uploadFeaturedImage(
+          attributes.featureImage,
+          attributes.slug
+        );
+      }
+
+      if (get(attributes, "description")) {
+        attributes.description = await uploadDescriptionImagesOnS3(
+          attributes.description
+        );
+      }
       attributes.ampSlug = `amp/${attributes.slug}`;
 
       return Articles.create(attributes);
@@ -205,7 +200,11 @@ module.exports = {
 };
 
 const uploadFeaturedImage = (ImageBase64, Slug) => {
-  return UploadBase64OnS3(ImageBase64, AWSCredentails.AWS_USER_IMG_PATH, Slug);
+  return UploadBase64OnS3(
+    ImageBase64,
+    AWSNewCredentials.AWS_USER_IMG_PATH,
+    Slug
+  );
 };
 
 // upload image inside description string on aws, replace the aws return url in description
