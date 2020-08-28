@@ -247,7 +247,7 @@ async function getBlobImageObject(DescriptionString) {
 }
 
 const buildFindQuery = async ({ args, UserID }) => {
-  const blockedAuthorIds = await queryForBlockedAuthors({ args });
+  // const blockedAuthorIds = await queryForBlockedAuthors({ args });
   let query = { $and: [] };
 
   query.$and.push({ status: 2 });
@@ -320,7 +320,7 @@ const buildFindQuery = async ({ args, UserID }) => {
 
 const queryForBlockedAuthors = async ({ args }) => {
   const blockedAuthor = await BlockAuthor.find(
-    { userID: args.UserID, Status: 0 },
+    { userID: args.userID, Status: 0 },
     { AuthorID: 1, _id: 0 }
   );
 
