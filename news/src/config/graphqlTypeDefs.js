@@ -56,6 +56,7 @@ const typeDefs = `
     isClicked : Boolean
     isContentAllowed : Boolean
     articleScope :Int
+    clapCountUser:[User]
   }
 
 type DefCategory{

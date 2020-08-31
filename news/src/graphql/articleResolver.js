@@ -49,7 +49,7 @@ module.exports = {
           articleData = await calculateSubscribeContent(args, articleData);
         await updateViewCount(args.filters, args.UserID);
 
-        if (get(args.filters, "userID")) {
+        if (get(args.filters, "authorId")) {
           await Promise.all(
             articleData.map(async (data) => {
               return Promise.all([
@@ -65,6 +65,16 @@ module.exports = {
           articleData[0].isBookmark = false;
           articleData[0].isFollowed = false;
         }
+        await Promise.all(
+          articleData.map(async (data) => {
+            return Promise.all([getClapCountUser(data, args)]).then(function (
+              values
+            ) {
+              let data1 = values[0];
+              data.clapCountUser = data1[0].users;
+            });
+          })
+        );
         if (get(articleData[0], "SubTitle")) {
           if (get(articleData[0], "Description")) {
             articleData[0].subTitle = articleData[0].description.replace(
@@ -78,6 +88,7 @@ module.exports = {
         await articleData;
       }
     }
+    console.log(articleData);
     return articleData;
   },
 
@@ -111,6 +122,7 @@ module.exports = {
       attributes.ampSlug = `amp/${attributes.slug}`;
       attributes.status = ArticleStatusConst.Approved;
       attributes.isPublish = true;
+      attributes.articleScope = 1;
 
       return Articles.create(attributes);
     }
@@ -376,7 +388,7 @@ async function checkUserSubscription(args, AuthorID) {
     $and: [
       { authorID: AuthorID },
       { status: { $ne: 0 } },
-      { userID: args.filters.userID },
+      { userID: args.filters.authorId },
       { endDate: { $gte: new Date() } },
     ],
   }).countDocuments();
@@ -399,7 +411,7 @@ async function updateArticleClickDetails(args) {
   let ClickData = {};
   Articles.findOne({ slug: args.slug }).then((data) => {
     ClickData.articleID = data.ID;
-    ClickData.userID = args.filters.userID;
+    ClickData.userID = args.filters.authorId;
     ClickData.authorID = data.authorID;
     ClickData.slug = args.slug;
     ClickData.articleTitle = data.title;
@@ -410,7 +422,7 @@ async function updateArticleClickDetails(args) {
 async function getBookMarkCount(data, args) {
   return ArticleBookmarks.find({
     articleID: data.ID,
-    userID: args.filters.userID,
+    userID: args.filters.authorId,
     status: 1,
   }).countDocuments();
 }
@@ -418,8 +430,28 @@ async function getBookMarkCount(data, args) {
 async function getFollowAuthorCount(data, args) {
   return FollowAuthor.find({
     authorID: data.AuthorID,
-    userID: args.filters.UserID,
+    userID: args.filters.authorId,
     status: 1,
     isFollowed: true,
   }).countDocuments();
+}
+
+async function getClapCountUser(data, args) {
+  console.log(data.ID);
+  return await ArticleRatings.aggregate([
+    {
+      $match: {
+        articleID: data.ID,
+        status: 1,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userID",
+        foreignField: "ID",
+        as: "users",
+      },
+    },
+  ]);
 }
