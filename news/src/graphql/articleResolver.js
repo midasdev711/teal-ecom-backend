@@ -295,10 +295,6 @@ const buildFindQuery = async ({ args, UserID }) => {
     query.$and.push({ authorID: parseInt(args.authorId) });
   }
 
-  if (get(args, "userId")) {
-    query.$and.push({ authorID: parseInt(args.userId) });
-  }
-
   if (get(args, "articleIds")) {
     query.$and.push({ ID: { $in: get(args, "articleIds") } });
   }
