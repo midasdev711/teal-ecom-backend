@@ -43,15 +43,31 @@ module.exports = {
       if (get(args.filters, "userId")) {
         await Promise.all(
           articleData.map(async (data) => {
-            return Promise.all([checkClapCountForUser(data, args)]).then(
-              function (values) {
-                console.log(values);
-                values.map(async (x) => {
-                  if (x) data.isArticleLiked = true;
+            return Promise.all([
+              checkClapCountForUser(data, args),
+              getFollowAuthorCount(data, args),
+              getBookMarkCount(data, args),
+            ]).then(function (values) {
+              console.log(values);
+              for (let i = 0; i < 3; i++) {
+                if (i == 0) {
+                  if (values[i]) data.isArticleLiked = true;
                   else data.isArticleLiked = false;
-                });
+                }
+                if (i == 1) {
+                  if (values[i]) data.isBookmark = values[i] == 1;
+                  else data.isBookmark = false;
+                }
+                if (i == 2) {
+                  if (values[i]) data.isFollowed = values[i] == 1;
+                  else data.isFollowed = false;
+                }
               }
-            );
+              // values.map(async (x) => {
+              //   if (x) data.isArticleLiked = true;
+              //   else data.isArticleLiked = false;
+              // });
+            });
           })
         );
       }
