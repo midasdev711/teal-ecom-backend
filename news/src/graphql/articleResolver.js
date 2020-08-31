@@ -63,10 +63,10 @@ module.exports = {
                   else data.isFollowed = false;
                 }
               }
-              // values.map(async (x) => {
-              //   if (x) data.isArticleLiked = true;
-              //   else data.isArticleLiked = false;
-              // });
+              values.map(async (x) => {
+                if (x) data.isArticleLiked = true;
+                else data.isArticleLiked = false;
+              });
             });
           })
         );
