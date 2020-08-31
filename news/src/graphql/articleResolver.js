@@ -109,6 +109,8 @@ module.exports = {
         );
       }
       attributes.ampSlug = `amp/${attributes.slug}`;
+      attributes.status = ArticleStatusConst.Approved;
+      attributes.isPublish = true;
 
       return Articles.create(attributes);
     }
@@ -249,6 +251,7 @@ async function getBlobImageObject(DescriptionString) {
 const buildFindQuery = async ({ args, UserID }) => {
   // const blockedAuthorIds = await queryForBlockedAuthors({ args });
   let query = { $and: [] };
+  console.log(args);
 
   query.$and.push({ status: 2 });
   query.$and.push({ isPublish: true });
@@ -259,6 +262,10 @@ const buildFindQuery = async ({ args, UserID }) => {
 
   if (get(args, "slug")) {
     query.$and.push({ slug: args.slug, articleScope: { $ne: 0 } });
+  }
+
+  if (get(args, "authorId")) {
+    query.$and.push({ authorID: parseInt(args.authorId) });
   }
 
   if (get(args, "articleIds")) {

@@ -39,6 +39,13 @@ const AUTHORIZE_NAME = "49N2ntFRg ";
 const AUTHORIZE_TRANSACTION_KEY = "6yEQ27c8hF6W8UCr";
 const RoleObject = { admin: 1, moderator: 2, user: 3 };
 
+const ArticleStatusConst = (DonationStatusConst = {
+  inActive: 0,
+  Active: 1,
+  Approved: 2,
+  Rejected: 3,
+});
+
 const ConstantArray = {
   StatusConst,
   ImagePath,
@@ -53,6 +60,7 @@ const ConstantArray = {
   AUTHORIZE_TRANSACTION_KEY,
   RoleObject,
   MAIL_DETAILS,
+  ArticleStatusConst,
 };
 
 module.exports = ConstantArray;

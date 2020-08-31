@@ -128,7 +128,7 @@ type Merchant{
           businessCity :String
           businessPostalCode :String
           contactPersonName :String
-          contactPersonEmail :Email
+          contactPersonEmail :String
           contactPersonPhone :String 
           userID: String
 }
@@ -145,7 +145,7 @@ input MerchantInput{
       businessCity :String
       businessPostalCode :String
       contactPersonName :String
-      contactPersonEmail :Email
+      contactPersonEmail :String
       contactPersonPhone :String 
       userID: String
       name: String
@@ -220,8 +220,8 @@ type Order{
         status: Int
         userID: Int
         orderAmount : String
-        deliveryAddress: Object
-        shippingAddress : Object
+        deliveryAddress: String
+        shippingAddress : String
         products: [OrderProductType]
         paymentMethod: String
         tokenID: String
@@ -231,9 +231,9 @@ type Order{
 input OrderInput{
   userID: Int
   orderAmount: String
-  deliveryAddress: Object
-  shippingAddress : Object
-  products: [OrderProductType]
+  deliveryAddress: String
+  shippingAddress : String
+  products: [OrderProductInput]
 }
 
     input OrderFilters {
@@ -251,8 +251,8 @@ type Query {
   
   type Mutation {
     upsertProduct(product: ProductInput): Product
-    upsertMerchant(merchant: MerchantInput)
-    upsertOrder(order:OrderInput)
+    upsertMerchant(merchant: MerchantInput): Merchant
+    upsertOrder(order:OrderInput): Order
   }
 `;
 

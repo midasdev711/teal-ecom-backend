@@ -109,7 +109,7 @@ input ArticleFilters {
   articleIds: [ID]
   articleId: ID
   ignoreArticleIds:[ID]
-  authorID: Int
+  authorId: Int
   userID: Int
   authorUserName: String
   isPopular: Boolean
