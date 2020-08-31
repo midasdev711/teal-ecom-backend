@@ -35,12 +35,27 @@ module.exports = {
       UserID: args.UserID,
     });
     // user object can be from apollo server context.user check if this is null
-    console.log(findQuery);
     let data = await Articles.aggregate(findQuery);
 
     articleData = data[0].data;
 
     if (articleData) {
+      if (get(args.filters, "userId")) {
+        await Promise.all(
+          articleData.map(async (data) => {
+            return Promise.all([checkClapCountForUser(data, args)]).then(
+              function (values) {
+                console.log(values);
+                values.map(async (x) => {
+                  if (x) data.isArticleLiked = true;
+                  else data.isArticleLiked = false;
+                });
+              }
+            );
+          })
+        );
+      }
+
       if (get(args.filters, "slug")) {
         if (
           articleData[0].articleScope == 2 &&
@@ -49,7 +64,7 @@ module.exports = {
           articleData = await calculateSubscribeContent(args, articleData);
         await updateViewCount(args.filters, args.UserID);
 
-        if (get(args.filters, "authorId")) {
+        if (get(args.filters, "userId")) {
           await Promise.all(
             articleData.map(async (data) => {
               return Promise.all([
@@ -70,8 +85,9 @@ module.exports = {
             return Promise.all([getClapCountUser(data, args)]).then(function (
               values
             ) {
-              let data1 = values[0];
-              data.clapCountUser = data1[0].users;
+              values.map(async (x) => {
+                data.clapCountUser = x[0].users;
+              });
             });
           })
         );
@@ -88,7 +104,6 @@ module.exports = {
         await articleData;
       }
     }
-    console.log(articleData);
     return articleData;
   },
 
@@ -280,6 +295,10 @@ const buildFindQuery = async ({ args, UserID }) => {
     query.$and.push({ authorID: parseInt(args.authorId) });
   }
 
+  if (get(args, "userId")) {
+    query.$and.push({ authorID: parseInt(args.userId) });
+  }
+
   if (get(args, "articleIds")) {
     query.$and.push({ ID: { $in: get(args, "articleIds") } });
   }
@@ -388,7 +407,7 @@ async function checkUserSubscription(args, AuthorID) {
     $and: [
       { authorID: AuthorID },
       { status: { $ne: 0 } },
-      { userID: args.filters.authorId },
+      { userID: args.filters.userId },
       { endDate: { $gte: new Date() } },
     ],
   }).countDocuments();
@@ -411,7 +430,7 @@ async function updateArticleClickDetails(args) {
   let ClickData = {};
   Articles.findOne({ slug: args.slug }).then((data) => {
     ClickData.articleID = data.ID;
-    ClickData.userID = args.filters.authorId;
+    ClickData.userID = args.filters.userId;
     ClickData.authorID = data.authorID;
     ClickData.slug = args.slug;
     ClickData.articleTitle = data.title;
@@ -422,7 +441,7 @@ async function updateArticleClickDetails(args) {
 async function getBookMarkCount(data, args) {
   return ArticleBookmarks.find({
     articleID: data.ID,
-    userID: args.filters.authorId,
+    userID: args.filters.userId,
     status: 1,
   }).countDocuments();
 }
@@ -430,7 +449,7 @@ async function getBookMarkCount(data, args) {
 async function getFollowAuthorCount(data, args) {
   return FollowAuthor.find({
     authorID: data.AuthorID,
-    userID: args.filters.authorId,
+    userID: args.filters.userId,
     status: 1,
     isFollowed: true,
   }).countDocuments();
@@ -454,4 +473,13 @@ async function getClapCountUser(data, args) {
       },
     },
   ]);
+}
+
+async function checkClapCountForUser(data, args) {
+  console.log(data.ID);
+  return await ArticleRatings.findOne({
+    articleID: data.ID,
+    userID: args.filters.userId,
+    status: 1,
+  });
 }

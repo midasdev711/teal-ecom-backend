@@ -57,6 +57,7 @@ const typeDefs = `
     isContentAllowed : Boolean
     articleScope :Int
     clapCountUser:[User]
+    isArticleLiked: Boolean
   }
 
 type DefCategory{
@@ -111,7 +112,7 @@ input ArticleFilters {
   articleId: ID
   ignoreArticleIds:[ID]
   authorId: Int
-  userID: Int
+  userId: Int
   authorUserName: String
   isPopular: Boolean
   slug: String
