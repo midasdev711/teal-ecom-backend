@@ -1,6 +1,7 @@
 const typeDefs = `
   input ArticleInput { 
-    ID: Int
+    articleId: Int
+    status: Int
     title: String
     subTitle : String
     description: String

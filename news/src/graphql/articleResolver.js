@@ -63,10 +63,6 @@ module.exports = {
                   else data.isFollowed = false;
                 }
               }
-              // values.map(async (x) => {
-              //   if (x) data.isArticleLiked = true;
-              //   else data.isArticleLiked = false;
-              // });
             });
           })
         );
@@ -127,10 +123,14 @@ module.exports = {
     let attributes = get(args, "article");
     console.log(args);
 
-    let article = await Articles.findOne({ ID: attributes.ID });
+    let article = await Articles.findOne({ ID: attributes.articleId });
 
     if (article) {
-      return Articles.update(attributes);
+      return await Articles.findOneAndUpdate(
+        { ID: attributes.articleId },
+        attributes,
+        { new: true }
+      );
     } else {
       attributes.slug = uniqid(Date.now());
       if (get(args, "title")) {
