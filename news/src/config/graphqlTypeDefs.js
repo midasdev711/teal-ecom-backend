@@ -10,7 +10,7 @@ const typeDefs = `
     readMinutes : String
     tags: [String]
     isPublish : Boolean
-    categories: [ArticleCategoryInput],
+    categories: [ArticleCategoryInput]
     acceptDonation : Boolean
     minimumDonationAmount : Float
     isPaidSubscription : Boolean
@@ -263,6 +263,152 @@ type ArticleBookmark{
       status : Int
       article: Article
 }
+
+
+type UserAccountType {
+  name: String 
+  email: String
+  userName :  String
+  isFacebook : Boolean
+}
+
+type PrivacyType {
+  isSocialStatShow : Boolean 
+  isCheeredPostShow : Boolean 
+}
+
+type ButtonType {
+  isDaily : Boolean
+  isWeekly : Boolean 
+  isOff :Boolean 
+}
+
+type TrendingType {
+  isEmail : Boolean 
+  isPush : Boolean 
+  button : ButtonType 
+}
+
+type SocialActivityType {
+  isEmail : Boolean 
+  isPush : Boolean 
+}
+
+type PagesFollowType {
+  isEmail : Boolean
+  isPush : Boolean
+}
+
+type AuthorsFollowType {
+  isEmail : Boolean 
+  isPush : Boolean 
+}
+
+type PagesLikeType {
+  isEmail : Boolean
+  isPush : Boolean
+  button : ButtonType
+}
+
+type AuthorsLikeType {
+  isEmail : Boolean
+  isPush : Boolean
+  button : ButtonType 
+}
+
+type RecommendedType {
+  isEmail : Boolean
+  isPush : Boolean
+  button : ButtonType
+}
+
+type NotificationType {
+      trending :TrendingType
+      recommended : RecommendedType
+      authorsLike: AuthorsLikeType
+      pagesLike: PagesLikeType
+      authorsFollow: AuthorsFollowType
+      pagesFollow: PagesFollowType
+      socialActivity: SocialActivityType
+}
+
+
+input UserAccountInput {
+    name: String 
+    email: String
+    userName :  String
+    isFacebook : Boolean
+}
+
+input PrivacyInput {
+    isSocialStatShow : Boolean 
+    isCheeredPostShow : Boolean 
+  }
+
+input ButtonInput {
+    isDaily : Boolean
+    isWeekly : Boolean 
+    isOff :Boolean 
+}
+
+input TrendingInput {
+    isEmail : Boolean 
+    isPush : Boolean 
+    button : ButtonInput 
+}
+
+input SocialActivityInput {
+    isEmail : Boolean 
+    isPush : Boolean 
+}
+
+input PagesFollowInput {
+    isEmail : Boolean
+    isPush : Boolean
+}
+
+input AuthorsFollowInput {
+    isEmail : Boolean 
+    isPush : Boolean 
+}
+
+input PagesLikeInput {
+    isEmail : Boolean
+    isPush : Boolean
+    button : ButtonInput
+}
+
+input AuthorsLikeInput {
+    isEmail : Boolean
+    isPush : Boolean
+    button : ButtonInput 
+}
+
+input RecommendedInput {
+    isEmail : Boolean
+    isPush : Boolean
+    button : ButtonInput
+}
+
+input NotificationInput {
+        trending :TrendingInput
+        recommended : RecommendedInput
+        authorsLike: AuthorsLikeInput
+        pagesLike: PagesLikeInput
+        authorsFollow: AuthorsFollowInput
+        pagesFollow: PagesFollowInput
+        socialActivity: SocialActivityInput
+}
+
+input PaidSubscriptionInput {
+        subscriptionID : Int
+        name : String
+        amount : String
+        description : String
+        days : Int
+        status : Int
+}
+
 
 type Query {
     articles(filters: ArticleFilters):[Article]

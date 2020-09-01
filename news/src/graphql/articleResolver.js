@@ -54,11 +54,11 @@ module.exports = {
                   if (values[i]) data.isArticleLiked = true;
                   else data.isArticleLiked = false;
                 }
-                if (i == 1) {
+                if (i == 2) {
                   if (values[i]) data.isBookmark = values[i] == 1;
                   else data.isBookmark = false;
                 }
-                if (i == 2) {
+                if (i == 1) {
                   if (values[i]) data.isFollowed = values[i] == 1;
                   else data.isFollowed = false;
                 }
@@ -355,16 +355,18 @@ const buildFindQuery = async ({ args, UserID }) => {
     aggregate.push({ $match: { "author.ID": parseInt(UserID) } });
   }
 
+  console.log(args.page, args.limit);
+
   aggregate.push({
     $facet: {
       data: [
         { $sort: { createdAt: -1 } },
-        { $skip: parseInt(args.page) - 1 || 0 },
-        { $limit: parseInt(args.limit) || 10 },
+        { $skip: (parseInt(args.page) - 1) * parseInt(args.limit) },
+        { $limit: parseInt(args.limit) },
       ],
-      pageInfo: [{ $group: { _id: null, count: { $sum: 1 } } }],
     },
   });
+  console.log(JSON.stringify(aggregate));
   return aggregate;
 };
 
