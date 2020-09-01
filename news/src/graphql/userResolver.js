@@ -1,13 +1,10 @@
 const Users = require("../models/users");
-const EmailLogs = require("../models/email_logs");
 const Articles = require("../models/articles");
 const ArticleRatings = require("../models/article_rating");
 const ArticleClickDetails = require("../models/article_click_details");
 const ArticleBookmarks = require("../models/bookmarks");
-const ForgotPasswordLogs = require("../models/forgot_passwords_log");
 const UsersPaidSubscriptions = require("../models/users_paid_subscriptions");
 const FollowAuthor = require("../models/follow_author");
-const { GraphQLEmail } = require("graphql-custom-types");
 const { ArticleStatusConst, RoleObject } = require("../constant");
 const { generateToken, verifyToken } = require("../middleware/middleware");
 const emailValidator = require("email-validator");

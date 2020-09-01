@@ -59,6 +59,7 @@ const typeDefs = `
     articleScope :Int
     clapCountUser:[User]
     isArticleLiked: Boolean
+    createdAt:String
   }
 
 type DefCategory{
@@ -265,12 +266,24 @@ type ArticleBookmark{
 }
 
 
+type UserSettingType {
+  userId : Int
+  account : UserAccountType
+  privacy : PrivacyType
+  notification : NotificationType
+  isPaidSubscription : Boolean
+  paidSubscription : [ID]
+}
+
 type UserAccountType {
   name: String 
   email: String
   userName :  String
   isFacebook : Boolean
 }
+
+
+
 
 type PrivacyType {
   isSocialStatShow : Boolean 
@@ -338,6 +351,8 @@ input UserAccountInput {
     email: String
     userName :  String
     isFacebook : Boolean
+    oldPassword: String
+    newPassword: String
 }
 
 input PrivacyInput {
@@ -409,12 +424,24 @@ input PaidSubscriptionInput {
         status : Int
 }
 
+input UserSettingInput {
+  userId : Int
+  account : UserAccountInput
+  privacy : PrivacyInput
+  notification : NotificationInput
+  isPaidSubscription : Boolean
+  paidSubscription : [ID]
+  oldPassword: String
+  newPassword: String
+}
+
 
 type Query {
     articles(filters: ArticleFilters):[Article]
     categories(filters: CategoryFilters):[Category]
     users(filters: UserFilters):[User]
     auth(email: String password: String) : User
+    userSetting(userId:ID): UserSettingType
 }
 
 type Mutation {
@@ -424,6 +451,7 @@ type Mutation {
   userAPIKey(UserID:ID!): String
   upsertArticleRating(articleRating: ArticleRBInput): ArticleRating
   upsertArticleBookmark(articleBookmark: ArticleRBInput): ArticleBookmark
+  upsertUserSetting(userSetting: UserSettingInput): UserSettingType
 }
 `;
 

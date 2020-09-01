@@ -81,17 +81,11 @@ function getTimeStamp() {
 }
 
 async function SaveUserSettings(args, UserID) {
-  console.log("object", args);
+  console.log("objectzxzxzx", UserID);
   let UserSettingsConstant = new UserSettings({
     userID: UserID,
-    account: {
-      name: args.name,
-      email: args.email,
-      userName: args.userName,
-    },
   });
-
-  await UserSettingsConstant.save();
+  await UserSettings.create({ userID: UserID });
 }
 
 async function generateUserName(FullName) {
