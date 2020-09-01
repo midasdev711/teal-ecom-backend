@@ -280,6 +280,7 @@ type UserAccountType {
   email: String
   userName :  String
   isFacebook : Boolean
+  avatar: String
 }
 
 
