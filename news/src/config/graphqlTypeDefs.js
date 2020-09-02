@@ -268,7 +268,7 @@ type ArticleBookmark{
 
 type UserSettingType {
   userId : Int
-  account : UserAccountType
+  account : User
   privacy : PrivacyType
   notification : NotificationType
   isPaidSubscription : Boolean

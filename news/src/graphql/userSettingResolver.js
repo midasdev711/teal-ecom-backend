@@ -16,7 +16,7 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
-    console.log(args);
+    console.log("asdasd", args);
 
     if (get(args.userSetting, "account")) {
       let accountData = args.userSetting.account;
@@ -40,14 +40,19 @@ module.exports = {
       }
       if (get(accountData, "oldPassword") && get(accountData, "newPassword")) {
         let userData = await Users.findOne({
-          ID: args.userSetting.USERiD,
+          ID: args.userSetting.userId,
           status: 1,
         });
         if (userData) {
+          console.log("accountData", accountData, userData);
+          console.log(
+            passwordHash.verify(accountData.oldPassword, userData.password)
+          );
           if (passwordHash.verify(accountData.oldPassword, userData.password)) {
-            accountData.newPassword = passwordHash.generate(
+            accountData.password = passwordHash.generate(
               accountData.newPassword
             );
+            console.log("accountData", accountData);
           } else {
             throw "Old password is not correct";
           }
