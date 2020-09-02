@@ -19,6 +19,7 @@ module.exports = {
     const data = await userQuery({ args: args.filters });
 
     // let data = await Users.find(findQuery);
+    if (typeof data == "object") return [data];
     return data;
   },
 
@@ -89,12 +90,10 @@ const userQuery = async ({ args }) => {
     return Users.find({ ID: { $in: get(args, "userIds") } });
   }
 
-  if (get(args, "authorID")) {
-    return Users.findOne({ status: 1, ID: args.authorID }).then(
-      async (user) => {
-        if (user != null) return userDetailsPromise(user, args);
-      }
-    );
+  if (get(args, "userId")) {
+    return Users.findOne({ status: 1, ID: args.userId }).then(async (user) => {
+      if (user != null) return userDetailsPromise(user, args);
+    });
   }
 
   if (get(args, "authorUserName")) {
@@ -140,30 +139,30 @@ const userQuery = async ({ args }) => {
 };
 
 async function userDetailsPromise(user, args) {
-  const Following = FollowAuthor.find({
+  const following = FollowAuthor.find({
     UserID: user.ID,
     Status: 1,
     isFollowed: true,
   }).countDocuments();
-  const Follower = FollowAuthor.find({
+  const follower = FollowAuthor.find({
     AuthorID: user.ID,
     Status: 1,
     isFollowed: true,
   }).countDocuments();
-  const FreeArticles = Articles.find({
+  const freeArticles = Articles.find({
     AuthorID: user.ID,
     Status: 2,
     ArticleScope: 1,
   });
-  const PremiumArticles = Articles.find({
+  const premiumArticles = Articles.find({
     AuthorID: user.ID,
     Status: 2,
     ArticleScope: 2,
   });
-  const LatestArticles = getLatestArticles(args, user);
-  const ClapedArticles = getAuthorsClapedArticle(args, user);
-  const RecentlyVisited = getRecentlyVisitedArticle(args, user);
-  const BookmarkedArticles = getBookmarkedArticle(args, user);
+  const latestArticles = getLatestArticles(args, user);
+  const clappedArticles = getAuthorsClapedArticle(args, user);
+  const recentlyVisited = getRecentlyVisitedArticle(args, user);
+  const bookmarkedArticles = getBookmarkedArticle(args, user);
   const isFollowing = FollowAuthor.findOne({
     AuthorID: user.ID,
     Status: 1,
@@ -186,7 +185,7 @@ async function userDetailsPromise(user, args) {
     freeArticles,
     premiumArticles,
     latestArticles,
-    clapedArticles,
+    clappedArticles,
     recentlyVisited,
     bookmarkedArticles,
     isFollowing,
@@ -197,7 +196,7 @@ async function userDetailsPromise(user, args) {
     user.freeArticles = values[2];
     user.premiumArticles = values[3];
     ActivityLog.latestArticles = values[4];
-    ActivityLog.clapedArticles = values[5];
+    ActivityLog.clappedArticles = values[5];
     ActivityLog.recentlyVisited = values[6];
     ActivityLog.bookmarkedArticles = values[7];
     user.activityLog = ActivityLog;
@@ -219,55 +218,51 @@ async function getLatestArticles(args, user) {
 }
 
 async function getAuthorsClapedArticle(args, user) {
-  let options = {
-    limit: args.limit || 10,
-    page: args.page || 1,
-    $sort: {
-      CreatedDate: -1,
-    },
-  };
-  return ArticleRatings.paginate({ UserID: user.ID }, options).then(
-    (ratings) => {
-      if (ratings.docs.length > 0)
-        return Articles.find({
-          ID: { $in: ratings.docs.map((rating) => rating.ArticleID) },
-        });
-      else return [];
-    }
-  );
+  // let options = {
+  //   limit: args.limit || 10,
+  //   page: args.page || 1,
+  //   $sort: {
+  //     CreatedDate: -1,
+  //   },
+  // };
+  return ArticleRatings.find({ UserID: user.ID }).then((ratings) => {
+    if (ratings.length > 0)
+      return Articles.find({
+        ID: { $in: ratings.docs.map((rating) => rating.articleID) },
+      });
+    else return [];
+  });
 }
 
 async function getRecentlyVisitedArticle(args, user) {
-  let options = {
-    limit: args.limit || 10,
-    page: args.page || 1,
-    $sort: {
-      CreatedDate: -1,
-      VisitedDate: -1,
-    },
-  };
-  return ArticleClickDetails.paginate({ UserID: user.ID }, options).then(
-    (clicked) => {
-      if (clicked.docs.length > 0)
-        return Articles.find({
-          ID: { $in: clicked.docs.map((click) => click.ArticleID) },
-        });
-      else return [];
-    }
-  );
+  // let options = {
+  //   limit: args.limit || 10,
+  //   page: args.page || 1,
+  //   $sort: {
+  //     CreatedDate: -1,
+  //     VisitedDate: -1,
+  //   },
+  // };
+  return ArticleClickDetails.find({ UserID: user.ID }).then((clicked) => {
+    if (clicked.length > 0)
+      return Articles.find({
+        ID: { $in: clicked.docs.map((click) => click.articleID) },
+      });
+    else return [];
+  });
 }
 
 async function getBookmarkedArticle(args, user) {
-  let options = {
-    limit: args.limit || 10,
-    page: args.page || 1,
-    $sort: {
-      CreatedDate: -1,
-    },
-  };
-  return ArticleBookmarks.find({ UserID: user.ID, Status: 1 }, options).then(
+  // let options = {
+  //   limit: args.limit || 10,
+  //   page: args.page || 1,
+  //   $sort: {
+  //     CreatedDate: -1,
+  //   },
+  // };
+  return ArticleBookmarks.find({ UserID: user.ID, Status: 1 }).then(
     (bookmarks) => {
-      if (bookmarks.docs.length > 0)
+      if (bookmarks.length > 0)
         return Articles.find({
           ID: { $in: bookmarks.map((bookmark) => bookmark.ArticleID) },
         });
