@@ -18,6 +18,7 @@ const FollowAuthor = require("../models/follow_author");
 const ArticleBookmarks = require("../models/bookmarks");
 const ArticleRatings = require("../models/article_rating");
 const uniqid = require("uniqid");
+const fetch = require("node-fetch");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -30,6 +31,39 @@ module.exports = {
         args.UserID = null;
       }
     }
+
+    if (
+      get(args.filters, "userId") &&
+      !args.filters.articleId &&
+      !args.filters.slug
+    ) {
+      let data = await Articles.find()
+        .sort({ ID: -1 })
+        .limit(10)
+        .select({ ID: 1, _id: 0 });
+      let IdArray = [];
+      await data.map((x) => {
+        IdArray.push(x.ID);
+      });
+      let articlesArray = await predictArticles(IdArray);
+      articlesArray.push(IdArray[0]);
+      console.log("data", articlesArray);
+      args.filters.articleIds = articlesArray;
+    }
+
+    if (
+      get(args.filters, "userId") &&
+      (args.filters.articleId || args.filters.slug)
+    ) {
+      let IdArray = [];
+      if (args.filters.articleId) IdArray.push(args.filters.articleId);
+      if (args.filters.slug) {
+        let data = await Articles.findOne({ slug: args.filters.slug });
+        IdArray.push(data.ID);
+      }
+      await predictArticles(IdArray);
+    }
+
     const findQuery = await buildFindQuery({
       args: args.filters,
       UserID: args.UserID,
@@ -48,7 +82,6 @@ module.exports = {
               getFollowAuthorCount(data, args),
               getBookMarkCount(data, args),
             ]).then(function (values) {
-              console.log(values);
               for (let i = 0; i < 3; i++) {
                 if (i == 0) {
                   if (values[i]) data.isArticleLiked = true;
@@ -121,7 +154,6 @@ module.exports = {
 
   upsert: async (root, args, context) => {
     let attributes = get(args, "article");
-    console.log(args);
 
     let article = await Articles.findOne({ ID: attributes.articleId });
 
@@ -161,7 +193,6 @@ module.exports = {
 
   articleRating: async (root, args, context) => {
     args = args.articleRating;
-    console.log(args);
 
     if (typeof args.userID != "undefined" && args.userID != 0) {
       return ArticleRatings.find({
@@ -294,7 +325,6 @@ async function getBlobImageObject(DescriptionString) {
 const buildFindQuery = async ({ args, UserID }) => {
   // const blockedAuthorIds = await queryForBlockedAuthors({ args });
   let query = { $and: [] };
-  console.log(args);
 
   query.$and.push({ status: 2 });
   query.$and.push({ isPublish: true });
@@ -355,8 +385,6 @@ const buildFindQuery = async ({ args, UserID }) => {
     aggregate.push({ $match: { "author.ID": parseInt(UserID) } });
   }
 
-  console.log(args.page, args.limit);
-
   aggregate.push({
     $facet: {
       data: [
@@ -366,7 +394,6 @@ const buildFindQuery = async ({ args, UserID }) => {
       ],
     },
   });
-  console.log(JSON.stringify(aggregate));
   return aggregate;
 };
 
@@ -470,7 +497,6 @@ async function getFollowAuthorCount(data, args) {
 }
 
 async function getClapCountUser(data, args) {
-  console.log(data.ID);
   return await ArticleRatings.aggregate([
     {
       $match: {
@@ -490,10 +516,23 @@ async function getClapCountUser(data, args) {
 }
 
 async function checkClapCountForUser(data, args) {
-  console.log(data.ID);
   return await ArticleRatings.findOne({
     articleID: data.ID,
     userID: args.filters.userId,
     status: 1,
   });
+}
+
+async function predictArticles(data) {
+  const POST_URL = `http://3.20.221.224:5000/predict`;
+  const response = await fetch(POST_URL, {
+    method: "post",
+    headers: {
+      "Content-type": "application/json",
+      Accept: "application/json",
+      "Accept-Charset": "utf-8",
+    },
+    body: JSON.stringify(data),
+  });
+  return await response.json();
 }

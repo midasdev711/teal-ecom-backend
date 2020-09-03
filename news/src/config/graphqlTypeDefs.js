@@ -287,8 +287,11 @@ type UserAccountType {
 
 
 type PrivacyType {
-  isSocialStatShow : Boolean 
-  isCheeredPostShow : Boolean 
+  isFollowersShow: Boolean
+    isFollowingShow: Boolean
+    isFollowButtonShow: Boolean
+    isSocialLinksShow: Boolean
+    isProfileBioShow:Boolean
 }
 
 type ButtonType {
@@ -357,8 +360,11 @@ input UserAccountInput {
 }
 
 input PrivacyInput {
-    isSocialStatShow : Boolean 
-    isCheeredPostShow : Boolean 
+  isFollowersShow: Boolean
+  isFollowingShow: Boolean
+  isFollowButtonShow: Boolean
+  isSocialLinksShow: Boolean
+  isProfileBioShow:Boolean 
   }
 
 input ButtonInput {

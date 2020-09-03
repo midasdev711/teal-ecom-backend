@@ -58,8 +58,11 @@ const UserSettings = new Schema({
     },
   },
   privacy: {
-    isSocialStatShow: { type: Boolean, default: true },
-    isCheeredPostShow: { type: Boolean, default: true },
+    isFollowersShow: { type: Boolean, default: true },
+    isFollowingShow: { type: Boolean, default: true },
+    isFollowButtonShow: { type: Boolean, default: true },
+    isSocialLinksShow: { type: Boolean, default: true },
+    isProfileBioShow: { type: Boolean, default: true },
   },
   createdDate: { type: Date, default: Date.now },
   modifiedDate: { type: Date, default: Date.now },
