@@ -32,24 +32,24 @@ module.exports = {
       }
     }
 
-    // if (
-    //   get(args.filters, "userId") &&
-    //   !args.filters.articleId &&
-    //   !args.filters.slug
-    // ) {
-    //   let data = await Articles.find()
-    //     .sort({ ID: -1 })
-    //     .limit(10)
-    //     .select({ ID: 1, _id: 0 });
-    //   let IdArray = [];
-    //   await data.map((x) => {
-    //     IdArray.push(x.ID);
-    //   });
-    //   let articlesArray = await predictArticles(IdArray);
-    //   articlesArray.push(IdArray[0]);
-    //   console.log("data", articlesArray);
-    //   args.filters.articleIds = articlesArray;
-    // }
+    if (
+      get(args.filters, "userId") &&
+      !args.filters.articleId &&
+      !args.filters.slug
+    ) {
+      let data = await Articles.find()
+        .sort({ ID: -1 })
+        .limit(10)
+        .select({ ID: 1, _id: 0 });
+      let IdArray = [];
+      await data.map((x) => {
+        IdArray.push(x.ID);
+      });
+      let articlesArray = await predictArticles(IdArray);
+      // articlesArray.push(IdArray[0]);
+      console.log("data", articlesArray);
+      // args.filters.articleIds = articlesArray;
+    }
 
     if (
       get(args.filters, "userId") &&
