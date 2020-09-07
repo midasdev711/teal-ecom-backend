@@ -15,6 +15,7 @@ const typeDefs = `
     minimumDonationAmount : Float
     isPaidSubscription : Boolean
     articleScope : Int
+    deleteArticleIds : [ID]
   }
 
   input ArticleCategoryInput {
@@ -118,6 +119,7 @@ input ArticleFilters {
   authorUserName: String
   isPopular: Boolean
   slug: String
+  deletedArticlesAuthorId: ID
   limit: Int
   page: Int
 }
@@ -459,6 +461,7 @@ type Mutation {
   upsertArticleRating(articleRating: ArticleRBInput): ArticleRating
   upsertArticleBookmark(articleBookmark: ArticleRBInput): ArticleBookmark
   upsertUserSetting(userSetting: UserSettingInput): UserSettingType
+
 }
 `;
 

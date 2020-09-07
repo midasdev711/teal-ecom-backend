@@ -155,39 +155,51 @@ module.exports = {
   upsert: async (root, args, context) => {
     let attributes = get(args, "article");
 
-    let article = await Articles.findOne({ ID: attributes.articleId });
-
-    if (article) {
-      return await Articles.findOneAndUpdate(
-        { ID: attributes.articleId },
-        attributes,
-        { new: true }
-      );
+    if (get(attributes, "deleteArticleIds")) {
+      console.log("asdadsasd", attributes.deleteArticleIds);
+      attributes.deleteArticleIds.map(async (x) => {
+        await Articles.findOneAndUpdate(
+          { ID: parseInt(x) },
+          { $set: { status: 0 } },
+          { multi: true }
+        );
+      });
+      return;
     } else {
-      attributes.slug = uniqid(Date.now());
-      if (get(args, "title")) {
-        attributes.titleSlug = formatString(attributes.title);
-        attributes.ampSlug = formatString(attributes.title);
-      }
+      let article = await Articles.findOne({ ID: attributes.articleId });
 
-      if (get(attributes, "featureImage")) {
-        attributes.featureImage = await uploadFeaturedImage(
-          attributes.featureImage,
-          attributes.slug
+      if (article) {
+        return await Articles.findOneAndUpdate(
+          { ID: attributes.articleId },
+          attributes,
+          { new: true }
         );
-      }
+      } else {
+        attributes.slug = uniqid(Date.now());
+        if (get(args, "title")) {
+          attributes.titleSlug = formatString(attributes.title);
+          attributes.ampSlug = formatString(attributes.title);
+        }
 
-      if (get(attributes, "description")) {
-        attributes.description = await uploadDescriptionImagesOnS3(
-          attributes.description
-        );
-      }
-      attributes.ampSlug = `amp/${attributes.slug}`;
-      attributes.status = ArticleStatusConst.Approved;
-      attributes.isPublish = true;
-      attributes.articleScope = 1;
+        if (get(attributes, "featureImage")) {
+          attributes.featureImage = await uploadFeaturedImage(
+            attributes.featureImage,
+            attributes.slug
+          );
+        }
 
-      return Articles.create(attributes);
+        if (get(attributes, "description")) {
+          attributes.description = await uploadDescriptionImagesOnS3(
+            attributes.description
+          );
+        }
+        attributes.ampSlug = `amp/${attributes.slug}`;
+        attributes.status = ArticleStatusConst.Approved;
+        attributes.isPublish = true;
+        attributes.articleScope = 1;
+
+        return Articles.create(attributes);
+      }
     }
   },
 
@@ -323,51 +335,57 @@ async function getBlobImageObject(DescriptionString) {
 }
 
 const buildFindQuery = async ({ args, UserID }) => {
-  // const blockedAuthorIds = await queryForBlockedAuthors({ args });
   let query = { $and: [] };
-
-  query.$and.push({ status: 2 });
-  query.$and.push({ isPublish: true });
-
-  if (get(args, "blockedAuthorIds")) {
-    query.$and.push({ authorID: { $nin: blockedAuthorIds } });
-  }
-
-  if (get(args, "slug")) {
-    query.$and.push({ slug: args.slug, articleScope: { $ne: 0 } });
-  }
-
-  if (get(args, "authorId")) {
-    query.$and.push({ authorID: parseInt(args.authorId) });
-  }
-
-  if (get(args, "articleIds")) {
-    query.$and.push({ ID: { $in: get(args, "articleIds") } });
-  }
-
-  if (get(args, "articleId")) {
-    query.$and.push({ ID: parseInt(args.articleId) });
-  }
-
-  if (get(args, "ignoreArticleIds")) {
-    query.$and.push({ ID: { $nin: get(args, "ignoreArticleIds") } });
-  }
-
-  if (get(args, "authorUserName")) {
-    args.authorUserName = args.authorUserName.trim();
-    const AuthorDetails = await Users.findOne({
-      status: 1,
-      userName: args.authorUserName,
+  if (get(args, "deletedArticlesAuthorId")) {
+    query.$and.push({
+      authorID: parseInt(args.deletedArticlesAuthorId),
+      status: 0,
     });
-    if (AuthorDetails) {
-      args.authorID = AuthorDetails.ID;
-    }
+  } else {
+    // const blockedAuthorIds = await queryForBlockedAuthors({ args });
     query.$and.push({ status: 2 });
-    query.$and.push({ articleScope: 1 });
-  }
+    query.$and.push({ isPublish: true });
 
-  if (get(args, "isPopular")) {
-    query.$and.push({ status: articleStatusConst.approved });
+    if (get(args, "blockedAuthorIds")) {
+      query.$and.push({ authorID: { $nin: blockedAuthorIds } });
+    }
+
+    if (get(args, "slug")) {
+      query.$and.push({ slug: args.slug, articleScope: { $ne: 0 } });
+    }
+
+    if (get(args, "authorId")) {
+      query.$and.push({ authorID: parseInt(args.authorId) });
+    }
+
+    if (get(args, "articleIds")) {
+      query.$and.push({ ID: { $in: get(args, "articleIds") } });
+    }
+
+    if (get(args, "articleId")) {
+      query.$and.push({ ID: parseInt(args.articleId) });
+    }
+
+    if (get(args, "ignoreArticleIds")) {
+      query.$and.push({ ID: { $nin: get(args, "ignoreArticleIds") } });
+    }
+
+    if (get(args, "authorUserName")) {
+      args.authorUserName = args.authorUserName.trim();
+      const AuthorDetails = await Users.findOne({
+        status: 1,
+        userName: args.authorUserName,
+      });
+      if (AuthorDetails) {
+        args.authorID = AuthorDetails.ID;
+      }
+      query.$and.push({ status: 2 });
+      query.$and.push({ articleScope: 1 });
+    }
+
+    if (get(args, "isPopular")) {
+      query.$and.push({ status: articleStatusConst.approved });
+    }
   }
 
   let aggregate = [{ $match: query }];
