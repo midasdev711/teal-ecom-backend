@@ -195,7 +195,7 @@ module.exports = {
         }
         attributes.ampSlug = `amp/${attributes.slug}`;
         attributes.status = ArticleStatusConst.Approved;
-        attributes.isPublish = true;
+        if (!attributes.isDraft) attributes.isPublish = true;
         attributes.articleScope = 1;
 
         return Articles.create(attributes);
@@ -341,6 +341,8 @@ const buildFindQuery = async ({ args, UserID }) => {
       authorID: parseInt(args.deletedArticlesAuthorId),
       status: 0,
     });
+  } else if (get(args, "getDraft")) {
+    query.$and.push({ authorID: args.userId, isDraft: true });
   } else {
     // const blockedAuthorIds = await queryForBlockedAuthors({ args });
     query.$and.push({ status: 2 });
@@ -348,6 +350,10 @@ const buildFindQuery = async ({ args, UserID }) => {
 
     if (get(args, "blockedAuthorIds")) {
       query.$and.push({ authorID: { $nin: blockedAuthorIds } });
+    }
+
+    if (get(args, "getDraft")) {
+      query.$and.push({ authorID: args.userId, isDraft: true });
     }
 
     if (get(args, "slug")) {

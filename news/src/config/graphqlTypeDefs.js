@@ -15,6 +15,7 @@ const typeDefs = `
     minimumDonationAmount : Float
     isPaidSubscription : Boolean
     articleScope : Int
+    isDraft: Boolean
     deleteArticleIds : [ID]
   }
 
@@ -36,6 +37,7 @@ const typeDefs = `
     titleSlug: String 
     description:String
     slug: String!
+    isDraft: Boolean
     sequence: ID
     urls :String
     createdDate : String
@@ -120,6 +122,7 @@ input ArticleFilters {
   isPopular: Boolean
   slug: String
   deletedArticlesAuthorId: ID
+  getDraft:Boolean
   limit: Int
   page: Int
 }

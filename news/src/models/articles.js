@@ -34,6 +34,7 @@ const ArticleSchema = new Schema(
     tags: Array,
     totalClapCount: { type: Number, default: 0 },
     status: { type: Number, default: 1 },
+    isDraft: { type: Boolean, default: false },
     isPublish: Boolean,
     isBookmark: { type: Boolean, default: false },
     viewCount: { type: Number, default: 0 },
