@@ -49,7 +49,7 @@ module.exports = {
         IdArray.push(x.ID);
       });
       let articlesArray = await predictArticles(IdArray);
-      // articlesArray.push(IdArray[0]);
+      articlesArray.push(IdArray[0]);
       console.log("data", articlesArray);
       // args.filters.articleIds = articlesArray;
     }
@@ -292,9 +292,12 @@ module.exports = {
   uploadArticles: async (root, args, context) => {
     let data = await getArticleDataFromAPI();
     await storeData(data);
-    const directories = path.dirname("../../../output.json");
-    console.log(directories);
+    await uploadArticlesOnS3(data, "");
   },
+};
+
+const uploadArticlesOnS3 = (data, Slug) => {
+  return UploadArticlesOnS3(data, AWSNewCredentials.AWS_ARTICLES_PATH, Slug);
 };
 
 const uploadFeaturedImage = (ImageBase64, Slug) => {
@@ -578,7 +581,7 @@ async function predictArticles(data) {
 }
 
 async function getArticleDataFromAPI(params) {
-  const POST_URL = `https://api.knowledia.com/v1/articles/search`;
+  const POST_URL = `https://api.knowledia.com/v1/articles/search?count=100`;
   const response = await fetch(POST_URL, {
     method: "GET",
     headers: {

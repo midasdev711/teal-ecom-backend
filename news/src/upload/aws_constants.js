@@ -39,6 +39,7 @@ const AWSNewCredentials = {
   // AWS_BASE_URL: "https://teal.s3.us-east-2.amazonaws.com/",
   // AWS_BASE_URL : "http://cdn.teal.com/",
   AWS_USER_IMG_PATH: "users",
+  AWS_ARTICLES_PATH: "articles",
   AWS_SHOP_IMG_PATH: "shop",
   AWS_PRODUCT_IMG_PATH: "shop/products",
   AWS_THUMBNAIL: "/thumbnail",

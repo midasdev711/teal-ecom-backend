@@ -14,7 +14,7 @@ async function UploadArticlesOnS3(jsonFileContent, Path, fileName) {
     console.log("uploadJSONFileOnS3Bucket function started");
     var bufferObject = new Buffer.from(JSON.stringify(jsonFileContent));
 
-    fileName = typeof fileName != "undefined" ? fileName : uniqid();
+    fileName = uniqid();
 
     const params = {
       Bucket: AWSNewCredentials.Bucket,
@@ -23,20 +23,18 @@ async function UploadArticlesOnS3(jsonFileContent, Path, fileName) {
       Body: bufferObject,
       ContentType: "application/json", // required. Notice the back ticks
     };
-    let articlesData;
-    s3Bucket.putObject(params, function (err, data) {
-      if (err) {
-        console.log(err, err.stack);
-      } else {
-        articlesData = data;
-      }
-    });
-
-    // Save the Location (url) to your database and Key if needs be.
-    // As good developers, we should return the url and let other function do the saving to database etc
-    console.log(articlesData);
-    return articlesData;
-    // return AWSNewCredentials.AWS_BASE_URL + AWS_KEY;
+    let location = "";
+    let key = "";
+    try {
+      const data = await s3Bucket.putObject(params).promise();
+      console.log(data, "dfdfdfdffdf");
+      location = data;
+      // key = Key;
+    } catch (error) {
+      console.log(error);
+    }
+    console.log("hello", location, key);
+    return location;
   } catch (e) {
     console.log(e);
   }
