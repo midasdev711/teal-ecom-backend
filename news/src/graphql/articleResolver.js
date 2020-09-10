@@ -291,7 +291,7 @@ module.exports = {
 
   uploadArticles: async (root, args, context) => {
     let data = await getArticleDataFromAPI();
-    // await storeData(data);
+    await storeData(data);
     const directories = path.dirname("../../../output.json");
     console.log(directories);
   },
@@ -354,8 +354,10 @@ const buildFindQuery = async ({ args, UserID }) => {
   } else if (get(args, "getDraft")) {
     if (get(args, "slug")) {
       query.$and.push({ slug: args.slug, isDraft: true });
-    } else if (get(args, "authorID")) {
+    } else if (get(args, "userId")) {
       query.$and.push({ authorID: args.userId, isDraft: true });
+    } else if (get(args, "articleID")) {
+      query.$and.push({ ID: args.articleID, isDraft: true });
     }
   } else {
     // const blockedAuthorIds = await queryForBlockedAuthors({ args });
