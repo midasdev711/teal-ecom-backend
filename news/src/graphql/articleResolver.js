@@ -11,6 +11,7 @@ const {
 } = require("../constant");
 const get = require("lodash/get");
 const UploadBase64OnS3 = require("../upload/base64_upload");
+const UploadArticlesOnS3 = require("../upload/upload_articles");
 const { AWSNewCredentials } = require("../upload/aws_constants");
 const UsersPaidSubscriptions = require("../models/users_paid_subscriptions");
 const ArticleClickDetails = require("../models/article_click_details");
@@ -19,6 +20,8 @@ const ArticleBookmarks = require("../models/bookmarks");
 const ArticleRatings = require("../models/article_rating");
 const uniqid = require("uniqid");
 const fetch = require("node-fetch");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -285,6 +288,13 @@ module.exports = {
         });
     } else throw new Error("Please login to continue");
   },
+
+  uploadArticles: async (root, args, context) => {
+    let data = await getArticleDataFromAPI();
+    // await storeData(data);
+    const directories = path.dirname("../../../output.json");
+    console.log(directories);
+  },
 };
 
 const uploadFeaturedImage = (ImageBase64, Slug) => {
@@ -342,7 +352,11 @@ const buildFindQuery = async ({ args, UserID }) => {
       status: 0,
     });
   } else if (get(args, "getDraft")) {
-    query.$and.push({ authorID: args.userId, isDraft: true });
+    if (get(args, "slug")) {
+      query.$and.push({ slug: args.slug, isDraft: true });
+    } else if (get(args, "authorID")) {
+      query.$and.push({ authorID: args.userId, isDraft: true });
+    }
   } else {
     // const blockedAuthorIds = await queryForBlockedAuthors({ args });
     query.$and.push({ status: 2 });
@@ -560,3 +574,31 @@ async function predictArticles(data) {
   });
   return await response.json();
 }
+
+async function getArticleDataFromAPI(params) {
+  const POST_URL = `https://api.knowledia.com/v1/articles/search`;
+  const response = await fetch(POST_URL, {
+    method: "GET",
+    headers: {
+      "Content-type": "application/json",
+      Accept: "application/json",
+      "Accept-Charset": "utf-8",
+    },
+  });
+  return await response.json();
+}
+
+const storeData = (data, path) => {
+  try {
+    fs.writeFile("output.json", JSON.stringify(data), "utf8", function (err) {
+      if (err) {
+        console.log("An error occured while writing JSON Object to File.");
+        return console.log(err);
+      }
+      console.log("JSON file has been saved.");
+    });
+    // fs.writeFileSync(path, JSON.stringify(data))
+  } catch (err) {
+    console.error(err);
+  }
+};

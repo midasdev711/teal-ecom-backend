@@ -450,6 +450,7 @@ input UserSettingInput {
 
 type Query {
     articles(filters: ArticleFilters):[Article]
+    uploadArticles: String
     categories(filters: CategoryFilters):[Category]
     users(filters: UserFilters):[User]
     auth(email: String password: String) : User
