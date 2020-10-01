@@ -242,17 +242,48 @@ input OrderInput{
       limit: Int
       page: Int
     }
+    type Customer {
+      _id:String
+      ID: Int
+      BasicDetails: String
+      AddressDetails: String
+      Tax : Int
+      Notes: String
+      Tags: String
+      createdDate : String
+      modifiedDate : String
+}
+
+input CustomerFilters{
+      _id: String
+      ID: Int
+      BasicDetails: String
+      AddressDetails: String
+      Tax : Int
+      Notes: String
+      Tags: String
+  }
+  input CustomerInput{
+    ID: Int
+      BasicDetails: String
+      AddressDetails: String
+      Tax : Int
+      Notes: String
+      Tags: String
+  }
 
 type Query {
       products(filters: ProductFilters):[Product]
       merchants(filters: MerchantFilters):[Merchant]
       orders(filters:OrderFilters):[Order]
+      customers(filters:CustomerFilters):[Customer]
   }
   
   type Mutation {
     upsertProduct(product: ProductInput): Product
     upsertMerchant(merchant: MerchantInput): Merchant
     upsertOrder(order:OrderInput): Order
+    upsertCustomer(customer:CustomerInput): Customer
   }
 `;
 

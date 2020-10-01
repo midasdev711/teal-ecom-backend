@@ -33,6 +33,8 @@ const { MerchantCategoryAll,MerchantCategoryByID,
         MerchantCategoryWithPagination ,MerchantBusinessCatgoryByID,
   MerchantContactsCatgoryByID }  = require('../root_queries/merchant_queries');
 
+  const { AddCustomer, GetCustomers  } = require('../root_queries/customers'),
+
 // declared root query constant
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
@@ -93,6 +95,9 @@ const RootQuery = new GraphQLObjectType({
                     getMerchantBusinessByID:MerchantBusinessCatgoryByID,
                     getMerchantContactByID:MerchantContactsCatgoryByID,
 
+          /* ------------------------------------Customers Queries------------------------------ */
+                  AddCustomer : AddCustomer ,
+                  GetCustomers : GetCustomers,
     }
   });
 
