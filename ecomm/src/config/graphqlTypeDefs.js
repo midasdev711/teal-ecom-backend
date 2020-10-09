@@ -5,7 +5,6 @@ type ProductCategoryType {
 }
 
 type ProductAttributeType{ 
-      _id: String
       attributeName :String
       attributeValues :[String] 
 }
@@ -17,7 +16,12 @@ type ProductVariantType {
 
 input ProductVariantInput {
   variantName : String
-  variantsValues : String
+  variantValues : String
+}
+
+input ProductAttributeInput{ 
+  attributeName :String
+  attributeValues :[String] 
 }
 
 type ProductSubcategoryType {
@@ -46,62 +50,64 @@ type ProductSubcategoryType {
    productTitle: String
    productSlug: String
    productDescription: String
-   productMRP: String
-   productSalePrice: String
+   productMRP: Int
+   productSalePrice: Int
    productThumbnailImage: String
    productFeaturedImage: String
-   productImages : String
+   productImages : [String]
    productCategory: Int
    productSubcategory: Int
    productSEO: ProductSEOInput
    ampSlug: String
    productTotalQuantity: Int
-   productInventory: Int
+   productInventory: String
    productTags: [String]
    productStock: Int
    productTermsAndConditions: String
-   productVariants: ProductVariantInput
-   productAttributes: Int
+   productVariants: [ProductVariantInput]
    productStartDate: String
    productEndDate: String
    productSearchEngineTitle: String
    productSearchEngineDescription: String
+   productCostPerItem: Int
+   isPublish: String
+   productAttributes:[ProductAttributeInput]
  }
 type Product {
       _id:String
-      productID :Int 
-      productMerchantID : Int 
-      productMerchantName :String 
-      productSKU : String 
-      productTitle :String 
-      productSlug :String 
-      productDescription :String 
-      productMRP : String 
-      productSalePrice : String
-      productThumbnailImage :String 
-      productFeaturedImage : String
-      productImages:String
-      productCategory : ProductCategoryType
-      productSubcategory :ProductSubcategoryType
-      productSEO : ProductSEOType
-      ampSlug :String
-      productTotalQuantity : Int
-      productInventory:Int
-      productTags : [String]
-      productStock : Int
-      productTermsAndConditions :String 
-      productVariants : ProductVariantType
-      productAttributes : ProductAttributeType
-      productStartDate : String
-      productEndDate : String
+      ID :Int 
+      merchantID : Int 
+      merchantName :String 
+      sku : String 
+      title :String 
+      slug :String 
+      description :String 
+      thumbnailImage :String 
+      featuredImage : String
+      images:[String]
+      seo : ProductSEOType
+      totalQuantity : Int
+      inventory:Int
+      tags : [String]
+      stock : Int
+      termsAndConditions :String 
+      variants : [ProductVariantType]
+      startDate : String
+      endDate : String
       isPublish : String
-      productSearchEngineTitle : String
-      productSearchEngineDescription : String
+      searchEngineTitle : String
+      searchEngineDescription : String
       status : Int
       createdBy : String
       modifiedBy : String
       createdDate : String
       modifiedDate : String
+      category:[productCatType]
+      subCategory:[productCatType]
+      attributes:[ProductAttributeType]
+      mrp:Int
+      salePrice:Int
+      productCost:Int
 }
 
 
@@ -247,13 +253,106 @@ type Query {
       products(filters: ProductFilters):[Product]
       merchants(filters: MerchantFilters):[Merchant]
       orders(filters:OrderFilters):[Order]
+      categories(filters: CategoryFilters):[ProductCategory]
+      getCategoryById(ID:Int):ProductCategory
+      getAllCategories:[ProductCategory]
+      getSubCategories(ID:Int):[ProductCategory]
+      getProductByMerchant(ID:Int):[MyProductType]
   }
   
   type Mutation {
     upsertProduct(product: ProductInput): Product
     upsertMerchant(merchant: MerchantInput): Merchant
     upsertOrder(order:OrderInput): Order
+    upsertProductCategory(category: ProductCategoryInput): ProductCategory 
+    upload(file: UploadFile!):File
   }
+
+  input ProductCategoryInput{
+    ID:Int
+    Name: String
+    Description: String 
+    Slug: String
+    isParent: Boolean 
+    FeatureImage : String
+    ParentCategoryID : Int
+    Sequence : Int
+    Type : Int
+}
+
+
+type ProductCategory{
+  ID: ID!
+  id: ID
+  name: String
+  description: String 
+  status: Int 
+  slug: String
+  isParent: Boolean 
+  featureImage : String
+  parentCategoryID : Int
+  createdDate :  String
+  modifiedDate :  String
+  sequence : Int
+  type : Int
+}
+
+input CategoryFilters {
+  categoryIds: [ID]
+  ignoreCategoryIds: [ID]
+}
+
+
+type MyProductType
+{
+  merchantID:Int
+  merchantName:String
+  totalQuantity:Int
+  images:[String]
+  startDate:String
+  isPublish:String
+  featuredImage:String
+  slug:String
+  thumbnailImage:String
+  attributes:[ProductAttributeType]
+  endDate:String
+  variants:[ProductVariantType]
+  tags:[String]
+  description:String
+  seo:ProductSEOType
+  subCategory:[productCatType]
+  category:[productCatType]
+  sku:String
+  title:String
+  salePrice:String
+  mrp:String
+  productCost:String
+  stock:Int
+  ID:Int
+ _id:String
+}
+
+
+type productCatType
+{
+  ID:Int
+}
+
+type File
+{
+  filename: String!
+  mimetype: String!
+  encoding: String!
+}
+
+scalar Upload
+
+input UploadFile {
+  id: Int!
+  file: Upload!
+}
+
+
 `;
 
 module.exports = typeDefs;

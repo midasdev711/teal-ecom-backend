@@ -13,8 +13,8 @@ const ProductSchema = new Schema(
     title: { type: String, exists: false, unique: true },
     slug: { type: String },
     description: { type: String },
-    mrp: { type: SchemaType.Decimal128 },
-    salePrice: { type: SchemaType.Decimal128 },
+    mrp: { type: Number },
+    salePrice: { type: Number },
     thumbnailImage: { type: String, default: "" },
     featuredImage: { type: String },
     images: [{ type: String }],
@@ -39,7 +39,7 @@ const ProductSchema = new Schema(
     attributes: [
       {
         attributeName: { type: String },
-        attributeValues: [{ type: String }],
+        attributeValues: [{ type: String }]
       },
     ],
     ampSlug: { type: String },
@@ -57,7 +57,13 @@ const ProductSchema = new Schema(
     modifiedBy: { type: Number },
     createdDate: { type: Date, default: Date.now() },
     modifiedDate: { type: Date, default: Date.now() },
+    variants: [{
+      variantName: { type: String },
+      variantValues: { type: String }
+    }],
+    productCost: { type: Number },
   },
+
   {
     timestamps: true,
   }

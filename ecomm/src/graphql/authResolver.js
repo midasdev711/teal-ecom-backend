@@ -1,15 +1,15 @@
-const Users = require("../models/users");
+const Users = require("../../../news/src/models/users");
 const { GraphQLEmail } = require("graphql-custom-types");
-const { ArticleStatusConst, RoleObject } = require("../constant");
-const { generateToken, verifyToken } = require("../middleware/middleware");
+const { ArticleStatusConst, RoleObject } = require("../../constant");
+const { generateToken, verifyToken } = require("../../schema/middleware/middleware");
 const emailValidator = require("email-validator");
 const uniqid = require("uniqid");
 const { get } = require("lodash");
-const sendMailToUser = require("../mail/signup");
-const UserSettings = require("../models/user_settings");
+// const sendMailToUser = require("../../");
+const UserSettings = require("../../../news/src/models/user_settings");
 const passwordHash = require("password-hash");
-const bcrypt = require("bcrypt");
-const apiKeys = require("../models/api_key");
+// const bcrypt = require("bcrypt");
+const apiKeys = require("../../../news/src/models/api_key");
 
 module.exports = {
   index: async (root, args, context) => {

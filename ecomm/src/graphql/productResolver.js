@@ -1,9 +1,9 @@
 var mongoose = require("mongoose");
 const { get } = require("lodash");
-var Users = mongoose.model("users");
 const ProductModel = mongoose.model("products");
 const UploadBase64OnS3 = require("../../../upload/base64_upload");
-const { AWSNewCredentials } = require("../../../upload/aws_constants");
+const { AWSCredentails } = require("../../../upload/aws_constants");
+const { verifyToken } = require("../../schema/middleware/middleware");
 module.exports = {
   index: async (root, args, context) => {
     if (context.userAuthenticate) {
@@ -22,39 +22,95 @@ module.exports = {
 
     return productData;
   },
-  upsert: async (root, args, context) => {
-    const id = await verifyToken(context);
 
+  getProductByMerchant: async (root, args, context) => {
+    let productByMerchant = await ProductModel.find({ merchantID: args.ID });
+    if (productByMerchant) {
+      return productByMerchant;
+    }
+  },
+
+  upsert: async (root, args, context) => {
+    // let attributes = get(args, "product");
+    const id = await verifyToken(context);
+    let productObj = {}
     let attributes = get(args, "product");
     if (id.UserID) {
-      attributes.merchantID = id.UserID;
+      attributes.productMerchantID = id.UserID;
     }
+
+
+    let productCat = [];
+    let productCatObj = {};
+    productCatObj.ID = attributes.productCategory
+    productCat.push(productCatObj);
+
+
+    let productSubCat = [];
+    let productSubCatObj = {};
+    productSubCatObj.ID = attributes.productSubcategory
+    productSubCat.push(productSubCatObj)
+
+
     let imageArray = [];
-    let featuredImage = await UploadBase64OnS3(
-      args.featuredImage,
-      AWSNewCredentials.AWS_PRODUCT_THUMBNAIL
-    );
+    let featuredImage = await UploadBase64OnS3(attributes.productFeaturedImage, AWSCredentails.AWS_PRODUCT_IMG_PATH);
 
-    if (args.image.length > 0) {
-      let promises = args.image.map(async (item, index) => {
+    let thumbNailImage = await UploadBase64OnS3(attributes.productThumbnailImage, AWSCredentails.AWS_PRODUCT_THUMBNAIL)
+
+    if (attributes.productImages.length > 0) {
+      // attributes.productImages = attributes.productImages.split(",");
+      let promises = attributes.productImages.map(async (item, index) => {
         let Image = item.split(";");
-
         let str1 = Image[0] + ";";
         let str2 = Image[2];
         let res = str1.concat(str2);
         let UploadedImage = await UploadBase64OnS3(
           res,
-          AWSCredentails.AWS_PRODUCT_THUMBNAIL
+          AWSCredentails.AWS_PRODUCT_IMG_PATH
         );
         imageArray.push(UploadedImage);
       });
-
       await Promise.all(promises);
     }
-    attributes.featuredImage = featuredImage;
+    productObj.merchantID = attributes.productMerchantID;;
+    productObj.merchantName = attributes.productMerchantName;
+    productObj.sku = attributes.productSKU;
+    productObj.title = attributes.productTitle;
+    productObj.slug = attributes.productSlug;
+    productObj.description = attributes.productDescription;
+    productObj.mrp = attributes.productMRP;
+    productObj.salePrice = attributes.productSalePrice;
+    productObj.thumbnailImage = thumbNailImage;
+    productObj.featuredImage = featuredImage;
+    productObj.images = imageArray;
+    productObj.category = productCat;
+    productObj.subCategory = productSubCat;
+    productObj.seo = attributes.productSEO;
+    productObj.attributes = attributes.productAttributes;
+    productObj.ampSlug = attributes.ampSlug;
+    productObj.totalQuantity = attributes.productTotalQuantity;
+    productObj.stock = attributes.productStock;
+    productObj.tags = attributes.productTags;
+    productObj.startDate = attributes.productStartDate;
+    productObj.endDate = attributes.productEndDate;
+    productObj.isPublish = attributes.isPublish;
+    if (productObj.isPublish === undefined || productObj.isPublish === null) {
+      productObj.isPublish = 'false';
+    }
+    productObj.variants = attributes.productVariants;
+    productObj.productCost = attributes.productCostPerItem;
+    return ProductModel.create(productObj);
 
-    return ProductModel.create(attributes);
   },
+
+  fileUpload: async (root, args, context) => {
+    return args.file.then(file => {
+      //file.createReadStream() is a readable node stream that contains the contents of the uploaded file
+      console.log('file', file.createReadStream());
+
+      return file;
+    });
+  }
 };
 
 const buildFindQuery = async ({ args, UserID }) => {
@@ -124,4 +180,6 @@ const buildFindQuery = async ({ args, UserID }) => {
       }).sort({ _id: -1 });
     }
   }
+
+
 };
