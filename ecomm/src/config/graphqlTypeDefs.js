@@ -244,9 +244,19 @@ input OrderInput{
     }
     type Customer {
       _id:String
-      ID: Int
-      BasicDetails: String
-      AddressDetails: String
+      BasicDetailsFirstName: String
+      BasicDetailsLastName: String
+      BasicDetailsEmail: String
+      BasicDetailsMobile: String
+      BasicDetailsEmailFlag: Boolean
+      AddressDetailsFirstName: String
+      AddressDetailsLastName: String
+      AddressDetailsCompany: String
+      AddressDetailsApartment: String
+      AddressDetailsCity: String
+      AddressDetailsCountry: String
+      AddressDetailsPostalCode: String
+      AddressDetailsMobile: String
       Tax : Int
       Notes: String
       Tags: String
@@ -256,17 +266,37 @@ input OrderInput{
 
 input CustomerFilters{
       _id: String
-      ID: Int
-      BasicDetails: String
-      AddressDetails: String
+      BasicDetailsFirstName: String
+      BasicDetailsLastName: String
+      BasicDetailsEmail: String
+      BasicDetailsMobile: String
+      BasicDetailsEmailFlag: Boolean
+      AddressDetailsFirstName: String
+      AddressDetailsLastName: String
+      AddressDetailsCompany: String
+      AddressDetailsApartment: String
+      AddressDetailsCity: String
+      AddressDetailsCountry: String
+      AddressDetailsPostalCode: String
+      AddressDetailsMobile: String
       Tax : Int
       Notes: String
       Tags: String
   }
   input CustomerInput{
-    ID: Int
-      BasicDetails: String
-      AddressDetails: String
+      BasicDetailsFirstName: String
+      BasicDetailsLastName: String
+      BasicDetailsEmail: String
+      BasicDetailsMobile: String
+      BasicDetailsEmailFlag: Boolean
+      AddressDetailsFirstName: String
+      AddressDetailsLastName: String
+      AddressDetailsCompany: String
+      AddressDetailsApartment: String
+      AddressDetailsCity: String
+      AddressDetailsCountry: String
+      AddressDetailsPostalCode: String
+      AddressDetailsMobile: String
       Tax : Int
       Notes: String
       Tags: String

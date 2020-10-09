@@ -19,12 +19,11 @@ const CustomerData = require('../../models/customers'),
 //       return CustomerData.find({ ID:args.ID }); }
 //   };
 
-// get all article categories
+// get all customer categories
   const CustomerAll = {
     type: new GraphQLList(CustomerType),
-    resolve: async (parent, args, context) => {
-      const id = await verifyToken(context);
-      return CustomerData.find({ Status: 1 }); }
+    resolve:  () => {
+      return customers }
   };
 
 //   // get parent categories
