@@ -5,6 +5,7 @@ const { AWSCredentails } = require("../../../upload/aws_constants");
 const { verifyToken } = require("../../schema/middleware/middleware");
 var AWS = require("aws-sdk")
 const { v4: uuidv4 } = require('uuid');
+const { AWSNewCredentials } = require("../../../upload/aws_constants");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -33,6 +34,7 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
+    console.log('args', args);
     const id = await verifyToken(context);
     let productObj = {}
     let attributes = get(args, "product");
@@ -40,8 +42,25 @@ module.exports = {
       attributes.productMerchantID = id.UserID;
     }
 
+
     //product-thubnail ,featured and productImages upload
-    let { createReadStream, filename, mimetype } = await attributes.productThumbnailImage;
+    // let { createReadStream, filename, mimetype } = await attributes.productThumbnailImage;
+    let createReadStream;
+    let filename;
+    let mimetype;
+    let thumbnailData = attributes.productThumbnailImage;
+    try {
+      thumbnailData.then((data) => {
+        if (data) {
+          createReadStream = data.createReadStream
+          filename = data.filename
+          mimetype = data.mimetype
+        }
+      })
+
+    } catch (error) {
+      console.log('error  while getting stream data of thumbnail image', error)
+    }
 
     let createReadStream1;
     let filename1;
@@ -61,11 +80,11 @@ module.exports = {
 
 
 
-    let productImageData = attributes.productImages;
+    // let productImageData = attributes.productImages;
     let imageArray = [];
     let imageValues = [];
 
-    //product image- uplaod to aws
+    // //product image- uplaod to aws
     try {
       await Promise.all(productImageData).then((values) => {
         imageValues = values;
@@ -103,7 +122,7 @@ module.exports = {
 
     let thumbNailImage;
 
-    //thumbnail image-upload to aws
+    // thumbnail image-upload to aws
     try {
       let thumbImgUrl = await uploadUrl(filename, createReadStream, mimetype, AWSCredentails.AWS_PRODUCT_THUMBNAIL)
       thumbNailImage = thumbImgUrl;
@@ -112,13 +131,49 @@ module.exports = {
       console.log('error while uploading thumbnail image to amazon S3 bucket\n', error)
     }
 
-    //featured image- upload to aws
+    // featured image- upload to aws
     try {
       let featuredImgUrl = await uploadUrl(filename1, createReadStream1, mimetype1, AWSCredentails.AWS_PRODUCT_IMG_PATH)
       featuredImage = featuredImgUrl;
 
     } catch (error) {
       console.log('error while uploading featured image to amazon S3 bucket\n', error)
+    }
+
+    if (attributes.productId !== null) {
+      let productData = await ProductModel.findOne({ ID: attributes.productId });
+      if (productData !== null) {
+        let updateObj = {};
+        updateObj.merchantID = attributes.productMerchantID;;
+        updateObj.merchantName = attributes.productMerchantName;
+        updateObj.sku = attributes.productSKU;
+        updateObj.title = attributes.productTitle;
+        updateObj.slug = attributes.productSlug;
+        updateObj.description = attributes.productDescription;
+        updateObj.mrp = attributes.productMRP;
+        updateObj.salePrice = attributes.productSalePrice;
+        updateObj.thumbnailImage = thumbNailImage;
+        updateObj.featuredImage = featuredImage;
+        updateObj.images = imageArray;
+        updateObj.category = productCat;
+        updateObj.subCategory = productSubCat;
+        updateObj.seo = attributes.productSEO;
+        updateObj.attributes = attributes.productAttributes;
+        updateObj.ampSlug = attributes.ampSlug;
+        updateObj.totalQuantity = attributes.productTotalQuantity;
+        updateObj.stock = attributes.productStock;
+        updateObj.tags = attributes.productTags;
+        updateObj.startDate = attributes.productStartDate;
+        updateObj.endDate = attributes.productEndDate;
+        updateObj.isPublish = attributes.isPublish;
+        if (updateObj.isPublish === undefined || updateObj.isPublish === null) {
+          updateObj.isPublish = 'false';
+        }
+        updateObj.variants = attributes.productVariants;
+        updateObj.productCost = attributes.productCostPerItem;
+        return await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: updateObj }, { new: true })
+      }
+
     }
 
 
@@ -161,6 +216,16 @@ module.exports = {
 
       return file;
     });
+  },
+  removeProduct: async (root, args, context) => {
+    const id = await verifyToken(context);
+    let removedProductData = await ProductModel.findOneAndDelete({ ID: args.ID });
+    if (removedProductData) {
+      let message = `Product with id - ${removedProductData.ID} removed sucessfully`;
+      let responseObj = { ID: removedProductData.ID, title: removedProductData.title, message: message }
+      return responseObj;
+    }
+
   }
 };
 
@@ -248,7 +313,7 @@ const uploadUrl = async (filename, streadData, mimetype, Path) => {
 
   let params = {
     'Bucket': AWSNewCredentials.Bucket,
-    'Key': `${Path}/`+uuidv4() + '.' + filename.split('.')[1],
+    'Key': `${Path}/`+ uuidv4() + '.' + filename.split('.')[1],
     'ACL': 'public-read',
     'Body': streadData(),
     'ContentType': mimetype

@@ -54,6 +54,7 @@ type ProductSubcategoryType {
 }
 
  input ProductInput{
+   productId:Int
    productMerchantID: Int
    productMerchantName: String
    productSKU: String
@@ -276,6 +277,7 @@ type Query {
     upsertOrder(order:OrderInput): Order
     upsertProductCategory(category: ProductCategoryInput): ProductCategory 
     upload(file: UploadFile!):File
+    removeProduct(ID:Int):RemoveProduct
   }
 
   input ProductCategoryInput{
@@ -348,9 +350,17 @@ type productCatType
   ID:Int
 }
 
+
 input UploadFile {
   id: Int!
   file: Upload!
+}
+
+type RemoveProduct
+{
+  ID:Int
+  title:String
+  message:String
 }
 
 
