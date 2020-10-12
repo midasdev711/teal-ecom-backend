@@ -140,72 +140,21 @@ module.exports = {
       console.log('error while uploading featured image to amazon S3 bucket\n', error)
     }
 
+    //product update
     if (attributes.productId !== null) {
       let productData = await ProductModel.findOne({ ID: attributes.productId });
       if (productData !== null) {
-        let updateObj = {};
-        updateObj.merchantID = attributes.productMerchantID;;
-        updateObj.merchantName = attributes.productMerchantName;
-        updateObj.sku = attributes.productSKU;
-        updateObj.title = attributes.productTitle;
-        updateObj.slug = attributes.productSlug;
-        updateObj.description = attributes.productDescription;
-        updateObj.mrp = attributes.productMRP;
-        updateObj.salePrice = attributes.productSalePrice;
-        updateObj.thumbnailImage = thumbNailImage;
-        updateObj.featuredImage = featuredImage;
-        updateObj.images = imageArray;
-        updateObj.category = productCat;
-        updateObj.subCategory = productSubCat;
-        updateObj.seo = attributes.productSEO;
-        updateObj.attributes = attributes.productAttributes;
-        updateObj.ampSlug = attributes.ampSlug;
-        updateObj.totalQuantity = attributes.productTotalQuantity;
-        updateObj.stock = attributes.productStock;
-        updateObj.tags = attributes.productTags;
-        updateObj.startDate = attributes.productStartDate;
-        updateObj.endDate = attributes.productEndDate;
-        updateObj.isPublish = attributes.isPublish;
-        if (updateObj.isPublish === undefined || updateObj.isPublish === null) {
-          updateObj.isPublish = 'false';
-        }
-        updateObj.variants = attributes.productVariants;
-        updateObj.productCost = attributes.productCostPerItem;
-        return await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: updateObj }, { new: true })
+        let updateData = {};
+        let productInsertObj = await insertOrUpdate(updateData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
+        return await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: productInsertObj }, { new: true })
       }
-
     }
 
-
-
-    productObj.merchantID = attributes.productMerchantID;;
-    productObj.merchantName = attributes.productMerchantName;
-    productObj.sku = attributes.productSKU;
-    productObj.title = attributes.productTitle;
-    productObj.slug = attributes.productSlug;
-    productObj.description = attributes.productDescription;
-    productObj.mrp = attributes.productMRP;
-    productObj.salePrice = attributes.productSalePrice;
-    productObj.thumbnailImage = thumbNailImage;
-    productObj.featuredImage = featuredImage;
-    productObj.images = imageArray;
-    productObj.category = productCat;
-    productObj.subCategory = productSubCat;
-    productObj.seo = attributes.productSEO;
-    productObj.attributes = attributes.productAttributes;
-    productObj.ampSlug = attributes.ampSlug;
-    productObj.totalQuantity = attributes.productTotalQuantity;
-    productObj.stock = attributes.productStock;
-    productObj.tags = attributes.productTags;
-    productObj.startDate = attributes.productStartDate;
-    productObj.endDate = attributes.productEndDate;
-    productObj.isPublish = attributes.isPublish;
-    if (productObj.isPublish === undefined || productObj.isPublish === null) {
-      productObj.isPublish = 'false';
-    }
-    productObj.variants = attributes.productVariants;
-    productObj.productCost = attributes.productCostPerItem;
-    return ProductModel.create(productObj);
+    //new product insert
+    let insertProductData = {};
+    let productInsertObj = await insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
+    return ProductModel.create(productInsertObj);
+    
 
   },
 
@@ -313,7 +262,7 @@ const uploadUrl = async (filename, streadData, mimetype, Path) => {
 
   let params = {
     'Bucket': AWSNewCredentials.Bucket,
-    'Key': `${Path}/`+ uuidv4() + '.' + filename.split('.')[1],
+    'Key': `${Path}/` + uuidv4() + '.' + filename.split('.')[1],
     'ACL': 'public-read',
     'Body': streadData(),
     'ContentType': mimetype
@@ -323,4 +272,37 @@ const uploadUrl = async (filename, streadData, mimetype, Path) => {
   var s3Bucket = new AWS.S3();
   const { Location } = await s3Bucket.upload(params).promise();
   return Location
+}
+
+//product - request data fetch 
+const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat) => {
+  uploadData.merchantID = attributes.productMerchantID;;
+  uploadData.merchantName = attributes.productMerchantName;
+  uploadData.sku = attributes.productSKU;
+  uploadData.title = attributes.productTitle;
+  uploadData.slug = attributes.productSlug;
+  uploadData.description = attributes.productDescription;
+  uploadData.mrp = attributes.productMRP;
+  uploadData.salePrice = attributes.productSalePrice;
+  uploadData.thumbnailImage = thumbNailImage;
+  uploadData.featuredImage = featuredImage;
+  uploadData.images = imageArray;
+  uploadData.category = productCat;
+  uploadData.subCategory = productSubCat;
+  uploadData.seo = attributes.productSEO;
+  uploadData.attributes = attributes.productAttributes;
+  uploadData.ampSlug = attributes.ampSlug;
+  uploadData.totalQuantity = attributes.productTotalQuantity;
+  uploadData.stock = attributes.productStock;
+  uploadData.tags = attributes.productTags;
+  uploadData.startDate = attributes.productStartDate;
+  uploadData.endDate = attributes.productEndDate;
+  uploadData.isPublish = attributes.isPublish;
+  if (uploadData.isPublish === undefined || uploadData.isPublish === null) {
+    uploadData.isPublish = 'false';
+  }
+  uploadData.variants = attributes.productVariants;
+  uploadData.productCost = attributes.productCostPerItem;
+  return uploadData;
+
 }
