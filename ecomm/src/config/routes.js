@@ -1,11 +1,12 @@
 const express = require("express"),
   { ApolloServer } = require("apollo-server-express");
-// rootResolver = require("../graphql/rootResolver"),
-// typeDefs = require("./graphqlTypeDefs");
 const { authenticateRequest } = require("../controllers/authController");
 const { mergeSchemas } = require("graphql-tools");
 const EcommSchema = require('../config/schema');
 const NewsSchema = require('../../../news/src/config/schema');
+const { graphqlUploadExpress } = require('graphql-upload');
+
+
 
 const schema = mergeSchemas({
   schemas: [EcommSchema, NewsSchema],
@@ -19,7 +20,7 @@ module.exports = function (app) {
       // get user object from here for the resolvers.
       let userAuthenticate = await authenticateRequest(req);
       return userAuthenticate;
-    },
+    }
   });
 
   app.get("/", async function (req, res, next) {
@@ -27,5 +28,6 @@ module.exports = function (app) {
   });
 
   app.use("/uploads", express.static("uploads"));
-  server.applyMiddleware({ app, bodyParserConfig: { limit: 524288000, parameterLimit: 10000000000000, extended: true, type: '' }, });
+  app.use('/graphql', graphqlUploadExpress({ maxFileSize: 524288000, maxFiles: 100 }));
+  server.applyMiddleware({ app, bodyParserConfig: { limit: 524288000, parameterLimit: 10000000000000, extended: true }, });
 };

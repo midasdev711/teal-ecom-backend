@@ -154,7 +154,8 @@ const addCategorySubCategory = async function () {
         for (let i = 0; i < categoryArr.length; i++) {
             let obj = {
                 name: categoryArr[i].name,
-                slug: categoryArr[i].name + ' slug'
+                slug: categoryArr[i].name + ' slug',
+                isParent: true
             };
             let categoryFind = await categoryModel.findOne({ name: obj.name })
             if (categoryFind !== null) {
@@ -170,6 +171,7 @@ const addCategorySubCategory = async function () {
                     subCategoryObj.name = mSubCategoryObj;
                     subCategoryObj.slug = mSubCategoryObj + ' slug';
                     subCategoryObj.parentCategoryID = parentCategory.ID;
+                    subCategoryObj.isParent = false;
                     await categoryModel.create(subCategoryObj);
                 }
             }

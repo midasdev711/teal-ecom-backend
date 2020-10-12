@@ -1,9 +1,11 @@
 var mongoose = require("mongoose");
 const { get } = require("lodash");
 const ProductModel = mongoose.model("products");
-const UploadBase64OnS3 = require("../../../upload/base64_upload");
 const { AWSCredentails } = require("../../../upload/aws_constants");
 const { verifyToken } = require("../../schema/middleware/middleware");
+var AWS = require("aws-sdk")
+const { v4: uuidv4 } = require('uuid');
+
 module.exports = {
   index: async (root, args, context) => {
     if (context.userAuthenticate) {
@@ -31,12 +33,59 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
-    // let attributes = get(args, "product");
     const id = await verifyToken(context);
     let productObj = {}
     let attributes = get(args, "product");
     if (id.UserID) {
       attributes.productMerchantID = id.UserID;
+    }
+
+    //product-thubnail ,featured and productImages upload
+    let { createReadStream, filename, mimetype } = await attributes.productThumbnailImage;
+
+    let createReadStream1;
+    let filename1;
+    let mimetype1;
+
+    let featuredImage;
+    let featuredData = attributes.productFeaturedImage;
+    try {
+      featuredData.then((data) => {
+        createReadStream1 = data.createReadStream
+        filename1 = data.filename
+        mimetype1 = data.mimetype
+      });
+    } catch (error) {
+      console.log('error while getting stream data of featured image\n', error)
+    }
+
+
+
+    let productImageData = attributes.productImages;
+    let imageArray = [];
+    let imageValues = [];
+
+    //product image- uplaod to aws
+    try {
+      await Promise.all(productImageData).then((values) => {
+        imageValues = values;
+        let promises = imageValues.map(async (obj) => {
+          let createReadStream1 = obj.createReadStream
+          let filename1 = obj.filename;
+          let mimetype1 = obj.mimetype;
+          try {
+            let url = await uploadUrl(filename1, createReadStream1, mimetype1, AWSCredentails.AWS_PRODUCT_IMG_PATH);
+            imageArray.push(url);
+          } catch (error) {
+            console.log('error while uploading product images to amazon S3 bucket\n', error)
+          }
+
+        });
+        Promise.all(promises);
+      });
+
+    } catch (error) {
+      console.log('error while getting stream data of product images\n', error)
     }
 
 
@@ -52,26 +101,28 @@ module.exports = {
     productSubCat.push(productSubCatObj)
 
 
-    let imageArray = [];
-    let featuredImage = await UploadBase64OnS3(attributes.productFeaturedImage, AWSCredentails.AWS_PRODUCT_IMG_PATH);
+    let thumbNailImage;
 
-    let thumbNailImage = await UploadBase64OnS3(attributes.productThumbnailImage, AWSCredentails.AWS_PRODUCT_THUMBNAIL)
+    //thumbnail image-upload to aws
+    try {
+      let thumbImgUrl = await uploadUrl(filename, createReadStream, mimetype, AWSCredentails.AWS_PRODUCT_THUMBNAIL)
+      thumbNailImage = thumbImgUrl;
 
-    if (attributes.productImages.length > 0) {
-      // attributes.productImages = attributes.productImages.split(",");
-      let promises = attributes.productImages.map(async (item, index) => {
-        let Image = item.split(";");
-        let str1 = Image[0] + ";";
-        let str2 = Image[2];
-        let res = str1.concat(str2);
-        let UploadedImage = await UploadBase64OnS3(
-          res,
-          AWSCredentails.AWS_PRODUCT_IMG_PATH
-        );
-        imageArray.push(UploadedImage);
-      });
-      await Promise.all(promises);
+    } catch (error) {
+      console.log('error while uploading thumbnail image to amazon S3 bucket\n', error)
     }
+
+    //featured image- upload to aws
+    try {
+      let featuredImgUrl = await uploadUrl(filename1, createReadStream1, mimetype1, AWSCredentails.AWS_PRODUCT_IMG_PATH)
+      featuredImage = featuredImgUrl;
+
+    } catch (error) {
+      console.log('error while uploading featured image to amazon S3 bucket\n', error)
+    }
+
+
+
     productObj.merchantID = attributes.productMerchantID;;
     productObj.merchantName = attributes.productMerchantName;
     productObj.sku = attributes.productSKU;
@@ -183,3 +234,28 @@ const buildFindQuery = async ({ args, UserID }) => {
 
 
 };
+
+
+
+//upload to amazon s3 func
+const uploadUrl = async (filename, streadData, mimetype, Path) => {
+  AWS.config.setPromisesDependency(require("bluebird"));
+  AWS.config.update({
+    accessKeyId: AWSNewCredentials.credentials.accessKeyId,
+    secretAccessKey: AWSNewCredentials.credentials.secretAccessKey,
+    region: AWSNewCredentials.Region,
+  });
+
+  let params = {
+    'Bucket': AWSNewCredentials.Bucket,
+    'Key': `${Path}/`+uuidv4() + '.' + filename.split('.')[1],
+    'ACL': 'public-read',
+    'Body': streadData(),
+    'ContentType': mimetype
+  };
+
+
+  var s3Bucket = new AWS.S3();
+  const { Location } = await s3Bucket.upload(params).promise();
+  return Location
+}

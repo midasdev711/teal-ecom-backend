@@ -52,9 +52,9 @@ type ProductSubcategoryType {
    productDescription: String
    productMRP: Int
    productSalePrice: Int
-   productThumbnailImage: String
-   productFeaturedImage: String
-   productImages : [String]
+   productThumbnailImage: Upload
+   productFeaturedImage: Upload
+   productImages : [Upload]
    productCategory: Int
    productSubcategory: Int
    productSEO: ProductSEOInput
@@ -82,7 +82,7 @@ type Product {
       title :String 
       slug :String 
       description :String 
-      thumbnailImage :String 
+      thumbnailImage :String
       featuredImage : String
       images:[String]
       seo : ProductSEOType
