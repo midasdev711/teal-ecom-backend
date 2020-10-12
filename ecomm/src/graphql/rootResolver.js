@@ -25,6 +25,7 @@ const root = {
     upsertOrder: orderResolver.upsert,
     // upsertCategory: CategoryResolver.upsert,
     upsertProductCategory: CategoryResolver.upsert,
+    removeProduct: ProductResolver.removeProduct
     // upload: ProductResolver.fileUpload
     // upsertAuth: AuthResolver.upsert,
     // userAPIKey: AuthResolver.createAPIKey,
