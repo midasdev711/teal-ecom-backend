@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 function connectWithMongodb() {
   mongoose.connect(
-    "mongodb+srv://fuckcovid:Li5D0vvZTVvyo0V9@cluster0.oml6y.mongodb.net/teal?retryWrites=true&w=majority",
+    "mongodb://localhost:27017/teal",
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,

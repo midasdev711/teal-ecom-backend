@@ -1,4 +1,14 @@
 const typeDefs = `
+
+type File
+{
+  filename: String!
+  mimetype: String!
+  encoding: String!
+}
+
+scalar Upload
+
 type ProductCategoryType {
       ID : Int
       name : String
@@ -337,15 +347,6 @@ type productCatType
 {
   ID:Int
 }
-
-type File
-{
-  filename: String!
-  mimetype: String!
-  encoding: String!
-}
-
-scalar Upload
 
 input UploadFile {
   id: Int!

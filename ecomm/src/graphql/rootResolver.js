@@ -25,10 +25,11 @@ const root = {
     upsertOrder: orderResolver.upsert,
     // upsertCategory: CategoryResolver.upsert,
     upsertProductCategory: CategoryResolver.upsert,
-    // upload: ProductResolver.fileUpload,
-    // upload: ProductResolver.Upload,
+    // upload: ProductResolver.fileUpload
+    // upsertAuth: AuthResolver.upsert,
+    // userAPIKey: AuthResolver.createAPIKey,
 
-  },
+  }
 };
 
 module.exports = root;
