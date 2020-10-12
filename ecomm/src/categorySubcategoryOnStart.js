@@ -1,6 +1,5 @@
 
 require('../../db/db')
-const { await } = require('await');
 let categoryModel = require('./models/product_category');
 let categoryArr = [
     {
@@ -157,10 +156,7 @@ const addCategorySubCategory = async function () {
                 slug: categoryArr[i].name + ' slug',
                 isParent: true
             };
-            let categoryFind = await categoryModel.findOne({ name: obj.name })
-            if (categoryFind !== null) {
-                console.log('duplicate category found', obj.name);
-            };
+            // let categoryFind = await categoryModel.findOne({ name: obj.name })
 
             let parentCategory = await categoryModel.create(obj);
 
@@ -178,7 +174,8 @@ const addCategorySubCategory = async function () {
         }
 
     } catch (error) {
-        console.log('error while adding category-subcategory', error)
+        console.log('error while adding category-subcategory\n', error);
+        throw error;
     }
 
 }

@@ -64,8 +64,8 @@ type ProductSubcategoryType {
    productMRP: Int
    productSalePrice: Int
    productThumbnailImage: Upload
-   productFeaturedImage: Upload
-   productImages : [Upload]
+   productFeaturedImage: Upload!
+   productImages : [Upload]!
    productCategory: Int
    productSubcategory: Int
    productSEO: ProductSEOInput

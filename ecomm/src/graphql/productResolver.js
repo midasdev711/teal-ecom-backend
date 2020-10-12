@@ -34,127 +34,105 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
-    console.log('args', args);
-    const id = await verifyToken(context);
-    let productObj = {}
-    let attributes = get(args, "product");
-    if (id.UserID) {
-      attributes.productMerchantID = id.UserID;
-    }
-
-
-    //product-thubnail ,featured and productImages upload
-    // let { createReadStream, filename, mimetype } = await attributes.productThumbnailImage;
-    let createReadStream;
-    let filename;
-    let mimetype;
-    let thumbnailData = attributes.productThumbnailImage;
     try {
-      thumbnailData.then((data) => {
-        if (data) {
-          createReadStream = data.createReadStream
-          filename = data.filename
-          mimetype = data.mimetype
-        }
-      })
-
-    } catch (error) {
-      console.log('error  while getting stream data of thumbnail image', error)
-    }
-
-    let createReadStream1;
-    let filename1;
-    let mimetype1;
-
-    let featuredImage;
-    let featuredData = attributes.productFeaturedImage;
-    try {
-      featuredData.then((data) => {
-        createReadStream1 = data.createReadStream
-        filename1 = data.filename
-        mimetype1 = data.mimetype
-      });
-    } catch (error) {
-      console.log('error while getting stream data of featured image\n', error)
-    }
-
-
-
-    let productImageData = attributes.productImages;
-    let imageArray = [];
-    let imageValues = [];
-
-    // //product image- uplaod to aws
-    try {
-      await Promise.all(productImageData).then((values) => {
-        imageValues = values;
-        let promises = imageValues.map(async (obj) => {
-          let createReadStream1 = obj.createReadStream
-          let filename1 = obj.filename;
-          let mimetype1 = obj.mimetype;
-          try {
-            let url = await uploadUrl(filename1, createReadStream1, mimetype1, AWSCredentails.AWS_PRODUCT_IMG_PATH);
-            imageArray.push(url);
-          } catch (error) {
-            console.log('error while uploading product images to amazon S3 bucket\n', error)
-          }
-
-        });
-        Promise.all(promises);
-      });
-
-    } catch (error) {
-      console.log('error while getting stream data of product images\n', error)
-    }
-
-
-    let productCat = [];
-    let productCatObj = {};
-    productCatObj.ID = attributes.productCategory
-    productCat.push(productCatObj);
-
-
-    let productSubCat = [];
-    let productSubCatObj = {};
-    productSubCatObj.ID = attributes.productSubcategory
-    productSubCat.push(productSubCatObj)
-
-
-    let thumbNailImage;
-
-    // thumbnail image-upload to aws
-    try {
-      let thumbImgUrl = await uploadUrl(filename, createReadStream, mimetype, AWSCredentails.AWS_PRODUCT_THUMBNAIL)
-      thumbNailImage = thumbImgUrl;
-
-    } catch (error) {
-      console.log('error while uploading thumbnail image to amazon S3 bucket\n', error)
-    }
-
-    // featured image- upload to aws
-    try {
-      let featuredImgUrl = await uploadUrl(filename1, createReadStream1, mimetype1, AWSCredentails.AWS_PRODUCT_IMG_PATH)
-      featuredImage = featuredImgUrl;
-
-    } catch (error) {
-      console.log('error while uploading featured image to amazon S3 bucket\n', error)
-    }
-
-    //product update
-    if (attributes.productId !== null) {
-      let productData = await ProductModel.findOne({ ID: attributes.productId });
-      if (productData !== null) {
-        let updateData = {};
-        let productInsertObj = await insertOrUpdate(updateData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
-        return await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: productInsertObj }, { new: true })
+      const id = await verifyToken(context);
+      let attributes = get(args, "product");
+      if (id.UserID) {
+        attributes.productMerchantID = id.UserID;
       }
+
+
+      //product-thubnail ,featured and productImages upload
+      let thumbnailStreamData = {}
+      let thumbnailData = await attributes.productThumbnailImage;
+      if (thumbnailData) {
+        thumbnailStreamData.createReadStream = thumbnailData.createReadStream
+        thumbnailStreamData.filename = thumbnailData.filename
+        thumbnailStreamData.mimetype = thumbnailData.mimetype
+      }
+
+
+
+
+      let featureStreamData = {};
+      let featuredImage;
+      let featuredData = await attributes.productFeaturedImage;
+      if (featuredData) {
+        featureStreamData.createReadStream = featuredData.createReadStream
+        featureStreamData.filename = featuredData.filename
+        featureStreamData.mimetype = featuredData.mimetype
+      }
+
+
+      let productImageData = attributes.productImages;
+      let imageArray = [];
+      let imageValues = [];
+
+      if (productImageData) {
+        imageValues = await Promise.all(productImageData);
+      }
+
+
+      if (imageValues !== undefined) {
+        for (const imgObj of imageValues) {
+          let createReadStream1 = imgObj.createReadStream
+          let filename1 = imgObj.filename;
+          let mimetype1 = imgObj.mimetype;
+          let url = await uploadUrl(filename1, createReadStream1, mimetype1, AWSCredentails.AWS_PRODUCT_IMG_PATH);
+          imageArray.push(url);
+        }
+      }
+
+
+      let productCat = [];
+      let productCatObj = {};
+      productCatObj.ID = attributes.productCategory
+      productCat.push(productCatObj);
+
+
+      let productSubCat = [];
+      let productSubCatObj = {};
+      productSubCatObj.ID = attributes.productSubcategory
+      productSubCat.push(productSubCatObj)
+
+
+      let thumbNailImage;
+
+      // thumbnail image-upload to aws
+      if (thumbnailStreamData !== undefined && thumbnailStreamData !== null && thumbnailStreamData.length > 0) {
+        let thumbImgUrl = await uploadUrl(thumbnailStreamData.filename, thumbnailStreamData.createReadStream, thumbnailStreamData.mimetype, AWSCredentails.AWS_PRODUCT_THUMBNAIL)
+        thumbNailImage = thumbImgUrl;
+      }
+
+
+
+      // featured image- upload to aws
+      if (featureStreamData !== undefined && featureStreamData !== null && featureStreamData.length > 0) {
+        let featuredImgUrl = await uploadUrl(featureStreamData.filename, featureStreamData.createReadStream, featureStreamData.mimetype, AWSCredentails.AWS_PRODUCT_IMG_PATH)
+        featuredImage = featuredImgUrl;
+      }
+
+
+      //product update
+      if (attributes.productId !== null) {
+        let productData = await ProductModel.findOne({ ID: attributes.productId });
+        if (productData !== null) {
+          let updateData = {};
+          let productInsertObj = await insertOrUpdate(updateData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
+          return await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: productInsertObj }, { new: true })
+        }
+      }
+
+      //new product insert
+      let insertProductData = {};
+      let productInsertObj = await insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
+      return ProductModel.create(productInsertObj);
+
+    } catch (error) {
+      console.log('Error while creating product', error);
+      throw error;
     }
 
-    //new product insert
-    let insertProductData = {};
-    let productInsertObj = await insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
-    return ProductModel.create(productInsertObj);
-    
 
   },
 

@@ -22,7 +22,7 @@ const generateToken = async (context, UserData) => {
 };
 
 const verifyToken = async (context) => {
-  console.log("this is context", context.headers.authorization);
+  // console.log("this is context", context.headers.authorization);
 
   try {
     const Authorization = context.headers.authorization;
