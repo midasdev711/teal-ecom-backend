@@ -80,7 +80,7 @@ module.exports = {
 
 
 
-    // let productImageData = attributes.productImages;
+    let productImageData = attributes.productImages;
     let imageArray = [];
     let imageValues = [];
 
