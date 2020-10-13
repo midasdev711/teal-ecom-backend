@@ -43,25 +43,10 @@ module.exports = {
 
 
       //product-thubnail ,featured and productImages upload
-      let thumbnailStreamData = {}
       let thumbnailData = await attributes.productThumbnailImage;
-      if (thumbnailData) {
-        thumbnailStreamData.createReadStream = thumbnailData.createReadStream
-        thumbnailStreamData.filename = thumbnailData.filename
-        thumbnailStreamData.mimetype = thumbnailData.mimetype
-      }
 
-
-
-
-      let featureStreamData = {};
       let featuredImage;
       let featuredData = await attributes.productFeaturedImage;
-      if (featuredData) {
-        featureStreamData.createReadStream = featuredData.createReadStream
-        featureStreamData.filename = featuredData.filename
-        featureStreamData.mimetype = featuredData.mimetype
-      }
 
 
       let productImageData = attributes.productImages;
@@ -75,10 +60,8 @@ module.exports = {
 
       if (imageValues !== undefined) {
         for (const imgObj of imageValues) {
-          let createReadStream1 = imgObj.createReadStream
-          let filename1 = imgObj.filename;
-          let mimetype1 = imgObj.mimetype;
-          let url = await uploadUrl(filename1, createReadStream1, mimetype1, AWSCredentails.AWS_PRODUCT_IMG_PATH);
+          const { filename, createReadStream, mimetype } = imgObj;
+          let url = await uploadUrl(filename, createReadStream, mimetype, AWSCredentails.AWS_PRODUCT_IMG_PATH);
           imageArray.push(url);
         }
       }
@@ -99,16 +82,16 @@ module.exports = {
       let thumbNailImage;
 
       // thumbnail image-upload to aws
-      if (thumbnailStreamData !== undefined && thumbnailStreamData !== null && thumbnailStreamData.length > 0) {
-        let thumbImgUrl = await uploadUrl(thumbnailStreamData.filename, thumbnailStreamData.createReadStream, thumbnailStreamData.mimetype, AWSCredentails.AWS_PRODUCT_THUMBNAIL)
+      if (thumbnailData) {
+        let thumbImgUrl = await uploadUrl(thumbnailData.filename, thumbnailData.createReadStream, thumbnailData.mimetype, AWSCredentails.AWS_PRODUCT_THUMBNAIL)
         thumbNailImage = thumbImgUrl;
       }
 
 
 
       // featured image- upload to aws
-      if (featureStreamData !== undefined && featureStreamData !== null && featureStreamData.length > 0) {
-        let featuredImgUrl = await uploadUrl(featureStreamData.filename, featureStreamData.createReadStream, featureStreamData.mimetype, AWSCredentails.AWS_PRODUCT_IMG_PATH)
+      if (featuredData) {
+        let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSCredentails.AWS_PRODUCT_IMG_PATH)
         featuredImage = featuredImgUrl;
       }
 
@@ -118,14 +101,15 @@ module.exports = {
         let productData = await ProductModel.findOne({ ID: attributes.productId });
         if (productData !== null) {
           let updateData = {};
-          let productInsertObj = await insertOrUpdate(updateData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
+          let productInsertObj = insertOrUpdate(updateData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
           return await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: productInsertObj }, { new: true })
         }
       }
 
       //new product insert
       let insertProductData = {};
-      let productInsertObj = await insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
+      let productInsertObj = insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat);
+      console.log('product insert obj', productInsertObj);
       return ProductModel.create(productInsertObj);
 
     } catch (error) {
@@ -253,7 +237,7 @@ const uploadUrl = async (filename, streadData, mimetype, Path) => {
 }
 
 //product - request data fetch 
-const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat) => {
+const insertOrUpdate = (uploadData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat) => {
   uploadData.merchantID = attributes.productMerchantID;;
   uploadData.merchantName = attributes.productMerchantName;
   uploadData.sku = attributes.productSKU;

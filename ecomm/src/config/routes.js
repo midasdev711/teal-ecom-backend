@@ -4,8 +4,6 @@ const { authenticateRequest } = require("../controllers/authController");
 const { mergeSchemas } = require("graphql-tools");
 const EcommSchema = require('../config/schema');
 const NewsSchema = require('../../../news/src/config/schema');
-const { graphqlUploadExpress } = require('graphql-upload');
-
 
 
 const schema = mergeSchemas({
@@ -27,7 +25,6 @@ module.exports = function (app) {
     console.log("Api is up");
   });
 
-  app.use('/graphql', graphqlUploadExpress({ maxFileSize: 524288000, maxFiles: 10 }))
 
   app.use("/uploads", express.static("uploads"));
   server.applyMiddleware({ app, bodyParserConfig: { limit: 524288000, parameterLimit: 10000000000000, extended: true }, });
