@@ -10,7 +10,7 @@ const root = {
     products: ProductResolver.index,
     merchants: merchantResolver.index,
     orders: orderResolver.index,
-    categories: CategoryResolver.index,
+    productCategories: CategoryResolver.index,
     getCategoryById: CategoryResolver.getCategory,
     getAllCategories: CategoryResolver.getAllCategory,
     getSubCategories: CategoryResolver.getSubCategory,

@@ -264,7 +264,7 @@ type Query {
       products(filters: ProductFilters):[Product]
       merchants(filters: MerchantFilters):[Merchant]
       orders(filters:OrderFilters):[Order]
-      categories(filters: CategoryFilters):[ProductCategory]
+      productCategories(filters: CategoryFilters):[ProductCategory]
       getCategoryById(ID:Int):ProductCategory
       getAllCategories:[ProductCategory]
       getSubCategories(ID:Int):[ProductCategory]
