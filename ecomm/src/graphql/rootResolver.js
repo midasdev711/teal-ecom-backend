@@ -12,7 +12,7 @@ const root = {
     orders: orderResolver.index,
     productCategories: CategoryResolver.index,
     getCategoryById: CategoryResolver.getCategory,
-    getAllCategories: CategoryResolver.getAllCategory,
+    getParentCategories: CategoryResolver.getParentCategories,
     getSubCategories: CategoryResolver.getSubCategory,
     getProductByMerchant: ProductResolver.getProductByMerchant,
     // categories: CategoryResolver.index,
@@ -25,7 +25,8 @@ const root = {
     upsertOrder: orderResolver.upsert,
     // upsertCategory: CategoryResolver.upsert,
     upsertProductCategory: CategoryResolver.upsert,
-    removeProduct: ProductResolver.removeProduct
+    removeProduct: ProductResolver.removeProduct,
+    updateProduct: ProductResolver.editProduct
     // upload: ProductResolver.fileUpload
     // upsertAuth: AuthResolver.upsert,
     // userAPIKey: AuthResolver.createAPIKey,

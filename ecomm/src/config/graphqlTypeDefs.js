@@ -54,6 +54,7 @@ type ProductSubcategoryType {
 }
 
  input ProductInput{
+   productExistingImages:[String]
    productId:Int
    productMerchantID: Int
    productMerchantName: String
@@ -64,8 +65,8 @@ type ProductSubcategoryType {
    productMRP: Int
    productSalePrice: Int
    productThumbnailImage: Upload
-   productFeaturedImage: Upload
-   productImages : [Upload]
+   productFeaturedImage: Upload!
+   productImages : [Upload]!
    productCategory: Int
    productSubcategory: Int
    productSEO: ProductSEOInput
@@ -266,7 +267,7 @@ type Query {
       orders(filters:OrderFilters):[Order]
       productCategories(filters: CategoryFilters):[ProductCategory]
       getCategoryById(ID:Int):ProductCategory
-      getAllCategories:[ProductCategory]
+      getParentCategories:[ProductCategory]
       getSubCategories(ID:Int):[ProductCategory]
       getProductByMerchant(ID:Int):[MyProductType]
   }
@@ -278,6 +279,7 @@ type Query {
     upsertProductCategory(category: ProductCategoryInput): ProductCategory 
     upload(file: UploadFile!):File
     removeProduct(ID:Int):RemoveProduct
+    updateProduct(product:ProductUpdateInput):Product
   }
 
   input ProductCategoryInput{
@@ -363,6 +365,39 @@ type RemoveProduct
   message:String
 }
 
+input ProductUpdateInput
+{
+  productExistingImages:[String]
+  productId:Int
+  productMerchantID: Int
+  productMerchantName: String
+  productSKU: String
+  productTitle: String
+  productSlug: String
+  productDescription: String
+  productMRP: Int
+  productSalePrice: Int
+  productThumbnailImage: Upload
+  productFeaturedImage: Upload
+  productImages : [Upload]
+  productCategory: Int
+  productSubcategory: Int
+  productSEO: ProductSEOInput
+  ampSlug: String
+  productTotalQuantity: Int
+  productInventory: String
+  productTags: [String]
+  productStock: Int
+  productTermsAndConditions: String
+  productVariants: [ProductVariantInput]
+  productStartDate: String
+  productEndDate: String
+  productSearchEngineTitle: String
+  productSearchEngineDescription: String
+  productCostPerItem: Int
+  isPublish: String
+  productAttributes:[ProductAttributeInput]
+}
 
 `;
 

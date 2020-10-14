@@ -72,8 +72,8 @@ module.exports = {
             return category;
         }
     },
-    getAllCategory: async (root, args, context) => {
-        let data = await ProductCategory.find({});
+    getParentCategories: async (root, args, context) => {
+        let data = await ProductCategory.find({ isParent: true });
         return data;
     },
     getSubCategory: async (root, args, context) => {

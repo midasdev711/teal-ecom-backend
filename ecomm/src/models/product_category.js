@@ -22,7 +22,7 @@ const ProductCategorySchema = new Schema({
 });
 
 ProductCategorySchema.plugin(autoIncrement.plugin, { model: 'product_category', field: 'ID', startAt: 1 });
-ProductCategorySchema.plugin(autoIncrement.plugin, { model: 'product_category', field: 'Sequence', startAt: 1 });
+ProductCategorySchema.plugin(autoIncrement.plugin, { model: 'product_category', field: 'sequence', startAt: 1 });
 class Category {
     static async getCategories({ args }) {
         const { ids: categoryIds } = args;
