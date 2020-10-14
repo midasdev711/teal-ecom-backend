@@ -21,7 +21,7 @@ type ProductAttributeType{
 
 type ProductVariantType {
       variantName : String
-      variantsValues : String
+      variantValues : String
 }
 
 input ProductVariantInput {
@@ -64,8 +64,8 @@ type ProductSubcategoryType {
    productMRP: Int
    productSalePrice: Int
    productThumbnailImage: Upload
-   productFeaturedImage: Upload!
-   productImages : [Upload]!
+   productFeaturedImage: Upload
+   productImages : [Upload]
    productCategory: Int
    productSubcategory: Int
    productSEO: ProductSEOInput

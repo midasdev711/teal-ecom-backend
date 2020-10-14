@@ -43,22 +43,27 @@ module.exports = {
 
 
       //product-thubnail ,featured and productImages upload
-      let thumbnailData = await attributes.productThumbnailImage;
+      let thumbnailData = null;
+      if (attributes.productThumbnailImage) {
+        thumbnailData = await attributes.productThumbnailImage;
+      }
 
-      let featuredImage;
-      let featuredData = await attributes.productFeaturedImage;
+      let featuredImage = null;
+      if (attributes.productFeaturedImage) {
+        featuredData = await attributes.productFeaturedImage;
+      }
 
 
       let productImageData = attributes.productImages;
       let imageArray = [];
       let imageValues = [];
 
-      if (productImageData) {
+      if (productImageData && productImageData.length) {
         imageValues = await Promise.all(productImageData);
       }
 
 
-      if (imageValues !== undefined) {
+      if (imageValues && imageValues.length) {
         for (const imgObj of imageValues) {
           const { filename, createReadStream, mimetype } = imgObj;
           let url = await uploadUrl(filename, createReadStream, mimetype, AWSCredentails.AWS_PRODUCT_IMG_PATH);
@@ -246,9 +251,19 @@ const insertOrUpdate = (uploadData, attributes, thumbNailImage, featuredImage, i
   uploadData.description = attributes.productDescription;
   uploadData.mrp = attributes.productMRP;
   uploadData.salePrice = attributes.productSalePrice;
-  uploadData.thumbnailImage = thumbNailImage;
-  uploadData.featuredImage = featuredImage;
-  uploadData.images = imageArray;
+
+  if (thumbNailImage) {
+    uploadData.thumbnailImage = thumbNailImage;
+  }
+
+  if (featuredImage) {
+    uploadData.featuredImage = featuredImage;
+  }
+
+  if (imageArray && imageArray.length) {
+    uploadData.images = imageArray;
+  }
+
   uploadData.category = productCat;
   uploadData.subCategory = productSubCat;
   uploadData.seo = attributes.productSEO;
