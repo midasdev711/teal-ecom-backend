@@ -312,9 +312,10 @@ const uploadUrl = async (filename, streadData, mimetype, Path) => {
     region: AWSNewCredentials.Region,
   });
 
+
   let params = {
     'Bucket': AWSNewCredentials.Bucket,
-    'Key': `${Path}/` + uuidv4() + '.' + filename.split('.')[1],
+    'Key': `${Path}/` + uuidv4() + '.' + filename.split('.').pop(),
     'ACL': 'public-read',
     'Body': streadData(),
     'ContentType': mimetype
