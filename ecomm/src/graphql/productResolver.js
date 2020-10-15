@@ -106,7 +106,7 @@ module.exports = {
 
       //new product insert
       let insertProductData = {};
-      let productInsertObj = insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
+      let productInsertObj = await insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
       return ProductModel.create(productInsertObj);
 
     } catch (error) {
@@ -198,7 +198,7 @@ module.exports = {
             productExistingImages = attributes.productExistingImages;
           }
           let updateData = {};
-          let productInsertObj = insertOrUpdate(updateData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
+          let productInsertObj = await insertOrUpdate(updateData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
           return await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: productInsertObj }, { new: true })
         }
       }
@@ -328,7 +328,7 @@ const uploadUrl = async (filename, streadData, mimetype, Path) => {
 }
 
 //product - request data fetch 
-const insertOrUpdate = (uploadData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages) => {
+const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages) => {
   uploadData.merchantID = attributes.productMerchantID;;
   uploadData.merchantName = attributes.productMerchantName;
   uploadData.sku = attributes.productSKU;
@@ -349,6 +349,73 @@ const insertOrUpdate = (uploadData, attributes, thumbNailImage, featuredImage, i
   if (imageArray && imageArray.length) {
     uploadData.images = imageArray;
   }
+
+
+  if (attributes.productId !== null && attributes.productId !== undefined) {
+    let findProductImg = await ProductModel.findOne({ ID: attributes.productId });
+    let dbImgArr = findProductImg.images;
+
+    let modifledExisiting = [];
+
+    //remove deleted image from db and aws
+    if (productExistingImages.length > 0 && dbImgArr.length > 0) {
+      modifledExisiting = dbImgArr.filter(function (obj) { return productExistingImages.indexOf(obj) == -1; });
+      const newArr = dbImgArr.filter(function (obj) { return modifledExisiting.indexOf(obj) != -1; });
+
+      let updatePro = await ProductModel.findOne({ ID: attributes.productId });
+      updatePro = JSON.parse(JSON.stringify(updatePro));
+
+
+    
+
+      //remove images from aws
+      if (modifledExisiting.length > 0) {
+        for (let j = 0; j < modifledExisiting.length; j++) {
+          let imgFileName;
+          imgFileName = modifledExisiting[j].substr(modifledExisiting[j].lastIndexOf("/") + 1);
+          await removeImageFromAWS(imgFileName, 'product');
+        }
+
+      }
+
+
+      //update images array to db
+      if (modifledExisiting.length > 0) {
+        await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: { images: newArr } }, { new: true });
+      }
+
+    }
+
+
+    //remove thumbnail image and product images  from db and aws
+    if (productExistingImages.length === 0 && imageArray.length === 0) {
+      let modelData = await ProductModel.findOne({ ID: attributes.productId });
+      let deleteThumbnailImg = modelData.thumbnailImage;
+
+      let deleteImages = modelData.images;
+      for await (let mProductImg of deleteImages) {
+        mProductImg = mProductImg.substr(mProductImg.lastIndexOf("/") + 1);
+        await removeImageFromAWS(mProductImg, 'product');
+      }
+      await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: { images: [] } }, { new: true });
+
+      deleteThumbnailImg = deleteThumbnailImg.substr(deleteThumbnailImg.lastIndexOf("/") + 1);
+      await removeImageFromAWS(deleteThumbnailImg, 'thumbnail');
+      await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: { thumbnailImage: '' } }, { new: true });
+    }
+
+    //remove old featured image while uploading  new image from db and aws
+    if (uploadData.featuredImage) {
+      let modelData = await ProductModel.findOne({ ID: attributes.productId });
+      let deleteFeaturedImg = modelData.featuredImage;
+      deleteFeaturedImg = deleteFeaturedImg.substr(deleteFeaturedImg.lastIndexOf("/") + 1);
+      await removeImageFromAWS(deleteFeaturedImg, 'featured');
+    }
+
+
+  }
+
+
 
   if (uploadData.images && productExistingImages.length) {
     uploadData.images = uploadData.images.concat(productExistingImages);
@@ -373,3 +440,39 @@ const insertOrUpdate = (uploadData, attributes, thumbNailImage, featuredImage, i
   return uploadData;
 
 }
+
+const removeImageFromAWS = async (filename, imgType) => {
+  try {
+    AWS.config.setPromisesDependency(require("bluebird"));
+    AWS.config.update({
+      accessKeyId: AWSNewCredentials.credentials.accessKeyId,
+      secretAccessKey: AWSNewCredentials.credentials.secretAccessKey,
+      region: AWSNewCredentials.Region,
+    });
+
+    var s3Bucket = new AWS.S3();
+    let bucketkey = '';
+
+    if (imgType === 'featured' || imgType === 'product') {
+      bucketkey = `shop/products/${filename}`;
+    }
+    if (imgType === 'thumbnail') {
+      bucketkey = `products/thumbnail/${filename}`;
+    }
+
+    s3Bucket.deleteObject({
+      Bucket: AWSNewCredentials.Bucket,
+      Key: bucketkey
+    }, async function (err, data) {
+      if (!err) {
+        console.log('file deleted sucessfully')
+      }
+    });
+
+  } catch (error) {
+    console.log('error while removing images from aws\n', error.message);
+    throw error;
+  }
+
+
+};
