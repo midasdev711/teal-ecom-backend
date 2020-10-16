@@ -114,8 +114,8 @@ type Product {
       modifiedBy : String
       createdDate : String
       modifiedDate : String
-      category:[productCatType]
-      subCategory:[productCatType]
+      category:Int
+      subCategory:Int
       attributes:[ProductAttributeType]
       mrp:Int
       salePrice:Int
@@ -334,8 +334,8 @@ type MyProductType
   tags:[String]
   description:String
   seo:ProductSEOType
-  subCategory:[productCatType]
-  category:[productCatType]
+  subCategory:Int
+  category:Int
   sku:String
   title:String
   salePrice:String
@@ -344,8 +344,9 @@ type MyProductType
   stock:Int
   ID:Int
  _id:String
- createdDate:String
- modifiedDate:String
+ createdDate : String
+ modifiedDate : String
+ createdAt:String
 }
 
 

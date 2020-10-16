@@ -27,8 +27,21 @@ module.exports = {
   },
 
   getProductByMerchant: async (root, args, context) => {
-    let productByMerchant = await ProductModel.find({ merchantID: args.ID });
+
+    let productByMerchant = await ProductModel.find({ merchantID: args.ID }).lean();
     if (productByMerchant) {
+      for await (let mProduct of productByMerchant) {
+
+
+        if (mProduct.category) {
+          mProduct.category = mProduct.category[0].ID;
+        }
+
+        if (mProduct.subCategory) {
+          mProduct.subCategory = mProduct.subCategory[0].ID
+        }
+
+      }
       return productByMerchant;
     }
   },
@@ -106,8 +119,18 @@ module.exports = {
 
       //new product insert
       let insertProductData = {};
-      let productInsertObj = await insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
-      return ProductModel.create(productInsertObj);
+      let productInsertObj = insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
+      let productInsert = await ProductModel.create(productInsertObj);
+      if (productInsert !== null) {
+        productInsert = JSON.parse(JSON.stringify(productInsert));
+        if (productInsert.category) {
+          productInsert.category = productInsert.category[0].ID;
+        }
+        if (productInsert.subCategory) {
+          productInsert.subCategory = productInsert.subCategory[0].ID;
+        }
+      }
+      return productInsert;
 
     } catch (error) {
       console.log('Error while creating product', error);
@@ -199,7 +222,16 @@ module.exports = {
           }
           let updateData = {};
           let productInsertObj = await insertOrUpdate(updateData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
-          return await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: productInsertObj }, { new: true })
+          let updatedProduct = await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: productInsertObj }, { new: true }).lean()
+          if (updatedProduct !== null) {
+            if (updatedProduct.category) {
+              updatedProduct.category = updatedProduct.category[0].ID;
+            }
+            if (updatedProduct.subCategory) {
+              updatedProduct.subCategory = updatedProduct.subCategory[0].ID;
+            }
+          }
+          return updatedProduct;
         }
       }
 
@@ -236,10 +268,21 @@ const buildFindQuery = async ({ args, UserID }) => {
   }
 
   if (get(args, "productIds")) {
-    return ProductModel.find({
-      ID: { $in: get(args, "productIds") },
-      status: 1,
-    });
+    let attributes = get(args, "productIds");
+    let products = await ProductModel.find({ ID: { $in: attributes }, status: 1 }).lean();
+    if (products) {
+      for await (let mProduct of products) {
+        if (mProduct.category) {
+          mProduct.category = mProduct.category[0].ID;
+        }
+
+        if (mProduct.subCategory) {
+          mProduct.subCategory = mProduct.subCategory[0].ID
+        }
+
+      }
+      return products;
+    }
   }
 
   if (
