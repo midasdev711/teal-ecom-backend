@@ -344,6 +344,8 @@ type MyProductType
   stock:Int
   ID:Int
  _id:String
+ createdDate:String
+ modifiedDate:String
 }
 
 
