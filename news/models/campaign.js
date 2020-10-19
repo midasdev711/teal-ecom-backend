@@ -1,0 +1,17 @@
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const autoIncrement = require('mongoose-auto-increment');
+autoIncrement.initialize(mongoose);
+
+const CampaignSchema = new Schema({
+    ID: {  type: Number,  required: true, exists: false, unique : true },
+    CampaignName: {type: String, required:true, unique : true},
+    ArticleId1: {  type: Number,  required: true },
+    ArticleId2: {  type: Number,  required: true },
+    SplitId: {  type: Number,  required: true }
+});
+CampaignSchema.plugin(autoIncrement.plugin, { model: 'campaign', field: 'ID',startAt: 1 });
+CampaignSchema.plugin(autoIncrement.plugin, { model: 'campaign', field: 'SplitId', startAt: 258678 });
+
+module.exports = mongoose.model('campaign',CampaignSchema );  
+
