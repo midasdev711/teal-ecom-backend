@@ -259,6 +259,13 @@ module.exports = {
       return responseObj;
     }
 
+  },
+  getAllProductsListing: async (root, args) => {
+    let products = await ProductModel.find({ isPublish: "true" }).select('merchantName  images   thumbnailImage attributes  variants tags description sku title salePrice stock').lean();
+    if (products) {
+      return products;
+    }
+
   }
 };
 
@@ -409,7 +416,7 @@ const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredIm
       updatePro = JSON.parse(JSON.stringify(updatePro));
 
 
-    
+
 
       //remove images from aws
       if (modifledExisiting.length > 0) {
