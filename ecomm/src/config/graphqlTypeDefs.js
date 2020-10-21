@@ -270,6 +270,7 @@ type Query {
       getParentCategories:[ProductCategory]
       getSubCategories(ID:Int):[ProductCategory]
       getProductByMerchant(ID:Int):[MyProductType]
+      getAllProductsListing:[ProductListing]
   }
   
   type Mutation {
@@ -400,6 +401,22 @@ input ProductUpdateInput
   productCostPerItem: Int
   isPublish: String
   productAttributes:[ProductAttributeInput]
+}
+
+type ProductListing
+{
+  merchantName:String
+  images:[String]
+  featuredImage:String
+  thumbnailImage:String
+  attributes:[ProductAttributeType]
+  variants:[ProductVariantType]
+  tags:[String]
+  description:String
+  sku:String
+  title:String
+  salePrice:String
+  stock:Int
 }
 
 `;

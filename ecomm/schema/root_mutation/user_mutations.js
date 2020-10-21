@@ -75,7 +75,7 @@ const UserSignUp = {
 
                const email = new emailTemplates({
                      message: {
-                       from: 'support@teal.com', // sender address
+                       from: 'support@juicypie.com', // sender address
                        to: args.Email, // list of receivers
                        subject: 'Welcome to Slag'
                      },
