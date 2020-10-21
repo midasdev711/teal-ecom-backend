@@ -46,6 +46,7 @@ require("../news/src/models/users");
 require("../news/src/models/users_categories");
 require("../news/src/models/users_paid_subscription_logs");
 require("../news/src/models/users_paid_subscriptions");
+require("../news/src/models/campaign");
 
 //-------------------------------Ecomm Schemas---------------------------------------------
 

@@ -1,5 +1,6 @@
 const ArticleResolver = require("./articleResolver");
 const CategoryResolver = require("./categoryResolver");
+const CampaignResolver = require("./campaignResolver");
 const UserResolver = require("./userResolver");
 const AuthResolver = require("./authResolver");
 const UserSettingResolver = require("./userSettingResolver");
@@ -12,6 +13,7 @@ const root = {
     users: UserResolver.index,
     auth: AuthResolver.index,
     userSetting: UserSettingResolver.index,
+    campaign: CampaignResolver.index
   },
   Mutation: {
     upsertArticle: ArticleResolver.upsert,
@@ -21,6 +23,7 @@ const root = {
     upsertArticleRating: ArticleResolver.articleRating,
     upsertArticleBookmark: ArticleResolver.articleBookmark,
     upsertUserSetting: UserSettingResolver.upsert,
+    upsertCampaign: CampaignResolver.upsert
   },
 };
 

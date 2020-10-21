@@ -20,6 +20,9 @@ const { GraphQLObjectType } = require('graphql'),
       { GetUsersBalanceDetails } = require('../root_queries/user_wallet_balance'),
       { FollowAuthorList } = require('../root_queries/follow_author');
 
+const { CampaignByID, GetAllCampaign, GetCampaignByName  } = require('../root_queries/campaign');
+
+
 // declared root query constant
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
@@ -85,6 +88,10 @@ const RootQuery = new GraphQLObjectType({
       getUsersWalletDetails : GetUsersBalanceDetails,
       myDonationtransactionDetails : MyDonationtransactionDetails,
       donationRecivedTransaction : DonationRecivedTransaction,
+
+      getCampaignByID: CampaignByID,
+      getAllCampaign: GetAllCampaign,
+      getCampaignByName: GetCampaignByName
     }
   });
 
