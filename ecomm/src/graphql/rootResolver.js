@@ -17,6 +17,7 @@ const root = {
     getParentCategories: CategoryResolver.getParentCategories,
     getSubCategories: CategoryResolver.getSubCategory,
     getProductByMerchant: ProductResolver.getProductByMerchant,
+    getAllProductsListing:ProductResolver.getAllProductsListing
     // categories: CategoryResolver.index,
     // users: UserResolver.index,
     // auth: AuthResolver.index,

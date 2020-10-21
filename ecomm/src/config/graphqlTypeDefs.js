@@ -114,8 +114,8 @@ type Product {
       modifiedBy : String
       createdDate : String
       modifiedDate : String
-      category:[productCatType]
-      subCategory:[productCatType]
+      category:Int
+      subCategory:Int
       attributes:[ProductAttributeType]
       mrp:Int
       salePrice:Int
@@ -423,8 +423,8 @@ type MyProductType
   tags:[String]
   description:String
   seo:ProductSEOType
-  subCategory:[productCatType]
-  category:[productCatType]
+  subCategory:Int
+  category:Int
   sku:String
   title:String
   salePrice:String
@@ -433,6 +433,9 @@ type MyProductType
   stock:Int
   ID:Int
  _id:String
+ createdDate : String
+ modifiedDate : String
+ createdAt:String
 }
 
 
@@ -498,6 +501,7 @@ type Query {
   getParentCategories:[ProductCategory]
   getSubCategories(ID:Int):[ProductCategory]
   getProductByMerchant(ID:Int):[MyProductType]
+  getAllProductsListing:[ProductListing]
 }
 
 type Mutation {
@@ -509,6 +513,21 @@ upsertProductCategory(category: ProductCategoryInput): ProductCategory
 upload(file: UploadFile!):File
 removeProduct(ID:Int):RemoveProduct
 updateProduct(product:ProductUpdateInput):Product
+}
+type ProductListing
+{
+  merchantName:String
+  images:[String]
+  featuredImage:String
+  thumbnailImage:String
+  attributes:[ProductAttributeType]
+  variants:[ProductVariantType]
+  tags:[String]
+  description:String
+  sku:String
+  title:String
+  salePrice:String
+  stock:Int
 }
 
 `;
