@@ -1,4 +1,4 @@
-// const Users = require("../models/users");
+const Users = require("../models/users");
 const { GraphQLEmail } = require("graphql-custom-types");
 const { ArticleStatusConst, RoleObject } = require("../constant");
 const { generateToken, verifyToken } = require("../middleware/middleware");
@@ -8,9 +8,9 @@ const { get } = require("lodash");
 const sendMailToUser = require("../mail/signup");
 const UserSettings = require("../models/user_settings");
 const passwordHash = require("password-hash");
-const bcrypt = require("bcrypt");
+// const bcrypt = require("bcrypt");
 const apiKeys = require("../models/api_key");
-const Users = require("../models/users");
+// const Users = require("../models/users");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -35,7 +35,7 @@ module.exports = {
       }
       if (get(args.auth, "name"))
         args.auth.userName = await generateUserName(args.auth.name);
-      if (get(args.auth, "signUpMethod") && get(args.auth, "password")) {
+      if (get(args.auth, "password")) {
         args.auth.password = passwordHash.generate(args.auth.password);
       }
       args.auth.uniqueID = uniqid();
@@ -125,7 +125,8 @@ const userQuery = async ({ args }) => {
             data.apiKey = apiKey.apiKey;
           }
           return data ? await generateToken(data) : [];
-        } else throw new Error("Password does not match");
+        }
+        else throw new Error("Password does not match");
       } else throw new Error("Email does not exists");
     }
   }

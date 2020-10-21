@@ -11,9 +11,8 @@ module.exports = {
   },
   upsert: async (root, args, context) => {
     // const id = await verifyToken(context);
-
     let attributes = get(args, "customer");
-
+    console.log('222222222222222222', attributes, args)
     return CustomerModel.create(attributes);
   },
 };
