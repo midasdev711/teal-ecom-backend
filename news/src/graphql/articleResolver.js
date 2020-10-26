@@ -134,9 +134,13 @@ module.exports = {
               values
             ) {
               values.map(async (x) => {
+                if(x[0]){
                 data.clapCountUser = x[0].users;
+              }
               });
-            });
+            }).catch(err=>{
+              console.log(err)
+            })
           })
         );
         if (get(articleData[0], "SubTitle")) {
