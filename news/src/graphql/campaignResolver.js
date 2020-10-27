@@ -17,18 +17,16 @@ module.exports = {
       args: args.filters,
     });
     // let data = await Campaign.find({}).populate({path: "ArticleId1", model: "articles"});
-    
     let data=await Campaign.aggregate(
       [
-      { $match: {}},
+      { $match: findQuery},
       { $lookup: {from: 'articles', localField: 'ArticleId1', foreignField: 'ID', as: 'ArticleId1'} },
-      { $lookup: {from: 'articles', localField: 'ArticleId2', foreignField: 'ID', as: 'ArticleId2'} }
+      { $lookup: {from: 'articles', localField: 'ArticleId2', foreignField: 'ID', as: 'ArticleId2'} },
+      { $lookup: {from: 'users', localField: 'authorID', foreignField: 'ID', as: 'author'} }
     ]
     );
 
     data.map(value=>{
-      console.log("value", value)
-      console.log("ArticleId1", value.ArticleId1)
       value.ArticleId1=value.ArticleId1[0];
       value.ArticleId2=value.ArticleId2[0];  
 
@@ -38,11 +36,13 @@ module.exports = {
   },
   upsert: async (root, args, context) => {
     let attributes = get(args, "campaign");
-
     let campaign = await Campaign.findOne({ ID: attributes.ID });
-
+    let IdArray = attributes.IdArray;
+    if(attributes.isDeleted && IdArray.length>0){
+      return Campaign.updateMany({ ID: {$in: IdArray} }, {isDeleted: true});
+    }
     if (campaign) {
-      return Campaign.update(args);
+      return Campaign.findOneAndUpdate({ ID: attributes.ID }, attributes);
     } else {
       return Campaign.create(attributes);
     }
@@ -50,17 +50,19 @@ module.exports = {
 };
 
 const buildFindQuery = async ({ args, UserID }) => {
-  let query = { $and: [] };
-
-  query.$and.push({ status: 1 });
+  let query = {isDeleted: false};
 
   if (get(args, "campaignIds")) {
-    query.$and.push({ ID:  get(args, "campaignIds")  });
+    query.campaignIds= get(args, "campaignIds");
   }
   if (get(args, "CampaignName")) {
-    query.$and.push({ CampaignName:  get(args, "CampaignName")  });
+    query.CampaignName= get(args, "CampaignName");
   }
-  
-
+  if (get(args, "SplitId")) {
+    query.SplitId= get(args, "SplitId");
+  }
+  if (get(args, "userId")) {
+    query.authorID= get(args, "userId");
+  }
   return query;
 };

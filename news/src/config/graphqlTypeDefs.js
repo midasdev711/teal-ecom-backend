@@ -124,16 +124,25 @@ type Campaign{
   Revenue : String
   CTR: String
   SplitId: Int
+  author : [User]
+  isDeleted: Boolean
 }
 input CampaignInput{
   CampaignName: String
   ArticleId1: Int 
   ArticleId2: Int 
+  ID: Int 
+  isDeleted: Boolean
+  IdArray: [Int]
+  authorID : Int
 }
 
 input CampaignFilters{
   CampaignName: String
   campaignIds: ID
+  SplitId: Int
+  isDeleted: Boolean
+  userId: Int
 }
 
 
