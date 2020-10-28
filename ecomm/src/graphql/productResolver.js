@@ -119,7 +119,7 @@ module.exports = {
 
       //new product insert
       let insertProductData = {};
-      let productInsertObj = insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
+      let productInsertObj = await insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
       let productInsert = await ProductModel.create(productInsertObj);
       if (productInsert !== null) {
         productInsert = JSON.parse(JSON.stringify(productInsert));
