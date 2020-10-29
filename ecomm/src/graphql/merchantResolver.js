@@ -6,6 +6,8 @@ const MerchantModel = mongoose.model("merchants");
 const UserModel = mongoose.model("users");
 const UploadBase64OnS3 = require("../../../upload/base64_upload");
 const { AWSNewCredentials } = require("../../../upload/aws_constants");
+const nodemailer = require('nodemailer');
+const { EmailCredentials } = require("../../constant");
 module.exports = {
   index: async (root, args, context) => {
     // if (context.userAuthenticate) {
@@ -67,6 +69,58 @@ module.exports = {
     args.merchant.userId = UserData.ID;
     return MerchantModel.create(attributes);
   },
+  inviteUser: async (root, args, context) => {
+    try {
+      let user = await Users.findOne({ email: args.invite.email }).lean();
+      if (user) {
+        if (args.invite.merchantId) {
+          let merchant = await Users.findOne({ ID: args.invite.merchantId }).lean();
+          if (merchant) {
+
+            let merchantName = merchant.name;
+            let username = user.name;
+
+            let transporter = nodemailer.createTransport({
+              service: "gmail",
+              User: EmailCredentials.USER_NAME,
+              Password: EmailCredentials.PASSWORD,
+              options: { debug: true },
+              auth: {
+                user: EmailCredentials.USER_NAME,
+                pass: EmailCredentials.PASSWORD
+              }
+            });
+
+
+            let mailOptions = {
+              from: EmailCredentials.USER_NAME,
+              to: user.email,
+              subject: "Invitation",
+              html: '<!doctype html><html><head><meta charset="utf-8"><title>Slang</title></head><body><table width="800" border="0" cellspacing="0" cellpadding="0" style="border:1px solid #110000; margin:0 auto; font-family: Arial, Helvetica, sans-serif; line-height:26px; color:#464646;"><tr><td style="background-color:#112a2c; padding:5px 15px;"></td></tr><tr><td style="padding:35px 25px;"><p style="padding:0px; color:#333333; font-size:16px; font-family:Arial, Helvetica, sans-serif; line-height:1.5;"> Hello Dear,' + "<b>" + username + "</b>" + '</p><p style="color:#333333; font-size:14px; font-family:Arial, Helvetica, sans-serif; line-height:1.5;"> You have been invited by ' + merchantName + '</p><p> Accept this link to accept an  invitation <a href="http://juicypie.com/account">Accept Invitation </a></p><p class="text-center"> Regards<br/>' + merchantName + '</p></td></tr><tr><td style="padding:5px 25px; color:#999; font-size:13px; line-height:20px;"><p>Notice: Please do not reply to this email address. This mailbox is not monitored and you will not receive a response.</p></td></tr></table></body></html>'
+            };
+
+            transporter.sendMail(mailOptions, function (error, info) {
+              if (error) {
+                console.log(error);
+                throw new Error('error in sending mail', error.message)
+              }
+              else {
+                console.log('Email sent: ' + info.response);
+              }
+            });
+            return { email: user.email, message: "Email sent sucessfully" }
+
+
+
+          }
+        }
+      }
+    } catch (error) {
+      throw new Error(error.message)
+    }
+
+
+  }
 };
 
 const buildFindQuery = async ({ args, UserID }) => {
@@ -82,3 +136,4 @@ async function generateUserName(FullName) {
     (await FullName.trim().replace(/ /g, "-")) + "-" + (await makeid(4));
   return await FullName.toLowerCase();
 }
+

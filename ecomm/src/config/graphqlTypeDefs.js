@@ -281,6 +281,7 @@ type Query {
     upload(file: UploadFile!):File
     removeProduct(ID:Int):RemoveProduct
     updateProduct(product:ProductUpdateInput):Product
+    sendUserInvite(invite: UserInvite): MailSuccess
   }
 
   input ProductCategoryInput{
@@ -417,6 +418,18 @@ type ProductListing
   title:String
   salePrice:String
   stock:Int
+}
+
+input UserInvite
+{
+  email:String
+  merchantId:Int
+}
+
+type MailSuccess
+{
+   email:String
+   message:String 
 }
 
 `;

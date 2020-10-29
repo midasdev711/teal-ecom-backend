@@ -27,7 +27,8 @@ const root = {
     // upsertCategory: CategoryResolver.upsert,
     upsertProductCategory: CategoryResolver.upsert,
     removeProduct: ProductResolver.removeProduct,
-    updateProduct: ProductResolver.editProduct
+    updateProduct: ProductResolver.editProduct,
+    sendUserInvite: merchantResolver.inviteUser
     // upload: ProductResolver.fileUpload
     // upsertAuth: AuthResolver.upsert,
     // userAPIKey: AuthResolver.createAPIKey,
