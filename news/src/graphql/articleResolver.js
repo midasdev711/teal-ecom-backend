@@ -197,12 +197,7 @@ module.exports = {
             throw new Error("You can enter maximum 5 tags")
           }
   
-          if (attributes.metaRobots !== null) {
-            let availablerobots = ['index,nofollow', 'noindex,follow', 'noindex,nofollow']
-            if (!availablerobots.includes(attributes.metaRobots)) {
-              throw new Error('Invalid meta robot type');
-            }
-          }
+
   
           if (attributes.article_SEO) {
             for await (let mSeoObj of attributes.article_SEO) {
@@ -269,12 +264,7 @@ module.exports = {
   
           }
   
-          if (attributes.metaRobots !== null) {
-            let availablerobots = ['index,nofollow', 'noindex,follow', 'noindex,nofollow']
-            if (!availablerobots.includes(attributes.metaRobots)) {
-              throw new Error('Invalid meta robot type');
-            }
-          }
+        
   
           if (get(attributes, "description")) {
             attributes.description = await uploadDescriptionImagesOnS3(
