@@ -52,6 +52,13 @@ const ArticleSchema = new Schema(
     createdBy: Number,
     modifiedBy: Number,
     urls: { type: String, default: "" },
+    metaRobots:
+    {
+      type: String,
+      enum: ['index,follow', 'index,nofollow', 'noindex,follow', 'noindex,nofollow'],
+      default: 'index,follow'
+    }
+
   },
   {
     timestamps: true,
