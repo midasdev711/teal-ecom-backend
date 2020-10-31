@@ -21,6 +21,8 @@ const typeDefs = `
     deleteArticleIds : [ID],
     article_SEO:[ArticleSEOType]
     metaRobots:String
+    internalArticle:Boolean
+
   }
 
  
@@ -79,6 +81,7 @@ const typeDefs = `
     createdAt:String
     article_SEO:[SEOType]
     metaRobots:String
+    internalArticle:Boolean
   }
 
 type SEOType

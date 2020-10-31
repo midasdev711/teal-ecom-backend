@@ -57,7 +57,8 @@ const ArticleSchema = new Schema(
       type: String,
       enum: ['index,follow', 'index,nofollow', 'noindex,follow', 'noindex,nofollow'],
       default: 'index,follow'
-    }
+    },
+    internalArticle: { type: Boolean, default: false },
 
   },
   {
