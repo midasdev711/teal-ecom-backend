@@ -211,9 +211,7 @@ module.exports = {
             }
           }
   
-          if (attributes.article_SEO) {
-            attributes.article_SEO = attributes.article_SEO.concat(article.article_SEO);
-          }
+         
   
   
           return await Articles.findOneAndUpdate(
