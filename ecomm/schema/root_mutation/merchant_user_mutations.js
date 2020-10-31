@@ -173,7 +173,7 @@ const transporter = nodemailer.createTransport({
 
                   const email = new emailTemplates({
                         message: {
-                          from: 'support@teal.com', // sender address
+                          from: 'support@juicypie.com', // sender address
                           to: args.Email, // list of receivers
                           subject: 'Reset Password Link'
                         },
@@ -214,7 +214,7 @@ const transporter = nodemailer.createTransport({
 
                         const email = new emailTemplates({
                               message: {
-                                from: 'support@teal.com', // sender address
+                                from: 'support@juicypie.com', // sender address
                                 to: args.Email, // list of receivers
                                 subject: 'Reset Password Link'
                               },

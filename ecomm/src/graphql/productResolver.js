@@ -13,7 +13,7 @@ module.exports = {
       if (context.apiKey) {
         let arrID = context.apiKey.split("_");
         let arrDomain = context.apiKey.split("%");
-        if (arrDomain[0] == "teal.com") args.UserID = arrID[1];
+        if (arrDomain[0] == "juicypie.com") args.UserID = arrID[1];
       } else {
         args.UserID = null;
       }
@@ -245,7 +245,7 @@ module.exports = {
   fileUpload: async (root, args, context) => {
     return args.file.then(file => {
       //file.createReadStream() is a readable node stream that contains the contents of the uploaded file
-      console.log('file', file.createReadStream());
+      // console.log('file', file.createReadStream());
 
       return file;
     });

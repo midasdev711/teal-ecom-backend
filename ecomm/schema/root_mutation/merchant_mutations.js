@@ -111,7 +111,7 @@ const transporter = nodemailer.createTransport({
                         const verificationLink = BASE_URL +'email-verification/'+user._id+'/'+token;
                         const email = new emailTemplates({
                               message: {
-                                from: 'support@teal.com', // sender address
+                                from: 'support@juicypie.com', // sender address
                                 to: args.Email, // list of receivers
                                 subject: 'Welcome to Slag'
                               },

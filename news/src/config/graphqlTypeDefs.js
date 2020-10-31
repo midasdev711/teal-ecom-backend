@@ -139,6 +139,31 @@ type Category{
   subCategories : [Category]
 }
 
+type Campaign{
+  ID: ID!
+  id: ID
+  CampaignName: String
+  ArticleId1: Article 
+  ArticleId2: Article 
+  createdDate : String
+  Views : String
+  Reactions : String
+  Revenue : String
+  CTR: String
+  SplitId: Int
+}
+input CampaignInput{
+  CampaignName: String
+  ArticleId1: Int 
+  ArticleId2: Int 
+}
+
+input CampaignFilters{
+  CampaignName: String
+  campaignIds: ID
+}
+
+
 input ArticleFilters {
   articleIds: [ID]
   articleId: ID
@@ -482,6 +507,7 @@ type Query {
     users(filters: UserFilters):[User]
     auth(email: String password: String) : User
     userSetting(userId:ID): UserSettingType
+    campaign(filters: CampaignFilters): [Campaign]
 }
 
 type Mutation {
@@ -492,7 +518,7 @@ type Mutation {
   upsertArticleRating(articleRating: ArticleRBInput): ArticleRating
   upsertArticleBookmark(articleBookmark: ArticleRBInput): ArticleBookmark
   upsertUserSetting(userSetting: UserSettingInput): UserSettingType
-
+  upsertCampaign(campaign: CampaignInput): Campaign
 }
 `;
 

@@ -23,6 +23,9 @@ const { GraphQLObjectType } = require('graphql'),
       { UpdateUserSettings } = require('../root_mutation/user_settings'),
       { AddUserCategory } = require('../root_mutation/user_categories'),
       { UploadUIImages } = require('../root_mutation/upload_ui_images');
+      
+const { AddCampaign, DeleteCampaign } = require('../root_mutation/campaign');
+
 
 // declared a mutation constant
 const Mutation = new GraphQLObjectType({
@@ -76,7 +79,10 @@ const Mutation = new GraphQLObjectType({
         updateUser : UpdateUser, // updated only enter values of fields
         uploadFrondendImg : UploadUIImages,
         regenerateToken : RegenerateToken,
-        RegenerateCreativeToken : RegenerateCreativeToken
+        RegenerateCreativeToken : RegenerateCreativeToken,
+
+        addCampaign: AddCampaign,
+        deleteCampaign: DeleteCampaign
 
 
 

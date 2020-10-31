@@ -17,7 +17,7 @@ const MAIL_DETAILS = {
   Password: "account@321",
   // "HTTP_RESET_URL" : "http://localhost/demo/node_mail.html"
   // "HTTP_RESET_URL" : "http://localhost:3000/resetpassword"
-  HTTP_RESET_URL: "https://teal.com/resetpassword",
+  HTTP_RESET_URL: "https://juicypie.com/resetpassword",
 };
 
 const StatusConst = { inActive: 0, Active: 1, Approved: 2, Rejected: 3 };

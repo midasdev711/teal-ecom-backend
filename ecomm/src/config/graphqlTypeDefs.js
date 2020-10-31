@@ -185,32 +185,6 @@ input ProductFilters {
     }
 
 
-type OrderProductType {
-        _id: String
-        status:Int
-        productID:String
-        productMerchantID:Int
-        productSKU:String
-        productTitle:String
-        productSalePrice:String
-        productTotalQuantity:Int
-        productTotalPrice:String
-        productVariantID:String
-        productVariantObject : VariantsType
-        productObject : Product
-}
-
-input OrderProductInput {
-  productID:String
-        productMerchantID:Int
-        productSKU:String
-        productTitle:String
-        productSalePrice:String
-        productTotalQuantity:Int
-        productTotalPrice:String
-        productVariantID:String
-        productObject : ProductInput
-}
 
 type  VariantsType{
       _id: String
@@ -232,26 +206,101 @@ type  VariantsType{
        value : String
 }
 
+
+type OrderProductType {
+  _id: String
+  status:Int
+  productID:String
+  productMerchantID:Int
+  productSKU:String
+  productTitle:String
+  productSalePrice:String
+  productTotalQuantity:Int
+  productTotalPrice:String
+  productVariantID:String
+  productVariantObject : VariantsType
+
+}
+
+input OrderProductInput {
+productID:String
+  productMerchantID:Int
+  productSKU:String
+  productTitle:String
+  productSalePrice:String
+  productTotalQuantity:Int
+  productTotalPrice:String
+  productVariantObject : [ProductVariantInput]
+}
+
+type ShippingAddress {
+  BasicDetailsFirstName:String
+  BasicDetailsLastName:String
+  AddressDetailsCompany:String
+  AddressDetailsMobile:String
+  AddressDetailsApartment:String
+  AddressDetailsCity:String
+  AddressDetailsCountry:String
+  AddressDetailsPostalCode: String
+}
+type DeliveryAddress {
+  BasicDetailsFirstName:String
+  BasicDetailsLastName:String
+  AddressDetailsCompany:String
+  AddressDetailsMobile:String
+  AddressDetailsApartment:String
+  AddressDetailsCity:String
+  AddressDetailsCountry:String
+  AddressDetailsPostalCode: String
+}
+input ShippingAddressInput {
+  BasicDetailsFirstName:String
+  BasicDetailsLastName:String
+  AddressDetailsCompany:String
+  AddressDetailsMobile:String
+  AddressDetailsApartment:String
+  AddressDetailsCity:String
+  AddressDetailsCountry:String
+  AddressDetailsPostalCode: String
+}
+input DeliveryAddressInput {
+  BasicDetailsFirstName:String
+  BasicDetailsLastName:String
+  AddressDetailsCompany:String
+  AddressDetailsMobile:String
+  AddressDetailsApartment:String
+  AddressDetailsCity:String
+  AddressDetailsCountry:String
+  AddressDetailsPostalCode: String
+}
+
 type Order{
         _id: String
         ID: Int
-        status: Int
-        userID: Int
-        orderAmount : String
-        deliveryAddress: String
-        shippingAddress : String
-        products: [OrderProductType]
-        paymentMethod: String
+        Status: Int
+        UserId: Int
+        OrderAmount : String
+        DeliveryAddress: DeliveryAddress
+        ShippingAddress : ShippingAddress
+        Products: [OrderProductType]
+        PaymentMethod: String
+        Notes: String
+        Tags: String
         tokenID: String
         createdAt: String
     }
 
 input OrderInput{
-  userID: Int
-  orderAmount: String
-  deliveryAddress: String
-  shippingAddress : String
-  products: [OrderProductInput]
+  Status: Int
+  UserId: Int
+  OrderAmount: String
+  PaymentMethod: String
+  tokenID: String
+  DeliveryAddress: DeliveryAddressInput
+  ShippingAddress : ShippingAddressInput
+  Products: [OrderProductInput]
+  Notes: String
+  Tags: String
 }
 
     input OrderFilters {
@@ -260,29 +309,67 @@ input OrderInput{
       limit: Int
       page: Int
     }
+    type Customer {
+      _id:String
+      BasicDetailsFirstName: String
+      BasicDetailsLastName: String
+      BasicDetailsEmail: String
+      BasicDetailsMobile: String
+      BasicDetailsEmailFlag: Boolean
+      AddressDetailsFirstName: String
+      AddressDetailsLastName: String
+      AddressDetailsCompany: String
+      AddressDetailsApartment: String
+      AddressDetailsCity: String
+      AddressDetailsCountry: String
+      AddressDetailsPostalCode: String
+      AddressDetailsMobile: String
+      Tax : Int
+      Notes: String
+      Tags: String
+      createdDate : String
+      modifiedDate : String
+}
 
-type Query {
-      products(filters: ProductFilters):[Product]
-      merchants(filters: MerchantFilters):[Merchant]
-      orders(filters:OrderFilters):[Order]
-      productCategories(filters: CategoryFilters):[ProductCategory]
-      getCategoryById(ID:Int):ProductCategory
-      getParentCategories:[ProductCategory]
-      getSubCategories(ID:Int):[ProductCategory]
-      getProductByMerchant(ID:Int):[MyProductType]
-      getAllProductsListing:[ProductListing]
+input CustomerFilters{
+      _id: String
+      BasicDetailsFirstName: String
+      BasicDetailsLastName: String
+      BasicDetailsEmail: String
+      BasicDetailsMobile: String
+      BasicDetailsEmailFlag: Boolean
+      AddressDetailsFirstName: String
+      AddressDetailsLastName: String
+      AddressDetailsCompany: String
+      AddressDetailsApartment: String
+      AddressDetailsCity: String
+      AddressDetailsCountry: String
+      AddressDetailsPostalCode: String
+      AddressDetailsMobile: String
+      Tax : Int
+      Notes: String
+      Tags: String
   }
-  
-  type Mutation {
-    upsertProduct(product: ProductInput): Product
-    upsertMerchant(merchant: MerchantInput): Merchant
-    upsertOrder(order:OrderInput): Order
-    upsertProductCategory(category: ProductCategoryInput): ProductCategory 
-    upload(file: UploadFile!):File
-    removeProduct(ID:Int):RemoveProduct
-    updateProduct(product:ProductUpdateInput):Product
-    sendUserInvite(invite: UserInvite): MailSuccess
+  input CustomerInput{
+      BasicDetailsFirstName: String
+      BasicDetailsLastName: String
+      BasicDetailsEmail: String
+      BasicDetailsMobile: String
+      BasicDetailsEmailFlag: Boolean
+      AddressDetailsFirstName: String
+      AddressDetailsLastName: String
+      AddressDetailsCompany: String
+      AddressDetailsApartment: String
+      AddressDetailsCity: String
+      AddressDetailsCountry: String
+      AddressDetailsPostalCode: String
+      AddressDetailsMobile: String
+      Tax : Int
+      Notes: String
+      Tags: String
   }
+
+
 
   input ProductCategoryInput{
     ID:Int
@@ -404,6 +491,30 @@ input ProductUpdateInput
   productAttributes:[ProductAttributeInput]
 }
 
+type Query {
+  products(filters: ProductFilters):[Product]
+  merchants(filters: MerchantFilters):[Merchant]
+  orders(filters:OrderFilters):[Order]
+  customers(filters:CustomerFilters):[Customer]
+  productCategories(filters: CategoryFilters):[ProductCategory]
+  getCategoryById(ID:Int):ProductCategory
+  getParentCategories:[ProductCategory]
+  getSubCategories(ID:Int):[ProductCategory]
+  getProductByMerchant(ID:Int):[MyProductType]
+  getAllProductsListing:[ProductListing]
+}
+
+type Mutation {
+  upsertProduct(product: ProductInput): Product
+  upsertMerchant(merchant: MerchantInput): Merchant
+  upsertOrder(order:OrderInput): Order
+  upsertCustomer(customer:CustomerInput): Customer
+  upsertProductCategory(category: ProductCategoryInput): ProductCategory 
+  upload(file: UploadFile!):File
+  removeProduct(ID:Int):RemoveProduct
+  updateProduct(product:ProductUpdateInput):Product
+  sendUserInvite(invite: UserInvite): MailSuccess
+}
 type ProductListing
 {
   merchantName:String

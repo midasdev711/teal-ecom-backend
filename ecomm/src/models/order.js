@@ -12,9 +12,9 @@ autoIncrement.initialize(mongoose);
 const OrderSchema = new Schema(
   {
     ID: { type: Number, exists: false, unique: true },
-    userId: { type: SchemaType.ObjectId },
-    status: { type: Number, default: 1 },
-    products: [
+    UserId: { type: SchemaType.ObjectId },
+    Status: { type: Number, default: 1 },
+    Products: [
       {
         productID: { type: Number, required: true },
         productSKU: { type: String },
@@ -28,8 +28,8 @@ const OrderSchema = new Schema(
         productVariantID: { type: SchemaType.ObjectId, ref: "ProductVariant" },
       },
     ],
-    orderAmount: { type: SchemaType.Decimal128 },
-    shippingAddress: {
+    OrderAmount: { type: SchemaType.Decimal128 },
+    ShippingAddress: {
       name: { type: String },
       email: { type: String },
       mobile: { type: String },
@@ -39,7 +39,7 @@ const OrderSchema = new Schema(
       state: { type: String },
       deliveryAddressType: { type: String },
     },
-    deliveryAddress: {
+    DeliveryAddress: {
       name: { type: String },
       email: { type: String },
       mobile: { type: String },
@@ -49,7 +49,7 @@ const OrderSchema = new Schema(
       state: { type: String },
       deliveryAddressType: { type: String },
     },
-    paymentMethod: { type: String },
+    PaymentMethod: { type: String },
     transactionID: { type: String },
     createdDate: { type: Date, default: Date.now() },
     modifiedDate: { type: Date, default: Date.now() },

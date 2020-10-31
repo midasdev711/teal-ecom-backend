@@ -1,6 +1,7 @@
 const ProductResolver = require("./productResolver");
 const merchantResolver = require("./merchantResolver");
 const orderResolver = require("./orderResolver");
+const customerResolver = require("./customerResolver");
 const CategoryResolver = require('./categoryResolver');
 const AuthResolver = require('./authResolver');
 const { GraphQLUpload } = require('graphql-upload');
@@ -10,6 +11,7 @@ const root = {
     products: ProductResolver.index,
     merchants: merchantResolver.index,
     orders: orderResolver.index,
+    customers: customerResolver.index,
     productCategories: CategoryResolver.index,
     getCategoryById: CategoryResolver.getCategory,
     getParentCategories: CategoryResolver.getParentCategories,
@@ -24,6 +26,7 @@ const root = {
     upsertProduct: ProductResolver.upsert,
     upsertMerchant: merchantResolver.upsert,
     upsertOrder: orderResolver.upsert,
+    upsertCustomer: customerResolver.upsert,
     // upsertCategory: CategoryResolver.upsert,
     upsertProductCategory: CategoryResolver.upsert,
     removeProduct: ProductResolver.removeProduct,

@@ -14,7 +14,7 @@ module.exports = {
     //   if (context.apiKey) {
     //     let arrID = context.apiKey.split("_");
     //     let arrDomain = context.apiKey.split("%");
-    //     if (arrDomain[0] == "teal.com") args.UserID = arrID[1];
+    //     if (arrDomain[0] == "juicypie.com") args.UserID = arrID[1];
     //   } else {
     //     args.UserID = null;
     //   }
