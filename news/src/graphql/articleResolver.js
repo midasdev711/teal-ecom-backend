@@ -22,7 +22,7 @@ const uniqid = require("uniqid");
 const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
-var AWS = require("aws-sdk")
+var AWS = require("aws-sdk");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -174,46 +174,43 @@ module.exports = {
         let article = await Articles.findOne({ ID: attributes.articleId });
         attributes.slug = uniqid(Date.now());
         if (article) {
-          if (attributes.featureImage) {
-            let featuredData = null;
+          let featuredData = null;
+
+          featuredData = await attributes.featureImage;
+          if (featuredData) {
             let deleteFeaturedImg;
             deleteFeaturedImg = article.featureImage;
+
             //remove image from aws
             if (deleteFeaturedImg) {
               deleteFeaturedImg = deleteFeaturedImg.substr(deleteFeaturedImg.lastIndexOf("/") + 1);
               await removeImageFromAWS(deleteFeaturedImg, 'users');
             }
-  
+
             //upload to aws
-            featuredData = await attributes.featureImage;
-  
-            if (featuredData) {
-              let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, attributes.slug)
-              attributes.featureImage = featuredImgUrl
-            }
+            let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, attributes.slug)
+            attributes.featureImage = featuredImgUrl
           }
-  
+          else if (attributes.featureImage === null) {
+            attributes.featureImage = article.featureImage
+          }
+
           if (attributes.tags && attributes.tags.length > 5) {
             throw new Error("You can enter maximum 5 tags")
           }
-  
 
-  
           if (attributes.article_SEO) {
             for await (let mSeoObj of attributes.article_SEO) {
               if (mSeoObj.metaTitle === "" || mSeoObj.metaTitle === undefined || mSeoObj.metaTitle === null) {
                 mSeoObj.metaTitle = attributes.title
               }
-  
+
               if (mSeoObj.metaDescription === null || mSeoObj.metaDescription === "" || mSeoObj.metaDescription === undefined) {
                 mSeoObj.metaDescription = attributes.subTitle;
               }
             }
           }
-  
-         
-  
-  
+
           return await Articles.findOneAndUpdate(
             { ID: attributes.articleId },
             attributes,
@@ -225,31 +222,31 @@ module.exports = {
             attributes.titleSlug = formatString(attributes.title);
             attributes.ampSlug = formatString(attributes.title);
           }
-  
+
           // console.log('args',attributes);
           if (attributes.article_SEO) {
             for await (let mSeoObj of attributes.article_SEO) {
               if (mSeoObj.metaTitle === "" || mSeoObj.metaTitle === undefined || mSeoObj.metaTitle === null) {
                 mSeoObj.metaTitle = attributes.title
               }
-  
+
               if (mSeoObj.metaDescription === null || mSeoObj.metaDescription === "" || mSeoObj.metaDescription === undefined) {
                 mSeoObj.metaDescription = attributes.subTitle;
               }
             }
           }
-  
+
           //tags 
           if (attributes.tags && attributes.tags.length > 5) {
             throw new Error("You can enter maximum 5 tags")
           }
-  
+
           let featuredData = null;
           if (get(attributes, "featureImage")) {
             if (attributes.featureImage) {
               featuredData = await attributes.featureImage;
             }
-            
+
             //upload to aws
             if (featuredData) {
               let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, attributes.slug)
@@ -259,11 +256,11 @@ module.exports = {
             //   attributes.featureImage,
             //   attributes.slug
             // );
-  
+
           }
-  
-        
-  
+
+
+
           if (get(attributes, "description")) {
             attributes.description = await uploadDescriptionImagesOnS3(
               attributes.description
@@ -273,14 +270,14 @@ module.exports = {
           attributes.status = ArticleStatusConst.Approved;
           if (!attributes.isDraft) attributes.isPublish = true;
           attributes.articleScope = 1;
-  
+
           return Articles.create(attributes);
         }
       }
     } catch (error) {
       throw new Error(error)
     }
- 
+
   },
 
   articleRating: async (root, args, context) => {
