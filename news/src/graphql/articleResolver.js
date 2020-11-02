@@ -74,10 +74,9 @@ module.exports = {
     });
     // user object can be from apollo server context.user check if this is null
     let data = await Articles.aggregate(findQuery);
-
     articleData = data[0].data;
 
-    if (articleData) {
+    if (articleData && articleData.length) {
       if (get(args.filters, "userId")) {
         await Promise.all(
           articleData.map(async (data) => {
@@ -129,14 +128,17 @@ module.exports = {
           articleData[0].isBookmark = false;
           articleData[0].isFollowed = false;
         }
+
         await Promise.all(
           articleData.map(async (data) => {
             return Promise.all([getClapCountUser(data, args)]).then(function (
               values
             ) {
-              values.map(async (x) => {
-                data.clapCountUser = x[0].users;
-              });
+              if (values && values.length) {
+                values.map(async (x) => {
+                  data.clapCountUser = x[0].users;
+                });
+              }
             });
           })
         );
