@@ -1,6 +1,9 @@
 const typeDefs = `
   scalar Upload
 
+  scalar JSON
+  
+
   input ArticleInput { 
     articleId: Int
     status: Int
@@ -22,7 +25,7 @@ const typeDefs = `
     article_SEO:[ArticleSEOType]
     metaRobots:String
     internalArticle:Boolean
-
+    descriptionJson:JSON
   }
 
  
@@ -32,7 +35,7 @@ const typeDefs = `
     metaTitle:String
     metaDescription:String
     conicalUrl:String
-    keyPhrases:String
+    keyPhrases:[String]
   }
 
   input ArticleCategoryInput {
@@ -82,6 +85,7 @@ const typeDefs = `
     article_SEO:[SEOType]
     metaRobots:String
     internalArticle:Boolean
+    descriptionJson:JSON
   }
 
 type SEOType
@@ -89,7 +93,7 @@ type SEOType
   metaTitle:String
   metaDescription:String
   conicalUrl:String
-  keyPhrases:String
+  keyPhrases:[String]
 }
 
 type DefCategory{
