@@ -129,20 +129,19 @@ module.exports = {
           articleData[0].isFollowed = false;
         }
 
-          await Promise.all(
-            articleData.map(async (data) => {
-              return Promise.all([getClapCountUser(data, args)]).then(function (
-                values
-              ) {
-                if (values && values.length) {
-                  values.map(async (x) => {
+        await Promise.all(
+          articleData.map(async (data) => {
+            return Promise.all([getClapCountUser(data, args)]).then(function (values) {
+              if (values && values.length) {
+                values.map(async (x) => {
+                  if (x.length) {
                     data.clapCountUser = x[0].users;
-                  });
-                }
-              })
-
+                  }
+                });
+              }
             })
-          );
+          })
+        );
 
         if (get(articleData[0], "SubTitle")) {
           if (get(articleData[0], "Description")) {
