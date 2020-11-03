@@ -33,7 +33,7 @@ module.exports = {
         if (arrDomain[0] == "juicypie.com") args.UserID = arrID[1];
       } else {
         args.UserID = null;
-      }
+      } 
     }
 
     if (
@@ -175,7 +175,7 @@ module.exports = {
         return;
       } else {
         let article = await Articles.findOne({ ID: attributes.articleId });
-        attributes.slug = uniqid(Date.now());
+        // attributes.slug = uniqid(Date.now());
         if (article) {
           let featuredData = null;
 
@@ -491,7 +491,6 @@ const buildFindQuery = async ({ args, UserID }) => {
   }
 
   let aggregate = [{ $match: query }];
-
   aggregate.push({
     $lookup: {
       from: "users",
