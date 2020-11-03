@@ -191,7 +191,7 @@ module.exports = {
             }
 
             //upload to aws
-            let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, attributes.slug)
+            let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, article.slug)
             attributes.featureImage = featuredImgUrl
           }
           else if (attributes.featureImage === null) {
