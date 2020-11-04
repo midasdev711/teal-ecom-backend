@@ -23,6 +23,7 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 var AWS = require("aws-sdk");
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = {
   index: async (root, args, context) => {
@@ -33,7 +34,7 @@ module.exports = {
         if (arrDomain[0] == "juicypie.com") args.UserID = arrID[1];
       } else {
         args.UserID = null;
-      } 
+      }
     }
 
     if (
@@ -281,6 +282,21 @@ module.exports = {
       throw new Error(error)
     }
 
+  },
+
+  articleImageUpload: async (root, args, context) => {
+    try {
+      let imageData = null;
+      if (args.articleImgInput.articleImage) {
+        imageData = await args.articleImgInput.articleImage;
+        if (imageData !== undefined) {
+          let imgUrl = await uploadUrl(imageData.filename, imageData.createReadStream, imageData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, "article")
+          return {imgUrl:imgUrl};
+        }
+      }
+    } catch (error) {
+      throw Error('error while article image upload', error.message)
+    }
   },
 
   articleRating: async (root, args, context) => {
@@ -692,14 +708,13 @@ const uploadUrl = async (filename, streadData, mimetype, Path, Slug) => {
     region: AWSNewCredentials.Region,
   });
 
-
-  let params = {
-    'Bucket': AWSNewCredentials.Bucket,
-    'Key': `${Path}/` + Slug + '.' + filename.split('.').pop(),
-    'ACL': 'public-read',
-    'Body': streadData(),
-    'ContentType': mimetype
-  };
+    let params = {
+      'Bucket': AWSNewCredentials.Bucket,
+      'Key': (Slug === 'article') ? `${Path}/` + uuidv4() + '.' + filename.split('.').pop() : `${Path}/` + Slug + '.' + filename.split('.').pop(),
+      'ACL': 'public-read',
+      'Body': streadData(),
+      'ContentType': mimetype
+    };
 
 
   var s3Bucket = new AWS.S3();
