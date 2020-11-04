@@ -282,6 +282,21 @@ module.exports = {
     }
 
   },
+  articleImageUpload: async (root, args, context) => {
+    try {
+      let imageData = null;
+      if (args.articleImgInput.articleImage) {
+        imageData = await args.articleImgInput.articleImage;
+        if (imageData !== undefined) {
+          let imgUrl = await uploadUrl(imageData.filename, imageData.createReadStream, imageData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, "article")
+          return {imgUrl:imgUrl};
+        }
+      }
+    } catch (error) {
+      throw Error('error while article image upload', error.message)
+    }
+  },
+
 
   articleRating: async (root, args, context) => {
     args = args.articleRating;

@@ -523,6 +523,17 @@ type Mutation {
   upsertArticleBookmark(articleBookmark: ArticleRBInput): ArticleBookmark
   upsertUserSetting(userSetting: UserSettingInput): UserSettingType
   upsertCampaign(campaign: CampaignInput): Campaign
+  uploadArticleImg(articleImgInput:UploadArticleImgInput):ArticleImage
+}
+
+input UploadArticleImgInput
+{
+  articleImage:Upload
+}
+
+type ArticleImage
+{
+  imgUrl: String
 }
 `;
 

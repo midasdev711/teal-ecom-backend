@@ -23,7 +23,8 @@ const root = {
     upsertArticleRating: ArticleResolver.articleRating,
     upsertArticleBookmark: ArticleResolver.articleBookmark,
     upsertUserSetting: UserSettingResolver.upsert,
-    upsertCampaign: CampaignResolver.upsert
+    upsertCampaign: CampaignResolver.upsert,
+    uploadArticleImg:ArticleResolver.articleImageUpload
   },
 };
 
