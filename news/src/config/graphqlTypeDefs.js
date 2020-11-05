@@ -535,6 +535,7 @@ type Mutation {
   uploadArticleImg(articleImgInput:UploadArticleImgInput):ArticleImage
 }
 
+
 input UploadArticleImgInput
 {
   articleImage:Upload
@@ -544,6 +545,7 @@ type ArticleImage
 {
   imgUrl: String
 }
+
 `;
 
 module.exports = typeDefs;
