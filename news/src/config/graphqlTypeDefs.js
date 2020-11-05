@@ -1,4 +1,9 @@
 const typeDefs = `
+  scalar Upload
+
+  scalar JSON
+  
+
   input ArticleInput { 
     articleId: Int
     status: Int
@@ -6,7 +11,7 @@ const typeDefs = `
     subTitle : String
     description: String
     authorID : Int
-    featureImage: String
+    featureImage: Upload
     readMinutes : String
     tags: [String]
     isPublish : Boolean
@@ -16,7 +21,21 @@ const typeDefs = `
     isPaidSubscription : Boolean
     articleScope : Int
     isDraft: Boolean
-    deleteArticleIds : [ID]
+    deleteArticleIds : [ID],
+    article_SEO:[ArticleSEOType]
+    metaRobots:String
+    internalArticle:Boolean
+    descriptionJson:JSON
+  }
+
+ 
+
+  input ArticleSEOType
+  {
+    metaTitle:String
+    metaDescription:String
+    conicalUrl:String
+    keyPhrases:[String]
   }
 
   input ArticleCategoryInput {
@@ -63,7 +82,19 @@ const typeDefs = `
     clapCountUser:[User]
     isArticleLiked: Boolean
     createdAt:String
+    article_SEO:[SEOType]
+    metaRobots:String
+    internalArticle:Boolean
+    descriptionJson:JSON
   }
+
+type SEOType
+{
+  metaTitle:String
+  metaDescription:String
+  conicalUrl:String
+  keyPhrases:[String]
+}
 
 type DefCategory{
     ID: Int
@@ -501,6 +532,17 @@ type Mutation {
   upsertArticleBookmark(articleBookmark: ArticleRBInput): ArticleBookmark
   upsertUserSetting(userSetting: UserSettingInput): UserSettingType
   upsertCampaign(campaign: CampaignInput): Campaign
+  uploadArticleImg(articleImgInput:UploadArticleImgInput):ArticleImage
+}
+
+input UploadArticleImgInput
+{
+  articleImage:Upload
+}
+
+type ArticleImage
+{
+  imgUrl: String
 }
 `;
 

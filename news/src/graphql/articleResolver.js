@@ -22,6 +22,7 @@ const uniqid = require("uniqid");
 const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
+var AWS = require("aws-sdk");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -32,7 +33,7 @@ module.exports = {
         if (arrDomain[0] == "juicypie.com") args.UserID = arrID[1];
       } else {
         args.UserID = null;
-      }
+      } 
     }
 
     if (
@@ -73,10 +74,9 @@ module.exports = {
     });
     // user object can be from apollo server context.user check if this is null
     let data = await Articles.aggregate(findQuery);
-
     articleData = data[0].data;
 
-    if (articleData) {
+    if (articleData && articleData.length) {
       if (get(args.filters, "userId")) {
         await Promise.all(
           articleData.map(async (data) => {
@@ -128,21 +128,21 @@ module.exports = {
           articleData[0].isBookmark = false;
           articleData[0].isFollowed = false;
         }
+
         await Promise.all(
           articleData.map(async (data) => {
-            return Promise.all([getClapCountUser(data, args)]).then(function (
-              values
-            ) {
-              values.map(async (x) => {
-                if(x[0]){
-                data.clapCountUser = x[0].users;
+            return Promise.all([getClapCountUser(data, args)]).then(function (values) {
+              if (values && values.length) {
+                values.map(async (x) => {
+                  if (x.length) {
+                    data.clapCountUser = x[0].users;
+                  }
+                });
               }
-              });
-            }).catch(err=>{
-              console.log(err)
             })
           })
         );
+
         if (get(articleData[0], "SubTitle")) {
           if (get(articleData[0], "Description")) {
             articleData[0].subTitle = articleData[0].description.replace(
@@ -160,55 +160,143 @@ module.exports = {
   },
 
   upsert: async (root, args, context) => {
-    let attributes = get(args, "article");
+    try {
+      let attributes = get(args, "article");
 
-    if (get(attributes, "deleteArticleIds")) {
-      console.log("asdadsasd", attributes.deleteArticleIds);
-      attributes.deleteArticleIds.map(async (x) => {
-        await Articles.findOneAndUpdate(
-          { ID: parseInt(x) },
-          { $set: { status: 0 } },
-          { multi: true }
-        );
-      });
-      return;
-    } else {
-      let article = await Articles.findOne({ ID: attributes.articleId });
-
-      if (article) {
-        return await Articles.findOneAndUpdate(
-          { ID: attributes.articleId },
-          attributes,
-          { new: true }
-        );
+      if (get(attributes, "deleteArticleIds")) {
+        console.log("asdadsasd", attributes.deleteArticleIds);
+        attributes.deleteArticleIds.map(async (x) => {
+          await Articles.findOneAndUpdate(
+            { ID: parseInt(x) },
+            { $set: { status: 0 } },
+            { multi: true }
+          );
+        });
+        return;
       } else {
-        attributes.slug = uniqid(Date.now());
-        if (get(args, "title")) {
-          attributes.titleSlug = formatString(attributes.title);
-          attributes.ampSlug = formatString(attributes.title);
-        }
+        let article = await Articles.findOne({ ID: attributes.articleId });
+        // attributes.slug = uniqid(Date.now());
+        if (article) {
+          let featuredData = null;
 
-        if (get(attributes, "featureImage")) {
-          attributes.featureImage = await uploadFeaturedImage(
-            attributes.featureImage,
-            attributes.slug
+          featuredData = await attributes.featureImage;
+          if (featuredData) {
+            let deleteFeaturedImg;
+            deleteFeaturedImg = article.featureImage;
+
+            //remove image from aws
+            if (deleteFeaturedImg) {
+              deleteFeaturedImg = deleteFeaturedImg.substr(deleteFeaturedImg.lastIndexOf("/") + 1);
+              await removeImageFromAWS(deleteFeaturedImg, 'users');
+            }
+
+            //upload to aws
+            let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, article.slug)
+            attributes.featureImage = featuredImgUrl
+          }
+          else if (attributes.featureImage === null) {
+            attributes.featureImage = article.featureImage
+          }
+
+          if (attributes.tags && attributes.tags.length > 5) {
+            throw new Error("You can enter maximum 5 tags")
+          }
+
+          if (attributes.article_SEO) {
+            for await (let mSeoObj of attributes.article_SEO) {
+              if (mSeoObj.metaTitle === "" || mSeoObj.metaTitle === undefined || mSeoObj.metaTitle === null) {
+                mSeoObj.metaTitle = attributes.title
+              }
+
+              if (mSeoObj.metaDescription === null || mSeoObj.metaDescription === "" || mSeoObj.metaDescription === undefined) {
+                mSeoObj.metaDescription = attributes.subTitle;
+              }
+            }
+          }
+
+          return await Articles.findOneAndUpdate(
+            { ID: attributes.articleId },
+            attributes,
+            { new: true }
           );
-        }
+        } else {
+          attributes.slug = uniqid(Date.now());
+          if (get(args, "title")) {
+            attributes.titleSlug = formatString(attributes.title);
+            attributes.ampSlug = formatString(attributes.title);
+          }
 
-        if (get(attributes, "description")) {
-          attributes.description = await uploadDescriptionImagesOnS3(
-            attributes.description
-          );
-        }
-        attributes.ampSlug = `amp/${attributes.slug}`;
-        attributes.status = ArticleStatusConst.Approved;
-        if (!attributes.isDraft) attributes.isPublish = true;
-        attributes.articleScope = 1;
+          // console.log('args',attributes);
+          if (attributes.article_SEO) {
+            for await (let mSeoObj of attributes.article_SEO) {
+              if (mSeoObj.metaTitle === "" || mSeoObj.metaTitle === undefined || mSeoObj.metaTitle === null) {
+                mSeoObj.metaTitle = attributes.title
+              }
 
-        return Articles.create(attributes);
+              if (mSeoObj.metaDescription === null || mSeoObj.metaDescription === "" || mSeoObj.metaDescription === undefined) {
+                mSeoObj.metaDescription = attributes.subTitle;
+              }
+            }
+          }
+
+          //tags 
+          if (attributes.tags && attributes.tags.length > 5) {
+            throw new Error("You can enter maximum 5 tags")
+          }
+
+          let featuredData = null;
+          if (get(attributes, "featureImage")) {
+            if (attributes.featureImage) {
+              featuredData = await attributes.featureImage;
+            }
+
+            //upload to aws
+            if (featuredData) {
+              let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, attributes.slug)
+              attributes.featureImage = featuredImgUrl
+            }
+            // attributes.featureImage = await uploadFeaturedImage(
+            //   attributes.featureImage,
+            //   attributes.slug
+            // );
+
+          }
+
+
+
+          if (get(attributes, "description")) {
+            attributes.description = await uploadDescriptionImagesOnS3(
+              attributes.description
+            );
+          }
+          attributes.ampSlug = `amp/${attributes.slug}`;
+          attributes.status = ArticleStatusConst.Approved;
+          if (!attributes.isDraft) attributes.isPublish = true;
+          attributes.articleScope = 1;
+
+          return Articles.create(attributes);
+        }
       }
+    } catch (error) {
+      throw new Error(error)
+    }
+
+  },
+  articleImageUpload: async (root, args, context) => {
+    try {
+      let imageData = null;
+      if (args.articleImgInput.articleImage) {
+        imageData = await args.articleImgInput.articleImage;
+        if (imageData !== undefined) {
+          let imgUrl = await uploadUrl(imageData.filename, imageData.createReadStream, imageData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, "article")
+          return {imgUrl:imgUrl};
+        }
+      }
+    } catch (error) {
+      throw Error('error while article image upload', error.message)
     }
   },
+
 
   articleRating: async (root, args, context) => {
     args = args.articleRating;
@@ -421,7 +509,6 @@ const buildFindQuery = async ({ args, UserID }) => {
   }
 
   let aggregate = [{ $match: query }];
-
   aggregate.push({
     $lookup: {
       from: "users",
@@ -613,4 +700,62 @@ const storeData = (data, path) => {
   } catch (err) {
     console.error(err);
   }
+};
+
+const uploadUrl = async (filename, streadData, mimetype, Path, Slug) => {
+  AWS.config.setPromisesDependency(require("bluebird"));
+  AWS.config.update({
+    accessKeyId: AWSNewCredentials.credentials.accessKeyId,
+    secretAccessKey: AWSNewCredentials.credentials.secretAccessKey,
+    region: AWSNewCredentials.Region,
+  });
+
+
+  let params = {
+    'Bucket': AWSNewCredentials.Bucket,
+    'Key': `${Path}/` + Slug + '.' + filename.split('.').pop(),
+    'ACL': 'public-read',
+    'Body': streadData(),
+    'ContentType': mimetype
+  };
+
+
+  var s3Bucket = new AWS.S3();
+  const { Location } = await s3Bucket.upload(params).promise();
+  return Location
+}
+
+
+const removeImageFromAWS = async (filename, imgType) => {
+  try {
+    AWS.config.setPromisesDependency(require("bluebird"));
+    AWS.config.update({
+      accessKeyId: AWSNewCredentials.credentials.accessKeyId,
+      secretAccessKey: AWSNewCredentials.credentials.secretAccessKey,
+      region: AWSNewCredentials.Region,
+    });
+
+    var s3Bucket = new AWS.S3();
+    let bucketkey = '';
+
+    if (imgType === 'users') {
+      bucketkey = `users/${filename}`;
+    }
+
+
+    s3Bucket.deleteObject({
+      Bucket: AWSNewCredentials.Bucket,
+      Key: bucketkey
+    }, async function (err, data) {
+      if (!err) {
+        console.log('file deleted sucessfully')
+      }
+    });
+
+  } catch (error) {
+    console.log('error while removing images from aws\n', error.message);
+    throw error;
+  }
+
+
 };

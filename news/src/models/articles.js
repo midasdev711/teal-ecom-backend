@@ -22,7 +22,7 @@ const ArticleSchema = new Schema(
       {
         metaTitle: String,
         metaDescription: String,
-        keyPhrases: String,
+        keyPhrases: [String],
         conicalUrl: String,
       },
     ],
@@ -52,6 +52,14 @@ const ArticleSchema = new Schema(
     createdBy: Number,
     modifiedBy: Number,
     urls: { type: String, default: "" },
+    metaRobots:
+    {
+      type: String,
+      enum: ['index,follow', 'index,nofollow', 'noindex,follow', 'noindex,nofollow'],
+      default: 'index,follow'
+    },
+    internalArticle: { type: Boolean, default: false },
+    descriptionJson: { type: Object }
   },
   {
     timestamps: true,

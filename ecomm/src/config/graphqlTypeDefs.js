@@ -505,14 +505,15 @@ type Query {
 }
 
 type Mutation {
-upsertProduct(product: ProductInput): Product
-upsertMerchant(merchant: MerchantInput): Merchant
-upsertOrder(order:OrderInput): Order
-upsertCustomer(customer:CustomerInput): Customer
-upsertProductCategory(category: ProductCategoryInput): ProductCategory 
-upload(file: UploadFile!):File
-removeProduct(ID:Int):RemoveProduct
-updateProduct(product:ProductUpdateInput):Product
+  upsertProduct(product: ProductInput): Product
+  upsertMerchant(merchant: MerchantInput): Merchant
+  upsertOrder(order:OrderInput): Order
+  upsertCustomer(customer:CustomerInput): Customer
+  upsertProductCategory(category: ProductCategoryInput): ProductCategory 
+  upload(file: UploadFile!):File
+  removeProduct(ID:Int):RemoveProduct
+  updateProduct(product:ProductUpdateInput):Product
+  sendUserInvite(invite: UserInvite): MailSuccess
 }
 type ProductListing
 {
@@ -528,6 +529,18 @@ type ProductListing
   title:String
   salePrice:String
   stock:Int
+}
+
+input UserInvite
+{
+  email:String
+  merchantId:Int
+}
+
+type MailSuccess
+{
+   email:String
+   message:String 
 }
 
 `;
