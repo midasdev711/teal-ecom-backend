@@ -476,7 +476,10 @@ const buildFindQuery = async ({ args, UserID }) => {
     }
 
     if (get(args, "articleIds")) {
-      query.$and.push({ ID: { $in: get(args, "articleIds") } });
+      const dataArray=args.articleIds.map(data=>{
+        return parseInt(data)
+      })
+      query.$and.push({ ID: { $in: dataArray}});
     }
 
     if (get(args, "articleId")) {
