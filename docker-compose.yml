@@ -5,6 +5,5 @@ services:
     restart: always
     command: npm start
     ports:
-      - "443:9200"
       - "9200:9200"
-      - "80:9200"
+
