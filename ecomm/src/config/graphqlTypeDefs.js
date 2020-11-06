@@ -533,6 +533,7 @@ type Mutation {
 }
 type ProductListing
 {
+  _id:String
   merchantName:String
   images:[String]
   featuredImage:String
@@ -544,6 +545,7 @@ type ProductListing
   sku:String
   title:String
   salePrice:String
+  mrp:String
   stock:Int
 }
 
