@@ -5,13 +5,13 @@
 */
 
 const Page = require('../../models/pages'),
-      { CategoryType } = require('../types/page_constant'),
+      { PageType } = require('../types/page_constant'),
       { GraphQLInt, GraphQLString } = require('graphql'),
       { verifyToken } = require('../middleware/middleware');
 
 // add page
 const AddPage = {
-  type : CategoryType,
+  type : PageType,
   args : {
     PageTitle : { type: GraphQLString },
     PageDescription : { type: GraphQLString },
@@ -43,7 +43,7 @@ const AddPage = {
   }
 };
 
-const PageArray = { AddPage , GetPage };
+const PageArray = { AddPage , GetPages };
 module.exports = PageArray;
 
 

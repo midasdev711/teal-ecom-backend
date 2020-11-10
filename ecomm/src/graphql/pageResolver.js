@@ -13,7 +13,7 @@ module.exports = {
     // const id = await verifyToken(context);
     let attributes = get(args, "page");
     console.log('222222222222222222', attributes, args)
-    // return PageModel.create(attributes);
+    return PageModel.create(attributes);
   },
 };
 

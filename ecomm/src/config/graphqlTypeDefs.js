@@ -491,6 +491,49 @@ input ProductUpdateInput
   productAttributes:[ProductAttributeInput]
 }
 
+
+type Page {
+  _id:String
+  PageTitle: String
+  PageDescription: String
+  PageCategory: String,
+  PageUserName: String,
+  PageEmail: String,
+  PagePhone: String,
+  PageWebsite: String,
+  PageLocation: String,
+  PageUserID: Int
+  createdDate: String
+  modifiedDate: String
+}
+
+input PageFilters{
+  _id:String
+  PageTitle: String
+  PageDescription: String
+  PageCategory: String,
+  PageUserName: String,
+  PageEmail: String,
+  PagePhone: String,
+  PageWebsite: String,
+  PageLocation: String,
+  PageUserID: Int
+  createdDate: String
+  modifiedDate: String
+}
+
+input PageInput{
+  PageTitle: String
+  PageDescription: String
+  PageCategory: String,
+  PageUserName: String,
+  PageEmail: String,
+  PagePhone: String,
+  PageWebsite: String,
+  PageLocation: String,
+  PageUserID: Int
+}
+
 type Query {
   products(filters: ProductFilters):[Product]
   merchants(filters: MerchantFilters):[Merchant]
@@ -502,6 +545,7 @@ type Query {
   getSubCategories(ID:Int):[ProductCategory]
   getProductByMerchant(ID:Int):[MyProductType]
   getAllProductsListing:[ProductListing]
+  pages(filters:PageFilters):[Page]
 }
 
 type Mutation {
@@ -513,6 +557,7 @@ upsertProductCategory(category: ProductCategoryInput): ProductCategory
 upload(file: UploadFile!):File
 removeProduct(ID:Int):RemoveProduct
 updateProduct(product:ProductUpdateInput):Product
+upsertPage(page:PageInput): Page
 }
 type ProductListing
 {
