@@ -37,6 +37,8 @@ const { UserSignUp , UpdateUserDetail } = require('../root_mutation/user_mutatio
 
 const { AddCustomer  } = require('../root_mutation/customer_mutations'),
 
+const { AddPage } = require('../root_mutation/page_mutations');
+
 // declared a mutation constant
 const Mutation = new GraphQLObjectType({
     name: 'Mutation',
@@ -106,6 +108,10 @@ const Mutation = new GraphQLObjectType({
             /* ------------------------------------User Mutation------------------------------------*/
 
                   AddCustomer : AddCustomer
+
+            /* ------------------------------------Page Mutation-------------------------------- */      
+
+                  AddPage : AddPage,     
 
          /*===========================================================================================
          ==============================================================================================*/

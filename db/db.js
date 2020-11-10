@@ -69,4 +69,5 @@ require("../ecomm/src/models/products");
 require("../ecomm/src/models/shopping_cart");
 require("../ecomm/src/models/shopping_cart_detail");
 require("../ecomm/src/models/customers");
-require("../ecomm/src/models/product_category");
+require("../ecomm/src/models/pages");
+require('../ecomm/src/models/product_category');
