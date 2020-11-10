@@ -1,0 +1,9 @@
+version: "3"
+services:
+  express:
+    build: .
+    restart: always
+    command: npm start
+    ports:
+      - "9200:9200"
+

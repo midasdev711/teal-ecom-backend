@@ -2,7 +2,7 @@
  * CreatedBy : Ankita Solace
  * Purporse : user paid subscrition log Schema
  */
-const mongoose = require("mongoose"),
+const mongoose = require("mongoose"),   
   Schema = mongoose.Schema,
   SchemaType = Schema.Types,
   autoIncrement = require("mongoose-auto-increment");

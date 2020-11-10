@@ -8,7 +8,10 @@ const CampaignSchema = new Schema({
     CampaignName: {type: String, required:true, unique : true},
     ArticleId1: {  type: Number,  required: true },
     ArticleId2: {  type: Number,  required: true },
-    SplitId: {  type: Number,  required: true }
+    SplitId: {  type: Number,  required: true },
+    viewCount: { type: Number, default: 0 },
+    isDeleted: {type: Boolean, default: false},
+    authorID: Number
 });
 CampaignSchema.plugin(autoIncrement.plugin, { model: 'campaign', field: 'ID',startAt: 1 });
 CampaignSchema.plugin(autoIncrement.plugin, { model: 'campaign', field: 'SplitId', startAt: 258678 });
