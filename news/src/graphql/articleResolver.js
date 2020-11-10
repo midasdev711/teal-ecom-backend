@@ -23,6 +23,8 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 var AWS = require("aws-sdk");
+const { verifyToken } = require('../controllers/authController');
+const user = require('../models/users');
 
 module.exports = {
   index: async (root, args, context) => {
@@ -33,7 +35,7 @@ module.exports = {
         if (arrDomain[0] == "juicypie.com") args.UserID = arrID[1];
       } else {
         args.UserID = null;
-      } 
+      }
     }
 
     if (
@@ -161,6 +163,7 @@ module.exports = {
 
   upsert: async (root, args, context) => {
     try {
+      const id = await verifyToken(context);
       let attributes = get(args, "article");
 
       if (get(attributes, "deleteArticleIds")) {
@@ -214,11 +217,33 @@ module.exports = {
             }
           }
 
-          return await Articles.findOneAndUpdate(
+
+          if (article.authorID === undefined || article.authorID === null) {
+            attributes.authorID = id.UserID;
+          }
+
+
+          let articleData = await Articles.findOneAndUpdate(
             { ID: attributes.articleId },
             attributes,
             { new: true }
           );
+
+          articleData = JSON.parse(JSON.stringify(articleData))
+
+          const authorDetails = await user.findOne({ ID: article.authorID });
+          let authors = []
+          let authorObj = {
+            ID: authorDetails.ID,
+            userName: authorDetails.userName,
+            avatar: authorDetails.avatar,
+            name: authorDetails.name
+          };
+          authors.push(authorObj)
+          articleData.author = authors;
+          return articleData;
+
+
         } else {
           attributes.slug = uniqid(Date.now());
           if (get(args, "title")) {
@@ -273,8 +298,21 @@ module.exports = {
           attributes.status = ArticleStatusConst.Approved;
           if (!attributes.isDraft) attributes.isPublish = true;
           attributes.articleScope = 1;
+          attributes.authorID = id.UserID;
 
-          return Articles.create(attributes);
+          let articleData = await Articles.create(attributes);
+          articleData = JSON.parse(JSON.stringify(articleData))
+          const authorDetails = await user.findOne({ ID: articleData.authorID });
+          let authors = []
+          let authorObj = {
+            ID: authorDetails.ID,
+            userName: authorDetails.userName,
+            avatar: authorDetails.avatar,
+            name: authorDetails.name
+          }
+          authors.push(authorObj)
+          articleData.author = authors
+          return articleData;
         }
       }
     } catch (error) {
@@ -289,7 +327,7 @@ module.exports = {
         imageData = await args.articleImgInput.articleImage;
         if (imageData !== undefined) {
           let imgUrl = await uploadUrl(imageData.filename, imageData.createReadStream, imageData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, "article")
-          return {imgUrl:imgUrl};
+          return { imgUrl: imgUrl };
         }
       }
     } catch (error) {
