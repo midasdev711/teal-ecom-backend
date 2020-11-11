@@ -7,6 +7,7 @@ type Blog {
   BlogCategory: String
   BlogPicture: String
   BlogUserID: Int
+  BlogPageID: String
   createdDate : String
   modifiedDate : String
 }
@@ -18,6 +19,7 @@ input BlogFilters{
   BlogCategory: String
   BlogPicture: String
   BlogUserID: Int
+  BlogPageID: String
   createdDate : String
   modifiedDate : String
 }
@@ -28,6 +30,7 @@ input BlogInput{
   BlogCategory: String
   BlogPicture: String
   BlogUserID: Int
+  BlogPageID: String
 }
 
 type Query {
