@@ -28,18 +28,18 @@ const AddPage = {
     const id = await verifyToken(context);
 
     console.log(args)
-    // let PageData = new Categories({
-    //   PageTitle: args.title,
-    //   PageDescription: args.description,
-    //   PageUserID: args.user_id,
-    //   PageCategory: args.category,
-    //   PageUserName: args.username,
-    //   PagePhone: args.phone,
-    //   PageWebsite: args.website,
-    //   PageLocation: args.location,
+    let PageData = new Categories({
+      PageTitle: args.title,
+      PageDescription: args.description,
+      PageUserID: args.user_id,
+      PageCategory: args.category,
+      PageUserName: args.username,
+      PagePhone: args.phone,
+      PageWebsite: args.website,
+      PageLocation: args.location,
 
-    // });
-    // return PageData.save();
+    });
+    return PageData.save();
   }
 };
 

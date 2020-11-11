@@ -30,9 +30,13 @@ const AddBlog = {
       BlogUserID: args.user_id
       BlogPageID: args.page_id
     });
+
+
+    console.log("args", args)
+
     return BlogData.save();
   }
 };
 
-const BlogArray = { AddBlog , GetBlog };
+const BlogArray = { AddBlog , GetBlogs };
 module.exports = BlogArray;

@@ -550,6 +550,40 @@ input PageInput{
   PageUserID: Int
 }
 
+type Blog {
+  _id:String
+  BlogTitle: String
+  BlogPublishingPlace: String
+  BlogCategory: String
+  BlogPicture: String
+  BlogUserID: Int
+  BlogPageID: String
+  createdDate : String
+  modifiedDate : String
+}
+
+input BlogFilters{
+  _id:String
+  BlogTitle: String
+  BlogPublishingPlace: String
+  BlogCategory: String
+  BlogPicture: String
+  BlogUserID: Int
+  BlogPageID: String
+  createdDate : String
+  modifiedDate : String
+}
+
+input BlogInput{
+  BlogTitle: String
+  BlogPublishingPlace: String
+  BlogCategory: String
+  BlogPicture: String
+  BlogUserID: Int
+  BlogPageID: String
+}
+
+
 type Query {
   products(filters: ProductFilters):[Product]
   merchants(filters: MerchantFilters):[Merchant]
@@ -562,6 +596,7 @@ type Query {
   getProductByMerchant(ID:Int):[MyProductType]
   getAllProductsListing:[ProductListing]
   pages(filters:PageFilters):[Page]
+  blogs(filters:BlogFilters):[Blog]
 }
 
 type Mutation {
@@ -575,6 +610,7 @@ type Mutation {
   updateProduct(product:ProductUpdateInput):Product
   sendUserInvite(invite: UserInvite): MailSuccess
   upsertPage(page:PageInput): Page
+  upsertBlog(blog:BlogInput): Blog
 }
 type ProductListing
 {
