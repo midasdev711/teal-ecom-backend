@@ -82,7 +82,7 @@ const OrderStatusType = new GraphQLObjectType({
         ID: { type: GraphQLInt },
         Status: { type: GraphQLInt },
         UserID: { type: GraphQLString },
-        OrderAmount : { type : DecimalConvertOrderAmount },
+        OrderAmount : { type : GraphQLString },
         DeliveryAddress: { type: GraphQLJSONObject },
         ShippingAddress : {type: GraphQLJSONObject },
         //Products:{ type: GraphQLJSONObject },
