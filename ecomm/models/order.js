@@ -25,7 +25,7 @@ const OrderSchema = new Schema({
         Status :  { type: Number, default: 1 },
         ProductVariantID : { type : SchemaType.ObjectId , ref: 'ProductVariant'},
      }],
-     OrderAmount : { type : SchemaType.Decimal128},
+     OrderAmount : { type : String},
       ShippingAddress : {
         BasicDetailsFirstName : {type : String },
         BasicDetailsLastName : {type : String },

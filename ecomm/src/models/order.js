@@ -12,23 +12,23 @@ autoIncrement.initialize(mongoose);
 const OrderSchema = new Schema(
   {
     ID: { type: Number, exists: false, unique: true },
-    UserId: { type: SchemaType.ObjectId },
+    UserId: { type: Number },
     Status: { type: Number, default: 1 },
     Products: [
       {
-        productID: { type: Number, required: true },
+        productID: { type: String, required: true },
         productSKU: { type: String },
         productMerchantID: { type: Number },
-        productSalePrice: { type: SchemaType.Decimal128 },
+        productSalePrice: { type: String },
         productTitle: { type: String },
         productTotalQuantity: { type: Number },
-        productTotalPrice: { type: SchemaType.Decimal128 },
+        productTotalPrice: { type: String },
         productTitle: { type: String },
         status: { type: Number, default: 1 },
         productVariantID: { type: SchemaType.ObjectId, ref: "ProductVariant" },
       },
     ],
-    OrderAmount: { type: SchemaType.Decimal128 },
+    OrderAmount: { type: String },
     ShippingAddress: {
       name: { type: String },
       email: { type: String },

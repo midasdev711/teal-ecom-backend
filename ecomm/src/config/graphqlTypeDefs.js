@@ -214,6 +214,7 @@ type OrderProductType {
   productMerchantID:Int
   productSKU:String
   productTitle:String
+  productImages:String
   productSalePrice:String
   productTotalQuantity:Int
   productTotalPrice:String
