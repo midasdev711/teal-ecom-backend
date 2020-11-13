@@ -16,10 +16,11 @@ const passwordHash = require("password-hash");
 
 module.exports = {
   index: async (root, args, context) => {
+    console.log("filter: ", args);
     const data = await userQuery({ args: args.filters });
 
     // let data = await Users.find(findQuery);
-    if (typeof data == "object") return [data];
+    // if (typeof data == "object") return [data];
     return data;
   },
 
@@ -86,6 +87,7 @@ async function makeid(length) {
 }
 
 const userQuery = async ({ args }) => {
+  console.log("user query: ", args);
   if (get(args, "userIds")) {
     return Users.find({ ID: { $in: get(args, "userIds") } });
   }
@@ -119,6 +121,19 @@ const userQuery = async ({ args }) => {
       });
       return await new Set(Result);
     }
+  }
+
+  if (get(args, "mobileNo")) {
+    console.log("mobile");
+    var Result = [];
+    await Users.find({
+      mobileNo: args.mobileNo,
+      status: 1,
+    }).then(async (isMobileNo) => {
+      Result = await isMobileNo;
+      Result = Result.concat(isMobileNo);
+    });
+    return await new Set(Result);
   }
 
   if (get(args, "userId")) {

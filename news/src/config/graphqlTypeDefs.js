@@ -300,6 +300,7 @@ input UserFilters {
   userIds: [ID]
   ignoreUserIds:[ID]
   email : String
+  mobileNo: String
   userId : Int
   apiKey : String
   limit: Int
@@ -512,13 +513,20 @@ input UserSettingInput {
   newPassword: String
 }
 
+input VerifyCodeObject {
+  email: String
+  provider: String,
+  mobileNo: String,
+  code: Int
+}
 
 type Query {
     articles(filters: ArticleFilters):[Article]
     uploadArticles: String
     categories(filters: CategoryFilters):[Category]
     users(filters: UserFilters):[User]
-    auth(email: String password: String) : User
+    auth(uniqueID: String password: String) : User
+    socialAuth(email: String signUpMethod: String) : User
     userSetting(userId:ID): UserSettingType
     campaign(filters: CampaignFilters): [Campaign]
 }
@@ -527,6 +535,9 @@ type Mutation {
   upsertArticle(article: ArticleInput): Article
   upsertCategory(category: CategoryInput): Category 
   upsertAuth(auth: UserInput) : User
+  sendEmailVerifyCode(email: String): Boolean
+  sendMobileVerifyCode(mobileNo: String): Boolean
+  verifyCode(codeObject: VerifyCodeObject): Boolean
   userAPIKey(UserID:ID!): String
   upsertArticleRating(articleRating: ArticleRBInput): ArticleRating
   upsertArticleBookmark(articleBookmark: ArticleRBInput): ArticleBookmark

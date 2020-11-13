@@ -16,9 +16,7 @@ const UserSchema = new Schema(
     description: String,
     email: {
       type: String,
-      required: "email id is required",
       exists: false,
-      unique: true,
     },
     password: { type: String },
     isVerified: { type: Boolean, default: true },
@@ -28,7 +26,7 @@ const UserSchema = new Schema(
       enum: ["Site", "Facebook", "Google", "Mobile"],
       default: "Site",
     },
-    mobileNo: { type: String, exists: false, unique: true },
+    mobileNo: { type: String, exists: false },
     roleID: { type: Number },
     dob: { type: Date },
     gender: {

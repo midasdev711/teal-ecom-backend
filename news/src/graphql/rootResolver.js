@@ -12,6 +12,7 @@ const root = {
     categories: CategoryResolver.index,
     users: UserResolver.index,
     auth: AuthResolver.index,
+    socialAuth: AuthResolver.socialAuth,
     userSetting: UserSettingResolver.index,
     campaign: CampaignResolver.index
   },
@@ -20,6 +21,9 @@ const root = {
     upsertCategory: CategoryResolver.upsert,
     upsertAuth: AuthResolver.upsert,
     userAPIKey: AuthResolver.createAPIKey,
+    sendEmailVerifyCode: AuthResolver.sendEmailVerifyCode,
+    sendMobileVerifyCode: AuthResolver.sendMobileVerifyCode,
+    verifyCode: AuthResolver.verifyCode,
     upsertArticleRating: ArticleResolver.articleRating,
     upsertArticleBookmark: ArticleResolver.articleBookmark,
     upsertUserSetting: UserSettingResolver.upsert,
