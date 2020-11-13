@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+dotenv.config();
+
 function connectWithMongodb() {
+  const DBService = process.env.DB_SERVICE;
   mongoose.connect(
-  //  "mongodb+srv://fuckcovid:Li5D0vvZTVvyo0V9@cluster0.oml6y.mongodb.net/vimal_juicypie_dev?retryWrites=true&w=majority",
-   "mongodb://localhost:27017/juicypie",
+    DBService,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -65,4 +68,4 @@ require("../ecomm/src/models/products");
 require("../ecomm/src/models/shopping_cart");
 require("../ecomm/src/models/shopping_cart_detail");
 require("../ecomm/src/models/customers");
-require('../ecomm/src/models/product_category');
+require("../ecomm/src/models/product_category");
