@@ -137,13 +137,9 @@ module.exports = {
 
       console.log("mobile verifyObject: ", verifyObject);
 
-      await verifyCode.updateOne(
-        { mobileNo: mobileNo },
-        verifyObject,
-        {
-          upsert: true,
-        }
-      );
+      await verifyCode.updateOne({ mobileNo: mobileNo }, verifyObject, {
+        upsert: true,
+      });
       const fromPhone = process.env.TWILLIO_PHONE;
       return client.messages
         .create({
@@ -227,26 +223,34 @@ async function makeid(length) {
 }
 
 const userQuery = async ({ args }) => {
-  if (get(args, "email") && get(args, "password")) {
-    let valid = emailValidator.validate(args.email);
+  if (get(args, "uniqueID") && get(args, "password")) {
+    let data;
+    let valid = emailValidator.validate(args.uniqueID);
     if (valid) {
-      let data = await Users.findOne({
-        email: args.email,
+      data = await Users.findOne({
+        email: args.uniqueID,
         status: 1,
         isVerified: 1,
       });
-      if (data) {
-        if (passwordHash.verify(args.password, data.password)) {
-          let apiKey = await apiKeys.findOne({
-            userID: parseInt(data.ID),
-            isExpired: false,
-          });
-          if (get(apiKey, "apiKey")) {
-            data.apiKey = apiKey.apiKey;
-          }
-          return data ? await generateToken(data) : [];
-        } else throw new Error("Password does not match");
-      } else throw new Error("Email does not exists");
+    } else {
+      data = await Users.findOne({
+        uniqueID: args.uniqueID,
+        status: 1,
+        isVerified: 1,
+      });
     }
+
+    if (data) {
+      if (passwordHash.verify(args.password, data.password)) {
+        let apiKey = await apiKeys.findOne({
+          userID: parseInt(data.ID),
+          isExpired: false,
+        });
+        if (get(apiKey, "apiKey")) {
+          data.apiKey = apiKey.apiKey;
+        }
+        return data ? await generateToken(data) : [];
+      } else throw new Error("Password does not match");
+    } else throw new Error("This user does not exists");
   }
 };
