@@ -10,7 +10,13 @@ const UserSettings = require("../models/user_settings");
 const passwordHash = require("password-hash");
 // const bcrypt = require("bcrypt");
 const apiKeys = require("../models/api_key");
+const verifyCode = require("../models/verification_code");
 // const Users = require("../models/users");
+
+const dotenv = require("dotenv");
+const postmark = require("postmark");
+const twilio = require("twilio");
+dotenv.config();
 
 module.exports = {
   index: async (root, args, context) => {
@@ -38,6 +44,8 @@ module.exports = {
       if (get(args.auth, "password")) {
         args.auth.password = passwordHash.generate(args.auth.password);
       }
+      console.log("auth upsert: ", args);
+
       args.auth.uniqueID = uniqid();
       args.auth.roleID = RoleObject.auth;
       UserData = await Users.create(args.auth);
@@ -73,7 +81,119 @@ module.exports = {
       return "User not found";
     }
   },
+
+  sendEmailVerifyCode: async (root, args, context) => {
+    const email = args.email;
+    const expireDate = Date.now();
+    const digitalCode = getRandomNumberBetween(100000, 999999);
+    const verifyObject = {
+      email: email,
+      provider: "email",
+      expireDate: expireDate,
+      code: digitalCode,
+    };
+    try {
+      await verifyCode.updateOne({ email: email }, verifyObject, {
+        upsert: true,
+      });
+      const client = new postmark.ServerClient(process.env.POSTMARK_CLIENT_KEY);
+      return client
+        .sendEmail({
+          From: process.env.FORM_EMAIL,
+          To: email,
+          Subject: "Verify Email",
+          HtmlBody: String(digitalCode),
+          TextBody: "Hello from Juicypie",
+          MessageStream: "outbound",
+        })
+        .then((res) => {
+          return true;
+        })
+        .catch((err) => {
+          return false;
+        });
+    } catch (error) {
+      console.log("error to send email verification code: ", error);
+      return false;
+    }
+  },
+
+  sendMobileVerifyCode: async (root, args, context) => {
+    try {
+      const accountSid = process.env.TWILLIO_SIDE;
+      const authToken = process.env.TWILLIO_AUTH_TOKEN;
+      const client = new twilio(accountSid, authToken);
+
+      const mobileNo = get(args, "mobileNo");
+      const expireDate = Date.now();
+      const digitalCode = getRandomNumberBetween(100000, 999999);
+
+      const verifyObject = {
+        mobileNo: mobileNo,
+        provider: "mobile",
+        expireDate: expireDate,
+        code: digitalCode,
+      };
+
+      console.log("mobile verifyObject: ", verifyObject);
+
+      await verifyCode.updateOne(
+        { mobileNo: mobileNo },
+        verifyObject,
+        {
+          upsert: true,
+        }
+      );
+      const fromPhone = process.env.TWILLIO_PHONE;
+      return client.messages
+        .create({
+          body: digitalCode,
+          to: mobileNo,
+          from: fromPhone, // From a valid Twilio number
+        })
+        .then((message) => {
+          console.log("sentMessage: ", message.sid);
+          return true;
+        })
+        .catch((err) => {
+          console.log("twilio error: ", err);
+          return false;
+        });
+    } catch (error) {
+      console.log("error mobile verifyObject result: ", error);
+      return false;
+    }
+  },
+
+  verifyCode: async (root, args, context) => {
+    if (get(args.codeObject, "provider") === "email") {
+      const verifiedResult = await verifyCode.findOne({
+        email: get(args.codeObject, "email"),
+        code: get(args.codeObject, "code"),
+      });
+      if (verifiedResult) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      const verifiedResult = await verifyCode.findOne({
+        mobileNo: get(args.codeObject, "mobileNo"),
+        code: get(args.codeObject, "code"),
+      });
+      console.log("mobile verify code result: ", verifiedResult);
+      if (verifiedResult) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
 };
+
+function getRandomNumberBetween(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
 
 function getTimeStamp() {
   const date = new Date();
@@ -125,8 +245,7 @@ const userQuery = async ({ args }) => {
             data.apiKey = apiKey.apiKey;
           }
           return data ? await generateToken(data) : [];
-        }
-        else throw new Error("Password does not match");
+        } else throw new Error("Password does not match");
       } else throw new Error("Email does not exists");
     }
   }

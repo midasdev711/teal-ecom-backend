@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 function connectWithMongodb() {
   mongoose.connect(
-   "mongodb+srv://fuckcovid:Li5D0vvZTVvyo0V9@cluster0.oml6y.mongodb.net/vimal_juicypie_dev?retryWrites=true&w=majority",
+  //  "mongodb+srv://fuckcovid:Li5D0vvZTVvyo0V9@cluster0.oml6y.mongodb.net/vimal_juicypie_dev?retryWrites=true&w=majority",
+   "mongodb://localhost:27017/juicypie",
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
