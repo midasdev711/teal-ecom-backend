@@ -27,6 +27,11 @@ module.exports = {
     return data;
   },
 
+  socialAuth: async (root, args, context) => {
+    const data = await userQuery({ args: args });
+    return data;
+  },
+
   upsert: async (root, args, context) => {
     let user = {};
     if (args.auth.userId) user = await Users.findOne({ ID: args.auth.userId });
@@ -251,6 +256,27 @@ const userQuery = async ({ args }) => {
         }
         return data ? await generateToken(data) : [];
       } else throw new Error("Password does not match");
+    } else throw new Error("This user does not exists");
+  }
+
+  if (get(args, "email") && get(args, "signUpMethod")) {
+    const data = await Users.findOne({
+      email: args.email,
+      signUpMethod: args.signUpMethod,
+      status: 1,
+      isVerified: 1,
+    });
+    console.log("yes", data);
+
+    if (data) {
+      let apiKey = await apiKeys.findOne({
+        userID: parseInt(data.ID),
+        isExpired: false,
+      });
+      if (get(apiKey, "apiKey")) {
+        data.apiKey = apiKey.apiKey;
+      }
+      return data ? await generateToken(data) : [];
     } else throw new Error("This user does not exists");
   }
 };

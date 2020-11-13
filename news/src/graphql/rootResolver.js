@@ -12,6 +12,7 @@ const root = {
     categories: CategoryResolver.index,
     users: UserResolver.index,
     auth: AuthResolver.index,
+    socialAuth: AuthResolver.socialAuth,
     userSetting: UserSettingResolver.index,
     campaign: CampaignResolver.index
   },

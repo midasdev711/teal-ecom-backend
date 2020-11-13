@@ -526,6 +526,7 @@ type Query {
     categories(filters: CategoryFilters):[Category]
     users(filters: UserFilters):[User]
     auth(uniqueID: String password: String) : User
+    socialAuth(email: String signUpMethod: String) : User
     userSetting(userId:ID): UserSettingType
     campaign(filters: CampaignFilters): [Campaign]
 }
