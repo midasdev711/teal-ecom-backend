@@ -15,6 +15,7 @@ const ProductSchema = new Schema(
     description: { type: String },
     mrp: { type: Number },
     salePrice: { type: Number },
+    yourShippingCost: { type: Number },
     thumbnailImage: { type: String, default: "" },
     featuredImage: { type: String },
     images: [{ type: String }],

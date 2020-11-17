@@ -64,6 +64,7 @@ type ProductSubcategoryType {
    productDescription: String
    productMRP: Int
    productSalePrice: Int
+   productYourShippingCost: Int
    productThumbnailImage: Upload
    productFeaturedImage: Upload!
    productImages : [Upload]!
@@ -120,6 +121,7 @@ type Product {
       mrp:Int
       salePrice:Int
       productCost:Int
+      yourShippingCost: Int
 }
 
 
