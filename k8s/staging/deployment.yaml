@@ -1,0 +1,26 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: staging
+  name: juicypie-backend-staging-deployment
+  labels:
+    app: juicypie-backend-staging
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: juicypie-backend-staging
+  template:
+    metadata:
+      labels:
+        app: juicypie-backend-staging
+    spec:
+      containers:
+      - name: juicypie-backend-staging-container
+        image: 638145506484.dkr.ecr.us-east-2.amazonaws.com/juicypie-backend:staging
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 9200

@@ -23,9 +23,9 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 var AWS = require("aws-sdk");
-const { v4: uuidv4 } = require('uuid');
-const user=require('../models/users')
-const {verifyToken}=require('../controllers/authController');
+const { v4: uuidv4 } = require("uuid");
+const user = require("../models/users");
+const { verifyToken } = require("../controllers/authController");
 
 module.exports = {
   index: async (root, args, context) => {
@@ -134,7 +134,9 @@ module.exports = {
 
         await Promise.all(
           articleData.map(async (data) => {
-            return Promise.all([getClapCountUser(data, args)]).then(function (values) {
+            return Promise.all([getClapCountUser(data, args)]).then(function (
+              values
+            ) {
               if (values && values.length) {
                 values.map(async (x) => {
                   if (x.length) {
@@ -142,7 +144,7 @@ module.exports = {
                   }
                 });
               }
-            })
+            });
           })
         );
 
@@ -190,39 +192,52 @@ module.exports = {
 
             //remove image from aws
             if (deleteFeaturedImg) {
-              deleteFeaturedImg = deleteFeaturedImg.substr(deleteFeaturedImg.lastIndexOf("/") + 1);
-              await removeImageFromAWS(deleteFeaturedImg, 'users');
+              deleteFeaturedImg = deleteFeaturedImg.substr(
+                deleteFeaturedImg.lastIndexOf("/") + 1
+              );
+              await removeImageFromAWS(deleteFeaturedImg, "users");
             }
 
             //upload to aws
-            let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, article.slug)
-            attributes.featureImage = featuredImgUrl
-          }
-          else if (attributes.featureImage === null) {
-            attributes.featureImage = article.featureImage
+            let featuredImgUrl = await uploadUrl(
+              featuredData.filename,
+              featuredData.createReadStream,
+              featuredData.mimetype,
+              AWSNewCredentials.AWS_USER_IMG_PATH,
+              article.slug
+            );
+            attributes.featureImage = featuredImgUrl;
+          } else if (attributes.featureImage === null) {
+            attributes.featureImage = article.featureImage;
           }
 
           if (attributes.tags && attributes.tags.length > 5) {
-            throw new Error("You can enter maximum 5 tags")
+            throw new Error("You can enter maximum 5 tags");
           }
 
           if (attributes.article_SEO) {
             for await (let mSeoObj of attributes.article_SEO) {
-              if (mSeoObj.metaTitle === "" || mSeoObj.metaTitle === undefined || mSeoObj.metaTitle === null) {
-                mSeoObj.metaTitle = attributes.title
+              if (
+                mSeoObj.metaTitle === "" ||
+                mSeoObj.metaTitle === undefined ||
+                mSeoObj.metaTitle === null
+              ) {
+                mSeoObj.metaTitle = attributes.title;
               }
 
-              if (mSeoObj.metaDescription === null || mSeoObj.metaDescription === "" || mSeoObj.metaDescription === undefined) {
+              if (
+                mSeoObj.metaDescription === null ||
+                mSeoObj.metaDescription === "" ||
+                mSeoObj.metaDescription === undefined
+              ) {
                 mSeoObj.metaDescription = attributes.subTitle;
               }
             }
           }
 
-
           if (article.authorID === undefined || article.authorID === null) {
             attributes.authorID = id.UserID;
           }
-
 
           let articleData = await Articles.findOneAndUpdate(
             { ID: attributes.articleId },
@@ -230,21 +245,19 @@ module.exports = {
             { new: true }
           );
 
-          articleData = JSON.parse(JSON.stringify(articleData))
+          articleData = JSON.parse(JSON.stringify(articleData));
 
           const authorDetails = await user.findOne({ ID: article.authorID });
-          let authors = []
+          let authors = [];
           let authorObj = {
             ID: authorDetails.ID,
             userName: authorDetails.userName,
             avatar: authorDetails.avatar,
-            name: authorDetails.name
+            name: authorDetails.name,
           };
-          authors.push(authorObj)
+          authors.push(authorObj);
           articleData.author = authors;
           return articleData;
-
-
         } else {
           attributes.slug = uniqid(Date.now());
           if (get(args, "title")) {
@@ -255,19 +268,27 @@ module.exports = {
           // console.log('args',attributes);
           if (attributes.article_SEO) {
             for await (let mSeoObj of attributes.article_SEO) {
-              if (mSeoObj.metaTitle === "" || mSeoObj.metaTitle === undefined || mSeoObj.metaTitle === null) {
-                mSeoObj.metaTitle = attributes.title
+              if (
+                mSeoObj.metaTitle === "" ||
+                mSeoObj.metaTitle === undefined ||
+                mSeoObj.metaTitle === null
+              ) {
+                mSeoObj.metaTitle = attributes.title;
               }
 
-              if (mSeoObj.metaDescription === null || mSeoObj.metaDescription === "" || mSeoObj.metaDescription === undefined) {
+              if (
+                mSeoObj.metaDescription === null ||
+                mSeoObj.metaDescription === "" ||
+                mSeoObj.metaDescription === undefined
+              ) {
                 mSeoObj.metaDescription = attributes.subTitle;
               }
             }
           }
 
-          //tags 
+          //tags
           if (attributes.tags && attributes.tags.length > 5) {
-            throw new Error("You can enter maximum 5 tags")
+            throw new Error("You can enter maximum 5 tags");
           }
 
           let featuredData = null;
@@ -278,17 +299,20 @@ module.exports = {
 
             //upload to aws
             if (featuredData) {
-              let featuredImgUrl = await uploadUrl(featuredData.filename, featuredData.createReadStream, featuredData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, attributes.slug)
-              attributes.featureImage = featuredImgUrl
+              let featuredImgUrl = await uploadUrl(
+                featuredData.filename,
+                featuredData.createReadStream,
+                featuredData.mimetype,
+                AWSNewCredentials.AWS_USER_IMG_PATH,
+                attributes.slug
+              );
+              attributes.featureImage = featuredImgUrl;
             }
             // attributes.featureImage = await uploadFeaturedImage(
             //   attributes.featureImage,
             //   attributes.slug
             // );
-
           }
-
-
 
           if (get(attributes, "description")) {
             attributes.description = await uploadDescriptionImagesOnS3(
@@ -302,24 +326,25 @@ module.exports = {
           attributes.authorID = id.UserID;
 
           let articleData = await Articles.create(attributes);
-          articleData = JSON.parse(JSON.stringify(articleData))
-          const authorDetails = await user.findOne({ ID: articleData.authorID });
-          let authors = []
+          articleData = JSON.parse(JSON.stringify(articleData));
+          const authorDetails = await user.findOne({
+            ID: articleData.authorID,
+          });
+          let authors = [];
           let authorObj = {
             ID: authorDetails.ID,
             userName: authorDetails.userName,
             avatar: authorDetails.avatar,
-            name: authorDetails.name
-          }
-          authors.push(authorObj)
-          articleData.author = authors
+            name: authorDetails.name,
+          };
+          authors.push(authorObj);
+          articleData.author = authors;
           return articleData;
         }
       }
     } catch (error) {
-      throw new Error(error)
+      throw new Error(error);
     }
-
   },
   articleImageUpload: async (root, args, context) => {
     try {
@@ -327,15 +352,20 @@ module.exports = {
       if (args.articleImgInput.articleImage) {
         imageData = await args.articleImgInput.articleImage;
         if (imageData !== undefined) {
-          let imgUrl = await uploadUrl(imageData.filename, imageData.createReadStream, imageData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, "article")
+          let imgUrl = await uploadUrl(
+            imageData.filename,
+            imageData.createReadStream,
+            imageData.mimetype,
+            AWSNewCredentials.AWS_USER_IMG_PATH,
+            "article"
+          );
           return { imgUrl: imgUrl };
         }
       }
     } catch (error) {
-      throw Error('error while article image upload', error.message)
+      throw Error("error while article image upload", error.message);
     }
   },
-
 
   articleImageUpload: async (root, args, context) => {
     try {
@@ -343,12 +373,18 @@ module.exports = {
       if (args.articleImgInput.articleImage) {
         imageData = await args.articleImgInput.articleImage;
         if (imageData !== undefined) {
-          let imgUrl = await uploadUrl(imageData.filename, imageData.createReadStream, imageData.mimetype, AWSNewCredentials.AWS_USER_IMG_PATH, "article")
-          return {imgUrl:imgUrl};
+          let imgUrl = await uploadUrl(
+            imageData.filename,
+            imageData.createReadStream,
+            imageData.mimetype,
+            AWSNewCredentials.AWS_USER_IMG_PATH,
+            "article"
+          );
+          return { imgUrl: imgUrl };
         }
       }
     } catch (error) {
-      throw Error('error while article image upload', error.message)
+      throw Error("error while article image upload", error.message);
     }
   },
 
@@ -530,10 +566,10 @@ const buildFindQuery = async ({ args, UserID }) => {
     }
 
     if (get(args, "articleIds")) {
-      const dataArray=args.articleIds.map(data=>{
-        return parseInt(data)
-      })
-      query.$and.push({ ID: { $in: dataArray}});
+      const dataArray = args.articleIds.map((data) => {
+        return parseInt(data);
+      });
+      query.$and.push({ ID: { $in: dataArray } });
     }
 
     if (get(args, "articleId")) {
@@ -579,7 +615,7 @@ const buildFindQuery = async ({ args, UserID }) => {
   aggregate.push({
     $facet: {
       data: [
-        { $sort: { createdAt: -1 } },
+        { $sort: { createdDate: -1 } },
         { $skip: (parseInt(args.page) - 1) * parseInt(args.limit) },
         { $limit: parseInt(args.limit) },
       ],
@@ -764,20 +800,21 @@ const uploadUrl = async (filename, streadData, mimetype, Path, Slug) => {
     region: AWSNewCredentials.Region,
   });
 
-    let params = {
-      'Bucket': AWSNewCredentials.Bucket,
-      'Key': (Slug === 'article') ? `${Path}/` + uuidv4() + '.' + filename.split('.').pop() : `${Path}/` + Slug + '.' + filename.split('.').pop(),
-      'ACL': 'public-read',
-      'Body': streadData(),
-      'ContentType': mimetype
-    };
-
+  let params = {
+    Bucket: AWSNewCredentials.Bucket,
+    Key:
+      Slug === "article"
+        ? `${Path}/` + uuidv4() + "." + filename.split(".").pop()
+        : `${Path}/` + Slug + "." + filename.split(".").pop(),
+    ACL: "public-read",
+    Body: streadData(),
+    ContentType: mimetype,
+  };
 
   var s3Bucket = new AWS.S3();
   const { Location } = await s3Bucket.upload(params).promise();
-  return Location
-}
-
+  return Location;
+};
 
 const removeImageFromAWS = async (filename, imgType) => {
   try {
@@ -789,26 +826,25 @@ const removeImageFromAWS = async (filename, imgType) => {
     });
 
     var s3Bucket = new AWS.S3();
-    let bucketkey = '';
+    let bucketkey = "";
 
-    if (imgType === 'users') {
+    if (imgType === "users") {
       bucketkey = `users/${filename}`;
     }
 
-
-    s3Bucket.deleteObject({
-      Bucket: AWSNewCredentials.Bucket,
-      Key: bucketkey
-    }, async function (err, data) {
-      if (!err) {
-        console.log('file deleted sucessfully')
+    s3Bucket.deleteObject(
+      {
+        Bucket: AWSNewCredentials.Bucket,
+        Key: bucketkey,
+      },
+      async function (err, data) {
+        if (!err) {
+          console.log("file deleted sucessfully");
+        }
       }
-    });
-
+    );
   } catch (error) {
-    console.log('error while removing images from aws\n', error.message);
+    console.log("error while removing images from aws\n", error.message);
     throw error;
   }
-
-
 };
