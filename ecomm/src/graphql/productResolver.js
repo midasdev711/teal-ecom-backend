@@ -388,6 +388,8 @@ const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredIm
   uploadData.mrp = attributes.productMRP;
   uploadData.salePrice = attributes.productSalePrice;
   uploadData.yourShippingCost = attributes.productYourShippingCost;
+  uploadData.shippingCost = attributes.productShippingCost;
+  uploadData.variants = attributes.productVariants;
 
   if (thumbNailImage) {
     uploadData.thumbnailImage = thumbNailImage;

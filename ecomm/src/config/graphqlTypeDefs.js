@@ -20,13 +20,17 @@ type ProductAttributeType{
 }
 
 type ProductVariantType {
-      variantName : String
-      variantValues : String
+      variant : String
+      price : Float
+      quantity: Int
+      sku: Int
 }
 
 input ProductVariantInput {
-  variantName : String
-  variantValues : String
+  variant : String
+  price : Float
+  quantity: Int
+  sku: Int
 }
 
 input ProductAttributeInput{ 
@@ -65,6 +69,7 @@ type ProductSubcategoryType {
    productMRP: Int
    productSalePrice: Int
    productYourShippingCost: Int
+   productShippingCost: Int
    productThumbnailImage: Upload
    productFeaturedImage: Upload!
    productImages : [Upload]!
@@ -122,6 +127,7 @@ type Product {
       salePrice:Int
       productCost:Int
       yourShippingCost: Int
+      shippingCost: Int
 }
 
 
