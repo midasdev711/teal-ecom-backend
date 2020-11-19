@@ -88,7 +88,9 @@ type ProductSubcategoryType {
    productSearchEngineTitle: String
    productSearchEngineDescription: String
    productCostPerItem: Int
-   isPublish: String
+   editStatus: String
+   views: Int
+   revenue: String
    productAttributes:[ProductAttributeInput]
  }
 type Product {
@@ -112,7 +114,9 @@ type Product {
       variants : [ProductVariantType]
       startDate : String
       endDate : String
-      isPublish : String
+      editStatus : String
+      views: Int
+      revenue: String
       searchEngineTitle : String
       searchEngineDescription : String
       status : Int
@@ -421,7 +425,9 @@ type MyProductType
   totalQuantity:Int
   images:[String]
   startDate:String
-  isPublish:String
+  editStatus:String
+  views: Int
+  revenue: String
   featuredImage:String
   slug:String
   thumbnailImage:String
@@ -495,7 +501,9 @@ input ProductUpdateInput
   productSearchEngineTitle: String
   productSearchEngineDescription: String
   productCostPerItem: Int
-  isPublish: String
+  editStatus: String
+  views: Int
+  revenue: String
   productAttributes:[ProductAttributeInput]
 }
 

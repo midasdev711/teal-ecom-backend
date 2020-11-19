@@ -23,8 +23,10 @@ const ProductAttributeType = new GraphQLObjectType({
 const ProductVariantType = new GraphQLObjectType({
     name: 'ProductVariantsType',
     fields: () => ({
-      VariantName :{type :GraphQLString},
-      VariantsValues :{type : new GraphQLList(GraphQLString) },
+      variant :{type :GraphQLString},
+      price :{type : new GraphQLList(GraphQLFloat) },
+      quantity :{type : new GraphQLList(GraphQLInt) },
+      sku :{type : new GraphQLList(GraphQLInt) },
     })
 });
 
