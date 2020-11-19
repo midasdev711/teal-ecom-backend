@@ -261,11 +261,10 @@ module.exports = {
 
   },
   getAllProductsListing: async (root, args) => {
-    let products = await ProductModel.find({ isPublish: "true" }).select('merchantName  images   thumbnailImage attributes  variants tags description sku title salePrice stock').lean();
+    let products = await ProductModel.find({ editStatus: "true" }).select('merchantName  images   thumbnailImage attributes  variants tags description sku title salePrice stock').lean();
     if (products) {
       return products;
     }
-
   }
 };
 
@@ -379,7 +378,7 @@ const uploadUrl = async (filename, streadData, mimetype, Path) => {
 
 //product - request data fetch 
 const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages) => {
-  uploadData.merchantID = attributes.productMerchantID;;
+  uploadData.merchantID = attributes.productMerchantID;
   uploadData.merchantName = attributes.productMerchantName;
   uploadData.sku = attributes.productSKU;
   uploadData.title = attributes.productTitle;
@@ -409,6 +408,7 @@ const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredIm
     let dbImgArr = findProductImg.images;
 
     let modifledExisiting = [];
+    uploadData['views'] = findProductImg.views;
 
     //remove deleted image from db and aws
     if (productExistingImages.length > 0 && dbImgArr.length > 0) {
@@ -418,9 +418,6 @@ const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredIm
       let updatePro = await ProductModel.findOne({ ID: attributes.productId });
       updatePro = JSON.parse(JSON.stringify(updatePro));
 
-
-
-
       //remove images from aws
       if (modifledExisiting.length > 0) {
         for (let j = 0; j < modifledExisiting.length; j++) {
@@ -428,17 +425,13 @@ const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredIm
           imgFileName = modifledExisiting[j].substr(modifledExisiting[j].lastIndexOf("/") + 1);
           await removeImageFromAWS(imgFileName, 'product');
         }
-
       }
-
-
       //update images array to db
       if (modifledExisiting.length > 0) {
         await ProductModel.findOneAndUpdate({ ID: attributes.productId }, { $set: { images: newArr } }, { new: true });
       }
 
     }
-
 
     //remove thumbnail image and product images  from db and aws
     if (productExistingImages.length === 0 && imageArray.length === 0) {
@@ -464,11 +457,7 @@ const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredIm
       deleteFeaturedImg = deleteFeaturedImg.substr(deleteFeaturedImg.lastIndexOf("/") + 1);
       await removeImageFromAWS(deleteFeaturedImg, 'featured');
     }
-
-
   }
-
-
 
   if (uploadData.images && productExistingImages.length) {
     uploadData.images = uploadData.images.concat(productExistingImages);
@@ -484,9 +473,9 @@ const insertOrUpdate = async (uploadData, attributes, thumbNailImage, featuredIm
   uploadData.tags = attributes.productTags;
   uploadData.startDate = attributes.productStartDate;
   uploadData.endDate = attributes.productEndDate;
-  uploadData.isPublish = attributes.isPublish;
-  if (uploadData.isPublish === undefined || uploadData.isPublish === null) {
-    uploadData.isPublish = 'false';
+  uploadData.editStatus = attributes.editStatus;
+  if (uploadData.editStatus === undefined || uploadData.editStatus === null) {
+    uploadData.editStatus = 'false';
   }
   uploadData.variants = attributes.productVariants;
   uploadData.productCost = attributes.productCostPerItem;
