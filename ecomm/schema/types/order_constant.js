@@ -45,6 +45,7 @@ const OrderProductType = new GraphQLObjectType({
         ProductTotalQuantity:{type :GraphQLInt},
         ProductTotalPrice:{type :DecimalConvertItemTotalPrice },
         ProductVariantID:{type :GraphQLString},
+        productImages:{type :GraphQLString},
         ProductVariantObject : {
         type : VariantsType,
         resolve : async (parent, args) => {
@@ -81,7 +82,7 @@ const OrderType = new GraphQLObjectType({
         ID: { type: GraphQLInt },
         Status: { type: GraphQLInt },
         UserID: { type: GraphQLString },
-        OrderAmount : { type : DecimalConvertOrderAmount },
+        OrderAmount : { type : GraphQLString },
         DeliveryAddress: { type: GraphQLJSONObject },
         ShippingAddress : {type: GraphQLJSONObject },
         Products:{type:  new GraphQLList(OrderProductType) },
