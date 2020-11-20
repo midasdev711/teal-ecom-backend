@@ -6,7 +6,8 @@ const CategoryResolver = require('./categoryResolver');
 const AuthResolver = require('./authResolver');
 const PageResolver = require('./pageResolver');
 const BlogResolver = require('./blogResolver');
-const { GraphQLUpload } = require('graphql-upload');
+const {GraphQLUpload} = require("apollo-server-express")
+// const { GraphQLUpload } = require('graphql-upload');
 const root = {
   Upload: GraphQLUpload,
   Query: {
