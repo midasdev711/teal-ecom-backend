@@ -12,25 +12,17 @@ autoIncrement.initialize(mongoose);
 
 const CustomerSchema = new Schema({
     ID: { type: Number, required: true, exists: false, unique: true },
-    BasicDetailsFirstName: { type: String,  required: true, exists: false },
-    BasicDetailsLastName: { type: String },
+    BasicDetailsFullName: { type: String,  required: true, exists: false },
     BasicDetailsEmail: { type: String },
     BasicDetailsMobile: { type: String },
-    BasicDetailsEmailFlag: { type: Boolean },
-
     
-    AddressDetailsFirstName: { type: String },
-    AddressDetailsLastName: { type: String },
-    AddressDetailsCompany: { type: String },
+    AddressDetailsAddress: { type: String },
     AddressDetailsApartment: { type: String },
     AddressDetailsCity: { type: String },
     AddressDetailsCountry: { type: String },
     AddressDetailsPostalCode: { type: String },
-    AddressDetailsMobile: { type: String },
+    AddressDetailsState: { type: String },
 
-    Tax: { type: Number },
-    Notes: { type: String },
-    Tags: { type: String },
     CreatedDate: { type: Date, default: Date.now() },
     ModifiedDate: { type: Date, default: Date.now() },
 });

@@ -10,25 +10,16 @@ const CustomerType = new GraphQLObjectType({
     fields: () => ({
         _id: { type: GraphQLInt },
         ID: { type: GraphQLInt },
-        BasicDetailsFirstName: { type: GraphQLString, required: true, exists: false },
-        BasicDetailsLastName: { type: GraphQLString },
+        BasicDetailsFullName: { type: GraphQLString, required: true, exists: false },
         BasicDetailsEmail: { type: GraphQLString },
         BasicDetailsMobile: { type: GraphQLString },
-        BasicDetailsEmailFlag: { type: GraphQLBoolean },
 
-
-        AddressDetailsFirstName: { type: GraphQLString },
-        AddressDetailsLastName: { type: GraphQLString },
-        AddressDetailsCompany: { type: GraphQLString },
+        AddressDetailsAddress: { type: GraphQLString },
         AddressDetailsApartment: { type: GraphQLString },
         AddressDetailsCity: { type: GraphQLString },
         AddressDetailsCountry: { type: GraphQLString },
         AddressDetailsPostalCode: { type: GraphQLString },
-        AddressDetailsMobile: { type: GraphQLString },
-
-        Tax: { type: GraphQLString },
-        Notes: { type: GraphQLEmail },
-        Tags: { type: GraphQLString },
+        AddressDetailsState: { type: GraphQLString },
     })
 });
 
