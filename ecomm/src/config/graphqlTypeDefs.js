@@ -226,6 +226,7 @@ type OrderProductType {
   productMerchantID:Int
   productSKU:String
   productTitle:String
+  productImages:String
   productSalePrice:String
   productTotalQuantity:Int
   productTotalPrice:String
@@ -507,6 +508,83 @@ input ProductUpdateInput
   productAttributes:[ProductAttributeInput]
 }
 
+
+type Page {
+  _id:String
+  PageTitle: String
+  PageDescription: String
+  PageCategory: String,
+  PageUserName: String,
+  PageEmail: String,
+  PagePhone: String,
+  PageWebsite: String,
+  PageLocation: String,
+  PageUserID: Int
+  createdDate: String
+  modifiedDate: String
+}
+
+input PageFilters{
+  _id:String
+  PageTitle: String
+  PageDescription: String
+  PageCategory: String,
+  PageUserName: String,
+  PageEmail: String,
+  PagePhone: String,
+  PageWebsite: String,
+  PageLocation: String,
+  PageUserID: Int
+  createdDate: String
+  modifiedDate: String
+}
+
+input PageInput{
+  PageTitle: String
+  PageDescription: String
+  PageCategory: String,
+  PageUserName: String,
+  PageEmail: String,
+  PagePhone: String,
+  PageWebsite: String,
+  PageLocation: String,
+  PageUserID: Int
+}
+
+type Blog {
+  _id:String
+  BlogTitle: String
+  BlogPublishingPlace: String
+  BlogCategory: String
+  BlogPicture: String
+  BlogUserID: Int
+  BlogPageID: String
+  createdDate : String
+  modifiedDate : String
+}
+
+input BlogFilters{
+  _id:String
+  BlogTitle: String
+  BlogPublishingPlace: String
+  BlogCategory: String
+  BlogPicture: String
+  BlogUserID: Int
+  BlogPageID: String
+  createdDate : String
+  modifiedDate : String
+}
+
+input BlogInput{
+  BlogTitle: String
+  BlogPublishingPlace: String
+  BlogCategory: String
+  BlogPicture: String
+  BlogUserID: Int
+  BlogPageID: String
+}
+
+
 type Query {
   products(filters: ProductFilters):[Product]
   merchants(filters: MerchantFilters):[Merchant]
@@ -518,6 +596,8 @@ type Query {
   getSubCategories(ID:Int):[ProductCategory]
   getProductByMerchant(ID:Int):[MyProductType]
   getAllProductsListing:[ProductListing]
+  pages(filters:PageFilters):[Page]
+  blogs(filters:BlogFilters):[Blog]
 }
 
 type Mutation {
@@ -530,9 +610,12 @@ type Mutation {
   removeProduct(ID:Int):RemoveProduct
   updateProduct(product:ProductUpdateInput):Product
   sendUserInvite(invite: UserInvite): MailSuccess
+  upsertPage(page:PageInput): Page
+  upsertBlog(blog:BlogInput): Blog
 }
 type ProductListing
 {
+  _id:String
   merchantName:String
   images:[String]
   featuredImage:String
@@ -544,6 +627,7 @@ type ProductListing
   sku:String
   title:String
   salePrice:String
+  mrp:String
   stock:Int
 }
 
