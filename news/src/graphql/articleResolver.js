@@ -44,7 +44,7 @@ module.exports = {
       !args.filters.articleId &&
       !args.filters.slug
     ) {
-      let data = await Articles.find()
+      let data = await Articles.find({ internalArticle: false })
         .sort({ ID: -1 })
         .limit(10)
         .select({ ID: 1, _id: 0 });
@@ -548,6 +548,7 @@ const buildFindQuery = async ({ args, UserID }) => {
     // const blockedAuthorIds = await queryForBlockedAuthors({ args });
     query.$and.push({ status: 2 });
     query.$and.push({ isPublish: true });
+    if (!args.showInternal) query.$and.push({ internalArticle: !true });
 
     if (get(args, "blockedAuthorIds")) {
       query.$and.push({ authorID: { $nin: blockedAuthorIds } });

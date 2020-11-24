@@ -190,6 +190,7 @@ input ArticleFilters {
   getDraft:Boolean
   limit: Int
   page: Int
+  showInternal: Boolean
 }
 
 input CategoryFilters {
