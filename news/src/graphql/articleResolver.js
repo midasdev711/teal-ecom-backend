@@ -52,9 +52,9 @@ module.exports = {
       await data.map((x) => {
         IdArray.push(x.ID);
       });
-      let articlesArray = await predictArticles(IdArray);
-      articlesArray.push(IdArray[0]);
-      console.log("data", articlesArray);
+      // let articlesArray = await predictArticles(IdArray);
+      // articlesArray.push(IdArray[0]);
+      // console.log("data", articlesArray);
       // args.filters.articleIds = articlesArray;
     }
 
