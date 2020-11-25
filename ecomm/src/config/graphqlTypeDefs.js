@@ -324,62 +324,41 @@ input OrderInput{
     }
     type Customer {
       _id:String
-      BasicDetailsFirstName: String
-      BasicDetailsLastName: String
+      BasicDetailsFullName: String
       BasicDetailsEmail: String
       BasicDetailsMobile: String
-      BasicDetailsEmailFlag: Boolean
-      AddressDetailsFirstName: String
-      AddressDetailsLastName: String
-      AddressDetailsCompany: String
+      AddressDetailsAddress: String
       AddressDetailsApartment: String
       AddressDetailsCity: String
       AddressDetailsCountry: String
       AddressDetailsPostalCode: String
-      AddressDetailsMobile: String
-      Tax : Int
-      Notes: String
-      Tags: String
+      AddressDetailsState: String
       createdDate : String
       modifiedDate : String
 }
 
 input CustomerFilters{
       _id: String
-      BasicDetailsFirstName: String
-      BasicDetailsLastName: String
+      BasicDetailsFullName: String
       BasicDetailsEmail: String
       BasicDetailsMobile: String
-      BasicDetailsEmailFlag: Boolean
-      AddressDetailsFirstName: String
-      AddressDetailsLastName: String
-      AddressDetailsCompany: String
+      AddressDetailsAddress: String
       AddressDetailsApartment: String
       AddressDetailsCity: String
       AddressDetailsCountry: String
       AddressDetailsPostalCode: String
-      AddressDetailsMobile: String
-      Tax : Int
-      Notes: String
-      Tags: String
+      AddressDetailsState: String
   }
   input CustomerInput{
-      BasicDetailsFirstName: String
-      BasicDetailsLastName: String
+      BasicDetailsFullName: String
       BasicDetailsEmail: String
       BasicDetailsMobile: String
-      BasicDetailsEmailFlag: Boolean
-      AddressDetailsFirstName: String
-      AddressDetailsLastName: String
-      AddressDetailsCompany: String
+      AddressDetailsAddress: String
       AddressDetailsApartment: String
       AddressDetailsCity: String
       AddressDetailsCountry: String
       AddressDetailsPostalCode: String
-      AddressDetailsMobile: String
-      Tax : Int
-      Notes: String
-      Tags: String
+      AddressDetailsState: String
   }
 
 
