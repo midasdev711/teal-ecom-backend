@@ -62,10 +62,19 @@ const ProductSchema = new Schema(
     createdDate: { type: Date, default: Date.now() },
     modifiedDate: { type: Date, default: Date.now() },
     variants: [{
-      variant: { type: String },
-      price: { type: Number },
-      quantity: { type: Number },
-      sku: { type: Number }
+      name: { type: String },
+      totalQuantity: { type: Number },
+      salePrice: { type: Number },
+      mrp: { type: Number },
+      costPerItem: { type: Number },
+      yourShippingCost: { type: Number },
+      images: [{ type: String }],
+      thumbnailImage: { type: String },
+      featuredImage: { type: String },
+      sku: { type: String },
+      shippingRate: { type: Number },
+      weight: { type: Number },
+      weightUnit: { type: String }
     }],
     productCost: { type: Number },
   },
