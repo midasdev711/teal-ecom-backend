@@ -13,7 +13,7 @@ autoIncrement.initialize(mongoose);
 const CustomerSchema = new Schema({
     ID: { type: Number, required: true, exists: false, unique: true },
     BasicDetailsFullName: { type: String,  required: true, exists: false },
-    BasicDetailsEmail: { type: String },
+    BasicDetailsEmail: { type: String, unique : true },
     BasicDetailsMobile: { type: String },
     
     AddressDetailsAddress: { type: String },

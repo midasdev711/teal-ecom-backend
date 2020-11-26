@@ -27,9 +27,9 @@ type ProductVariantType {
   mrp: Float
   costPerItem: Float
   yourShippingCost: Float
-  images: [Upload]!
-  thumbnailImage: Upload
-  featuredImage: Upload!
+  images: [String]!
+  thumbnailImage: String
+  featuredImage: String!
   sku: String
   shippingRate: Float
   weight: Float
@@ -58,19 +58,18 @@ input ProductAttributeInput{
 }
 
 type ProductSubcategoryType {
-    ID : Int
-    name : String 
-    parentCategoryID : Int
+  ID : Int
+  name : String 
+  parentCategoryID : Int
 }
 
+type ProductSEOType {
+  title :String
+  description :String 
+  cronicalUrl : String
+}
 
- type ProductSEOType {
-      title :String
-      description :String 
-      cronicalUrl : String
- }
-
- input ProductSEOInput {
+input ProductSEOInput {
   title :String
   description :String 
   cronicalUrl : String
@@ -153,7 +152,6 @@ type Product {
   shippingCost: Int
 }
 
-
 type Merchant{
   _id: String
   ID: Int
@@ -215,8 +213,6 @@ input MerchantFilters {
   ignoreMerchantIds:[ID]
 }
 
-
-
 type  VariantsType{
   _id: String
   ID: Int 
@@ -240,99 +236,133 @@ type VariantsAttribute{
 
 type OrderProductType {
   _id: String
-  status:Int
-  productID:String
-  productMerchantID:Int
-  productSKU:String
-  productTitle:String
-  productImages:String
-  productSalePrice:String
-  productTotalQuantity:Int
-  productTotalPrice:String
-  productVariantID:String
-  productVariantObject : VariantsType
-
+  ID: Int
+  merchantID: Int
+  merchantName: String
+  sku: String
+  title: String
+  slug: String
+  description: String
+  mrp: Float
+  salePrice: Float
+  yourShippingCost: Float
+  shippingCost: Float
+  thumbnailImage: String
+  featuredImage: String
+  images: [String]
+  category: Int
+  subCategory: Int
+  seo: ProductSEOType
+  attributes: [ProductAttributeType]
+  ampSlug: String
+  totalQuantity: Int
+  stock: Int
+  termsAndConditions: String
+  tags: [String]
+  startDate: String
+  endDate: String
+  editStatus: String
+  views: Int
+  revenue: String
+  searchEngineTitle: String
+  searchEngineDescription: String
+  status: Int
+  createdBy: String
+  modifiedBy: String
+  createdDate: String
+  modifiedDate: String
+  weight: Float
+  weightUnit: String
+  name: String
+  productCost: Float
+  costPerItem: Float
+  shippingRate: Float
+  count: Int
 }
 
 input OrderProductInput {
-productID:String
-  productMerchantID:Int
-  productSKU:String
-  productTitle:String
-  productSalePrice:String
-  productTotalQuantity:Int
-  productTotalPrice:String
-  productVariantObject : [ProductVariantInput]
-}
-
-type ShippingAddress {
-  BasicDetailsFirstName:String
-  BasicDetailsLastName:String
-  AddressDetailsCompany:String
-  AddressDetailsMobile:String
-  AddressDetailsApartment:String
-  AddressDetailsCity:String
-  AddressDetailsCountry:String
-  AddressDetailsPostalCode: String
-}
-type DeliveryAddress {
-  BasicDetailsFirstName:String
-  BasicDetailsLastName:String
-  AddressDetailsCompany:String
-  AddressDetailsMobile:String
-  AddressDetailsApartment:String
-  AddressDetailsCity:String
-  AddressDetailsCountry:String
-  AddressDetailsPostalCode: String
-}
-input ShippingAddressInput {
-  BasicDetailsFirstName:String
-  BasicDetailsLastName:String
-  AddressDetailsCompany:String
-  AddressDetailsMobile:String
-  AddressDetailsApartment:String
-  AddressDetailsCity:String
-  AddressDetailsCountry:String
-  AddressDetailsPostalCode: String
-}
-input DeliveryAddressInput {
-  BasicDetailsFirstName:String
-  BasicDetailsLastName:String
-  AddressDetailsCompany:String
-  AddressDetailsMobile:String
-  AddressDetailsApartment:String
-  AddressDetailsCity:String
-  AddressDetailsCountry:String
-  AddressDetailsPostalCode: String
+  ID: Int
+  merchantID: Int
+  merchantName: String
+  sku: String
+  title: String
+  slug: String
+  description: String
+  mrp: Float
+  salePrice: Float
+  yourShippingCost: Float
+  shippingCost: Float
+  thumbnailImage: String
+  featuredImage: String
+  images: [String]
+  category: Int
+  subCategory: Int
+  seo: ProductSEOInput
+  attributes: [ProductAttributeInput]
+  ampSlug: String
+  totalQuantity: Int
+  stock: Int
+  termsAndConditions: String
+  tags: [String]
+  startDate: String
+  endDate: String
+  editStatus: String
+  views: Int
+  revenue: String
+  searchEngineTitle: String
+  searchEngineDescription: String
+  status: Int
+  createdBy: String
+  modifiedBy: String
+  createdDate: String
+  modifiedDate: String
+  weight: Float
+  weightUnit: String
+  name: String
+  productCost: Float
+  costPerItem: Float
+  shippingRate: Float
+  count: Int
 }
 
 type Order{
   _id: String
   ID: Int
-  Status: Int
-  UserId: Int
-  OrderAmount : String
-  DeliveryAddress: DeliveryAddress
-  ShippingAddress : ShippingAddress
-  Products: [OrderProductType]
-  PaymentMethod: String
-  Notes: String
-  Tags: String
-  tokenID: String
+  status: Int
+  userId: Int
+  orderAmount: Float
+  customer: Customer
+  line_items: [OrderProductType]
+  fulfillment_status: String
+  fulfillments: [OrderProductType]
+  paymentMethod: String
+  transactionID: String
   createdAt: String
 }
 
 input OrderInput{
-  Status: Int
-  UserId: Int
-  OrderAmount: String
-  PaymentMethod: String
-  tokenID: String
-  DeliveryAddress: DeliveryAddressInput
-  ShippingAddress : ShippingAddressInput
-  Products: [OrderProductInput]
-  Notes: String
-  Tags: String
+  status: Int
+  userId: Int
+  orderAmount : Float
+  customer: OrderCustomerInput
+  line_items: [OrderProductInput]
+  fulfillment_status: String
+  fulfillments: [OrderProductInput]
+  paymentMethod: String
+  transactionID: String
+}
+
+input OrderCustomerInput{
+  ID: Int
+  BasicDetailsFullName: String
+  BasicDetailsEmail: String
+  BasicDetailsMobile: String
+  AddressDetailsAddress: String
+  AddressDetailsApartment: String
+  AddressDetailsCity: String
+  AddressDetailsCountry: String
+  AddressDetailsPostalCode: String
+  AddressDetailsState: String
 }
 
 input OrderFilters {
@@ -341,8 +371,10 @@ input OrderFilters {
   limit: Int
   page: Int
 }
+
 type Customer {
   _id:String
+  ID: Int
   BasicDetailsFullName: String
   BasicDetailsEmail: String
   BasicDetailsMobile: String
