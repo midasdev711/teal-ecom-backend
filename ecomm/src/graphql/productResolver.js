@@ -76,7 +76,6 @@ module.exports = {
         imageValues = await Promise.all(productImageData);
       }
 
-
       if (imageValues && imageValues.length) {
         for (const imgObj of imageValues) {
           const { filename, createReadStream, mimetype } = imgObj;
@@ -85,6 +84,31 @@ module.exports = {
         }
       }
 
+
+      let productVariants = attributes.productVariants;
+      for (let i = 0; i < productVariants.length; i ++) {
+        let variantImageArray = [];
+        let variantImageValues = [];
+
+        if (productVariants[i].images && productVariants[i].images.length) {
+          variantImageValues = await Promise.all(productVariants[i].images);
+        }
+
+        if (variantImageValues && variantImageValues.length) {
+          for (const imgObj of variantImageValues) {
+            const { filename, createReadStream, mimetype } = imgObj;
+            let url = await uploadUrl(filename, createReadStream, mimetype, AWSCredentails.AWS_PRODUCT_IMG_PATH);
+            variantImageArray.push(url);
+          }
+        }
+
+        productVariants[i].images = variantImageArray;
+        productVariants[i].thumbnailImage = variantImageArray[0]
+        productVariants[i].featuredImage = variantImageArray[0]
+      }
+
+      attributes.productVariants = Object.assign([], productVariants);
+      
 
       let productCat = [];
       let productCatObj = {};
@@ -121,6 +145,7 @@ module.exports = {
       let insertProductData = {};
       let productInsertObj = await insertOrUpdate(insertProductData, attributes, thumbNailImage, featuredImage, imageArray, productCat, productSubCat, productExistingImages);
       let productInsert = await ProductModel.create(productInsertObj);
+      console.log("---------------")
       if (productInsert !== null) {
         productInsert = JSON.parse(JSON.stringify(productInsert));
         if (productInsert.category) {
@@ -360,6 +385,8 @@ const uploadUrl = async (filename, streadData, mimetype, Path) => {
     secretAccessKey: AWSNewCredentials.credentials.secretAccessKey,
     region: AWSNewCredentials.Region,
   });
+
+  console.log(filename)
 
 
   let params = {

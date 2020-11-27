@@ -20,17 +20,36 @@ type ProductAttributeType{
 }
 
 type ProductVariantType {
-      variant : String
-      price : Float
-      quantity: Int
-      sku: Int
+  _id: String
+  name: String
+  totalQuantity: Int
+  salePrice: Float
+  mrp: Float
+  costPerItem: Float
+  yourShippingCost: Float
+  images: [String]!
+  thumbnailImage: String
+  featuredImage: String!
+  sku: String
+  shippingRate: Float
+  weight: Float
+  weightUnit: String
 }
 
 input ProductVariantInput {
-  variant : String
-  price : Float
-  quantity: Int
-  sku: Int
+  name: String
+  totalQuantity: Int
+  salePrice: Float
+  mrp: Float
+  costPerItem: Float
+  yourShippingCost: Float
+  images: [Upload]!
+  thumbnailImage: Upload
+  featuredImage: Upload!
+  sku: String
+  shippingRate: Float
+  weight: Float
+  weightUnit: String
 }
 
 input ProductAttributeInput{ 
@@ -39,19 +58,18 @@ input ProductAttributeInput{
 }
 
 type ProductSubcategoryType {
-    ID : Int
-    name : String 
-    parentCategoryID : Int
+  ID : Int
+  name : String 
+  parentCategoryID : Int
 }
 
+type ProductSEOType {
+  title :String
+  description :String 
+  cronicalUrl : String
+}
 
- type ProductSEOType {
-      title :String
-      description :String 
-      cronicalUrl : String
- }
-
- input ProductSEOInput {
+input ProductSEOInput {
   title :String
   description :String 
   cronicalUrl : String
@@ -94,285 +112,318 @@ type ProductSubcategoryType {
    productAttributes:[ProductAttributeInput]
  }
 type Product {
-      _id:String
-      ID :Int 
-      merchantID : Int 
-      merchantName :String 
-      sku : String 
-      title :String 
-      slug :String 
-      description :String 
-      thumbnailImage :String
-      featuredImage : String
-      images:[String]
-      seo : ProductSEOType
-      totalQuantity : Int
-      inventory:Int
-      tags : [String]
-      stock : Int
-      termsAndConditions :String 
-      variants : [ProductVariantType]
-      startDate : String
-      endDate : String
-      editStatus : String
-      views: Int
-      revenue: String
-      searchEngineTitle : String
-      searchEngineDescription : String
-      status : Int
-      createdBy : String
-      modifiedBy : String
-      createdDate : String
-      modifiedDate : String
-      category:Int
-      subCategory:Int
-      attributes:[ProductAttributeType]
-      mrp:Int
-      salePrice:Int
-      productCost:Int
-      yourShippingCost: Int
-      shippingCost: Int
+  _id:String
+  ID :Int 
+  merchantID : Int 
+  merchantName :String 
+  sku : String 
+  title :String 
+  slug :String 
+  description :String 
+  thumbnailImage :String
+  featuredImage : String
+  images:[String]
+  seo : ProductSEOType
+  totalQuantity : Int
+  inventory:Int
+  tags : [String]
+  stock : Int
+  termsAndConditions :String 
+  variants : [ProductVariantType]
+  startDate : String
+  endDate : String
+  editStatus : String
+  views: Int
+  revenue: String
+  searchEngineTitle : String
+  searchEngineDescription : String
+  status : Int
+  createdBy : String
+  modifiedBy : String
+  createdDate : String
+  modifiedDate : String
+  category:Int
+  subCategory:Int
+  attributes:[ProductAttributeType]
+  mrp:Int
+  salePrice:Int
+  productCost:Int
+  yourShippingCost: Int
+  shippingCost: Int
 }
 
-
 type Merchant{
-          _id: String
-          ID: Int
-          name:String
-          userName :String
-          email: String
-          password : String
-          mobileNo: String
-          token: String
-          refreshToken: String
-          merchantLogo : String
-          isAdminApproved : Boolean
-          verificationToken :String
-          businessName :String
-          businessWebsite :String
-          businessRegistrationNumber :String
-          businessPhone :String
-          businessAddress :String
-          businessCountry :String
-          businessState :String
-          businessCity :String
-          businessPostalCode :String
-          contactPersonName :String
-          contactPersonEmail :String
-          contactPersonPhone :String 
-          userID: String
+  _id: String
+  ID: Int
+  name:String
+  userName :String
+  email: String
+  password : String
+  mobileNo: String
+  token: String
+  refreshToken: String
+  merchantLogo : String
+  isAdminApproved : Boolean
+  verificationToken :String
+  businessName :String
+  businessWebsite :String
+  businessRegistrationNumber :String
+  businessPhone :String
+  businessAddress :String
+  businessCountry :String
+  businessState :String
+  businessCity :String
+  businessPostalCode :String
+  contactPersonName :String
+  contactPersonEmail :String
+  contactPersonPhone :String 
+  userID: String
 }
 
 input MerchantInput{
-      merchantLogo: String
-      businessName: String
-      businessWebsite: String
-      businessRegistrationNumber: String
-      businessPhone:String
-      businessAddress: String
-      businessCountry: String
-      businessState :String
-      businessCity :String
-      businessPostalCode :String
-      contactPersonName :String
-      contactPersonEmail :String
-      contactPersonPhone :String 
-      userID: String
-      name: String
-      mobileNo: String
-      email: String
-      password: String
+  merchantLogo: String
+  businessName: String
+  businessWebsite: String
+  businessRegistrationNumber: String
+  businessPhone:String
+  businessAddress: String
+  businessCountry: String
+  businessState :String
+  businessCity :String
+  businessPostalCode :String
+  contactPersonName :String
+  contactPersonEmail :String
+  contactPersonPhone :String 
+  userID: String
+  name: String
+  mobileNo: String
+  email: String
+  password: String
 }
 
 input ProductFilters {
-      productIds: [ID]
-      ignoreProductIds:[ID]
-      limit: Int
-      page: Int
-    }
+  productIds: [ID]
+  ignoreProductIds:[ID]
+  limit: Int
+  page: Int
+}
 
-    input MerchantFilters {
-      merchantIds: [ID]
-      ignoreMerchantIds:[ID]
-    }
-
-
+input MerchantFilters {
+  merchantIds: [ID]
+  ignoreMerchantIds:[ID]
+}
 
 type  VariantsType{
-      _id: String
-      ID: Int 
-      productID : String 
-      merchantID : String
-      costPrice  : String
-      sellingPrice  : String
-      variantStock  : String
-      variantSKU : String
-      variantImage : String
-      status : Int
-      productVariants  : VariantsAttribute
-  }
+  _id: String
+  ID: Int 
+  productID: String 
+  merchantID: String
+  costPrice: String
+  sellingPrice: String
+  variantStock: String
+  variantSKU: String
+  variantImage: String
+  status: Int
+  productVariants: VariantsAttribute
+}
 
-  type VariantsAttribute{
-        _id: String
-       name : String
-       value : String
+type VariantsAttribute{
+  _id: String
+  name : String
+  value : String
 }
 
 
 type OrderProductType {
   _id: String
-  status:Int
-  productID:String
-  productMerchantID:Int
-  productSKU:String
-  productTitle:String
-  productImages:String
-  productSalePrice:String
-  productTotalQuantity:Int
-  productTotalPrice:String
-  productVariantID:String
-  productVariantObject : VariantsType
-
+  ID: Int
+  merchantID: Int
+  merchantName: String
+  sku: String
+  title: String
+  slug: String
+  description: String
+  mrp: Float
+  salePrice: Float
+  yourShippingCost: Float
+  shippingCost: Float
+  thumbnailImage: String
+  featuredImage: String
+  images: [String]
+  category: Int
+  subCategory: Int
+  seo: ProductSEOType
+  attributes: [ProductAttributeType]
+  ampSlug: String
+  totalQuantity: Int
+  stock: Int
+  termsAndConditions: String
+  tags: [String]
+  startDate: String
+  endDate: String
+  editStatus: String
+  views: Int
+  revenue: String
+  searchEngineTitle: String
+  searchEngineDescription: String
+  status: Int
+  createdBy: String
+  modifiedBy: String
+  createdDate: String
+  modifiedDate: String
+  weight: Float
+  weightUnit: String
+  name: String
+  productCost: Float
+  costPerItem: Float
+  shippingRate: Float
+  count: Int
 }
 
 input OrderProductInput {
-productID:String
-  productMerchantID:Int
-  productSKU:String
-  productTitle:String
-  productSalePrice:String
-  productTotalQuantity:Int
-  productTotalPrice:String
-  productVariantObject : [ProductVariantInput]
-}
-
-type ShippingAddress {
-  BasicDetailsFirstName:String
-  BasicDetailsLastName:String
-  AddressDetailsCompany:String
-  AddressDetailsMobile:String
-  AddressDetailsApartment:String
-  AddressDetailsCity:String
-  AddressDetailsCountry:String
-  AddressDetailsPostalCode: String
-}
-type DeliveryAddress {
-  BasicDetailsFirstName:String
-  BasicDetailsLastName:String
-  AddressDetailsCompany:String
-  AddressDetailsMobile:String
-  AddressDetailsApartment:String
-  AddressDetailsCity:String
-  AddressDetailsCountry:String
-  AddressDetailsPostalCode: String
-}
-input ShippingAddressInput {
-  BasicDetailsFirstName:String
-  BasicDetailsLastName:String
-  AddressDetailsCompany:String
-  AddressDetailsMobile:String
-  AddressDetailsApartment:String
-  AddressDetailsCity:String
-  AddressDetailsCountry:String
-  AddressDetailsPostalCode: String
-}
-input DeliveryAddressInput {
-  BasicDetailsFirstName:String
-  BasicDetailsLastName:String
-  AddressDetailsCompany:String
-  AddressDetailsMobile:String
-  AddressDetailsApartment:String
-  AddressDetailsCity:String
-  AddressDetailsCountry:String
-  AddressDetailsPostalCode: String
+  ID: Int
+  merchantID: Int
+  merchantName: String
+  sku: String
+  title: String
+  slug: String
+  description: String
+  mrp: Float
+  salePrice: Float
+  yourShippingCost: Float
+  shippingCost: Float
+  thumbnailImage: String
+  featuredImage: String
+  images: [String]
+  category: Int
+  subCategory: Int
+  seo: ProductSEOInput
+  attributes: [ProductAttributeInput]
+  ampSlug: String
+  totalQuantity: Int
+  stock: Int
+  termsAndConditions: String
+  tags: [String]
+  startDate: String
+  endDate: String
+  editStatus: String
+  views: Int
+  revenue: String
+  searchEngineTitle: String
+  searchEngineDescription: String
+  status: Int
+  createdBy: String
+  modifiedBy: String
+  createdDate: String
+  modifiedDate: String
+  weight: Float
+  weightUnit: String
+  name: String
+  productCost: Float
+  costPerItem: Float
+  shippingRate: Float
+  count: Int
 }
 
 type Order{
-        _id: String
-        ID: Int
-        Status: Int
-        UserId: Int
-        OrderAmount : String
-        DeliveryAddress: DeliveryAddress
-        ShippingAddress : ShippingAddress
-        Products: [OrderProductType]
-        PaymentMethod: String
-        Notes: String
-        Tags: String
-        tokenID: String
-        createdAt: String
-    }
-
-input OrderInput{
-  Status: Int
-  UserId: Int
-  OrderAmount: String
-  PaymentMethod: String
-  tokenID: String
-  DeliveryAddress: DeliveryAddressInput
-  ShippingAddress : ShippingAddressInput
-  Products: [OrderProductInput]
-  Notes: String
-  Tags: String
+  _id: String
+  ID: Int
+  status: Int
+  userId: Int
+  orderAmount: Float
+  customer: Customer
+  line_items: [OrderProductType]
+  fulfillment_status: String
+  fulfillments: [OrderProductType]
+  paymentMethod: String
+  transactionID: String
+  createdAt: String
 }
 
-    input OrderFilters {
-      orderIds: [Int]
-      ignoreOrderIds:[Int]
-      limit: Int
-      page: Int
-    }
-    type Customer {
-      _id:String
-      BasicDetailsFullName: String
-      BasicDetailsEmail: String
-      BasicDetailsMobile: String
-      AddressDetailsAddress: String
-      AddressDetailsApartment: String
-      AddressDetailsCity: String
-      AddressDetailsCountry: String
-      AddressDetailsPostalCode: String
-      AddressDetailsState: String
-      createdDate : String
-      modifiedDate : String
+input OrderInput{
+  status: Int
+  userId: Int
+  orderAmount : Float
+  customer: OrderCustomerInput
+  line_items: [OrderProductInput]
+  fulfillment_status: String
+  fulfillments: [OrderProductInput]
+  paymentMethod: String
+  transactionID: String
+}
+
+input OrderCustomerInput{
+  ID: Int
+  BasicDetailsFullName: String
+  BasicDetailsEmail: String
+  BasicDetailsMobile: String
+  AddressDetailsAddress: String
+  AddressDetailsApartment: String
+  AddressDetailsCity: String
+  AddressDetailsCountry: String
+  AddressDetailsPostalCode: String
+  AddressDetailsState: String
+}
+
+input OrderFilters {
+  orderIds: [Int]
+  ignoreOrderIds:[Int]
+  limit: Int
+  page: Int
+}
+
+type Customer {
+  _id:String
+  ID: Int
+  BasicDetailsFullName: String
+  BasicDetailsEmail: String
+  BasicDetailsMobile: String
+  AddressDetailsAddress: String
+  AddressDetailsApartment: String
+  AddressDetailsCity: String
+  AddressDetailsCountry: String
+  AddressDetailsPostalCode: String
+  AddressDetailsState: String
+  createdDate : String
+  modifiedDate : String
 }
 
 input CustomerFilters{
-      _id: String
-      BasicDetailsFullName: String
-      BasicDetailsEmail: String
-      BasicDetailsMobile: String
-      AddressDetailsAddress: String
-      AddressDetailsApartment: String
-      AddressDetailsCity: String
-      AddressDetailsCountry: String
-      AddressDetailsPostalCode: String
-      AddressDetailsState: String
-  }
-  input CustomerInput{
-      BasicDetailsFullName: String
-      BasicDetailsEmail: String
-      BasicDetailsMobile: String
-      AddressDetailsAddress: String
-      AddressDetailsApartment: String
-      AddressDetailsCity: String
-      AddressDetailsCountry: String
-      AddressDetailsPostalCode: String
-      AddressDetailsState: String
-  }
+  _id: String
+  BasicDetailsFullName: String
+  BasicDetailsEmail: String
+  BasicDetailsMobile: String
+  AddressDetailsAddress: String
+  AddressDetailsApartment: String
+  AddressDetailsCity: String
+  AddressDetailsCountry: String
+  AddressDetailsPostalCode: String
+  AddressDetailsState: String
+}
+input CustomerInput{
+  BasicDetailsFullName: String
+  BasicDetailsEmail: String
+  BasicDetailsMobile: String
+  AddressDetailsAddress: String
+  AddressDetailsApartment: String
+  AddressDetailsCity: String
+  AddressDetailsCountry: String
+  AddressDetailsPostalCode: String
+  AddressDetailsState: String
+}
 
 
 
-  input ProductCategoryInput{
-    ID:Int
-    Name: String
-    Description: String 
-    Slug: String
-    isParent: Boolean 
-    FeatureImage : String
-    ParentCategoryID : Int
-    Sequence : Int
-    Type : Int
+input ProductCategoryInput{
+  ID:Int
+  Name: String
+  Description: String 
+  Slug: String
+  isParent: Boolean 
+  FeatureImage : String
+  ParentCategoryID : Int
+  Sequence : Int
+  Type : Int
 }
 
 
@@ -426,10 +477,10 @@ type MyProductType
   productCost:String
   stock:Int
   ID:Int
- _id:String
- createdDate : String
- modifiedDate : String
- createdAt:String
+  _id:String
+  createdDate : String
+  modifiedDate : String
+  createdAt:String
 }
 
 
