@@ -4,6 +4,31 @@ const SchemaType = Schema.Types;
 const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose);
 
+const ProductVariantSchema = new Schema({
+  ID: { type: Number, unique: true },
+  name: { type: String },
+  totalQuantity: { type: Number },
+  salePrice: { type: Number },
+  mrp: { type: Number },
+  costPerItem: { type: Number },
+  yourShippingCost: { type: Number },
+  images: [{ type: String }],
+  thumbnailImage: { type: String },
+  featuredImage: { type: String },
+  sku: { type: String },
+  shippingRate: { type: Number },
+  weight: { type: Number },
+  weightUnit: { type: String }
+})
+
+ProductVariantSchema.plugin(autoIncrement.plugin, {
+  model: "product_variants",
+  field: "ID",
+  startAt: 100,
+});
+mongoose.model("product_variants", ProductVariantSchema);
+
+
 const ProductSchema = new Schema(
   {
     ID: { type: Number, required: true, exists: false, unique: true },
@@ -61,21 +86,7 @@ const ProductSchema = new Schema(
     modifiedBy: { type: Number },
     createdDate: { type: Date, default: Date.now() },
     modifiedDate: { type: Date, default: Date.now() },
-    variants: [{
-      name: { type: String },
-      totalQuantity: { type: Number },
-      salePrice: { type: Number },
-      mrp: { type: Number },
-      costPerItem: { type: Number },
-      yourShippingCost: { type: Number },
-      images: [{ type: String }],
-      thumbnailImage: { type: String },
-      featuredImage: { type: String },
-      sku: { type: String },
-      shippingRate: { type: Number },
-      weight: { type: Number },
-      weightUnit: { type: String }
-    }],
+    variants: [ProductVariantSchema],
     productCost: { type: Number },
   },
 
@@ -84,9 +95,11 @@ const ProductSchema = new Schema(
   }
 );
 
+
 ProductSchema.plugin(autoIncrement.plugin, {
   model: "products",
   field: "ID",
   startAt: 100,
 });
+
 module.exports = mongoose.model("products", ProductSchema);

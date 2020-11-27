@@ -16,11 +16,11 @@ const OrderSchema = new Schema(
     status: { type: Number, default: 1 },
     line_items: [
       {
-        ID: { type: Number, exists: false, unique: true },
+        ID: { type: Number },
         merchantID: { type: Number },
         merchantName: { type: String },
         sku: { type: String, default: "" },
-        title: { type: String, exists: false, unique: true },
+        title: { type: String },
         slug: { type: String },
         description: { type: String },
         mrp: { type: Number },
@@ -76,7 +76,7 @@ const OrderSchema = new Schema(
         merchantID: { type: Number },
         merchantName: { type: String },
         sku: { type: String, default: "" },
-        title: { type: String, exists: false, unique: true },
+        title: { type: String },
         slug: { type: String },
         description: { type: String },
         mrp: { type: Number },
@@ -127,8 +127,8 @@ const OrderSchema = new Schema(
     ],
     orderAmount: { type: Number },
     customer: {
-      ID: { type: Number, required: true, exists: false, unique: true },
-      BasicDetailsFullName: { type: String,  required: true, exists: false },
+      ID: { type: Number, required: true },
+      BasicDetailsFullName: { type: String, required: true },
       BasicDetailsEmail: { type: String },
       BasicDetailsMobile: { type: String },
       AddressDetailsAddress: { type: String },

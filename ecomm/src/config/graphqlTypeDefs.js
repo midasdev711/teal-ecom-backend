@@ -21,6 +21,7 @@ type ProductAttributeType{
 
 type ProductVariantType {
   _id: String
+  ID: Int
   name: String
   totalQuantity: Int
   salePrice: Float
@@ -37,6 +38,7 @@ type ProductVariantType {
 }
 
 input ProductVariantInput {
+  ID: Int
   name: String
   totalQuantity: Int
   salePrice: Float
@@ -232,7 +234,6 @@ type VariantsAttribute{
   name : String
   value : String
 }
-
 
 type OrderProductType {
   _id: String
