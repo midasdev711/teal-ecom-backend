@@ -5,7 +5,7 @@ const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose);
 
 const ProductVariantSchema = new Schema({
-  ID: { type: Number, unique: true },
+  ID: { type: Number },
   name: { type: String },
   totalQuantity: { type: Number },
   salePrice: { type: Number },
